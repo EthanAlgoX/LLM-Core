@@ -14,4 +14,4 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate finetune
 
 python -m pip install -r requirements.txt
-python grpo_demo.py
+python grpo_demo.py "$@"
