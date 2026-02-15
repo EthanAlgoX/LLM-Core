@@ -53,3 +53,23 @@ checkpoint-*/
 **/ppo/checkpoints/
 **/ppo/models/
 **/ppo/output/
+
+# RLHF ignore rules
+**/rlhf/checkpoints/
+**/rlhf/models/
+**/rlhf/output/
+
+# Actor-Critic ignore rules
+**/actor_critic/checkpoints/
+**/actor_critic/models/
+**/actor_critic/output/
+
+# Diffusion ignore rules
+**/diffusion/checkpoints/
+**/diffusion/models/
+**/diffusion/output/
+
+# DiT ignore rules
+**/dit/checkpoints/
+**/dit/models/
+**/dit/output/
