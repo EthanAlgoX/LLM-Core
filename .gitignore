@@ -8,7 +8,7 @@ __pycache__/
 .gradio/
 qwen3_lora/
 qwen3_grpo_out/
-**/LLaMA-Factory/
+# **/LLaMA-Factory/
 **/qwen3_grpo_out*/
 **/qwen3_lora*/
 dummy_data.jsonl
@@ -18,3 +18,38 @@ test_out/
 runs/
 **/runs/
 checkpoint-*/
+
+# LLaMA-Factory ignore rules
+**/hf_cache/
+**/ms_cache/
+**/om_cache/
+**/llamaboard_cache/
+**/llamaboard_config/
+**/saves/
+**/output/
+**/outputs/
+**/wandb/
+**/swanlog/
+**/generated_predictions.jsonl
+**/predictions_score.json
+**/build/
+**/dist/
+**/python-wheels/
+**/.eggs/
+**/*.egg-info/
+**/*.egg
+
+# DPO ignore rules
+**/dpo/checkpoints/
+**/dpo/models/
+**/dpo/output/
+
+# Policy Gradient ignore rules
+**/policy_gradient/checkpoints/
+**/policy_gradient/models/
+**/policy_gradient/output/
+
+# PPO ignore rules
+**/ppo/checkpoints/
+**/ppo/models/
+**/ppo/output/
