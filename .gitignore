@@ -8,11 +8,13 @@ __pycache__/
 .gradio/
 qwen3_lora/
 qwen3_grpo_out/
-sft/LLaMA-Factory/
-grpo/qwen3_grpo_out/
+**/LLaMA-Factory/
+**/qwen3_grpo_out/
+**/qwen3_lora/
 dummy_data.jsonl
 test_io.log
 debug_grpo.py
 test_out/
 runs/
 **/runs/
+checkpoint-*/

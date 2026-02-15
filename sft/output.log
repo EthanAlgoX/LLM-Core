@@ -1,7 +1,0 @@
-ERROR conda.cli.main_run:execute(127): `conda run ipython /Users/yunxuanhan/Documents/workspace/ai/Finetune/finetune/finetune.py` failed. (See above for error)
-  [36mFile [39m[32m~/Documents/workspace/ai/Finetune/finetune/finetune.py:34[39m
-[31m    [39m[31m%cd LLaMA-Factory/[39m
-    ^
-[31mSyntaxError[39m[31m:[39m invalid syntax
-
-
