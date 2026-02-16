@@ -38,6 +38,16 @@ NOTES: dict[str, dict[str, str]] = {
         "compare": "相比 SFT，PPO 优化目标是奖励而不是监督标签拟合。",
         "engineering": "重点看 reward 与 loss 是否同步改善，以及是否出现 KL 失控。",
     },
+    "policy_gradient": {
+        "principle": "直接对策略参数求梯度，按回报加权更新动作概率，提升高回报行为出现概率。",
+        "compare": "相比 Actor-Critic，纯策略梯度不依赖价值网络基线，结构更简单但方差更高。",
+        "engineering": "要关注回报方差和梯度波动，常配合 baseline 或归一化稳定训练。",
+    },
+    "actor_critic": {
+        "principle": "Actor 学策略、Critic 估计价值，利用 Critic 提供的优势信号更新 Actor。",
+        "compare": "相比纯 Policy Gradient，Actor-Critic 通常样本效率更高、收敛更稳。",
+        "engineering": "重点排查 Actor/Critic 学习率失衡，否则会出现策略震荡或价值崩溃。",
+    },
     "rlhf": {
         "principle": "RLHF 是流程：SFT 打底 -> 奖励建模 -> PPO 优化策略。",
         "compare": "相比 DPO，RLHF 通常显式包含奖励模型与在线强化学习阶段。",
@@ -62,6 +72,46 @@ NOTES: dict[str, dict[str, str]] = {
         "principle": "Advantage 衡量动作相对状态基线的增益，核心是减少策略梯度估计方差。",
         "compare": "相比直接用 return，优势函数更容易让优化步骤稳定。",
         "engineering": "检查优势归一化与基线估计是否正确，否则会出现训练震荡。",
+    },
+    "cql": {
+        "principle": "CQL 在离线数据上学习价值函数时对未见动作施加保守约束，降低过估计风险。",
+        "compare": "相比 BCQ，CQL 直接在价值目标上引入保守项，不依赖显式动作生成约束。",
+        "engineering": "离线数据覆盖决定上限，先检查行为策略分布再解释指标变化。",
+    },
+    "bcq": {
+        "principle": "BCQ 通过行为克隆生成候选动作，再做小范围扰动与价值筛选，避免 OOD 动作。",
+        "compare": "相比 CQL，BCQ 更强调动作空间约束与候选过滤机制。",
+        "engineering": "候选动作质量是关键，行为克隆阶段欠拟合会直接拖慢后续性能。",
+    },
+    "deepspeed": {
+        "principle": "DeepSpeed 通过 ZeRO 等技术切分优化器状态与梯度，降低显存占用提升可训练规模。",
+        "compare": "相比普通单卡训练，DeepSpeed 更偏系统层优化而非算法目标变化。",
+        "engineering": "要同时看吞吐、显存峰值与通信开销，避免只看 step time 得出误判。",
+    },
+    "cuda": {
+        "principle": "CUDA 模块用于理解 GPU 执行路径、内核并行与数据搬运对训练速度的影响。",
+        "compare": "相比算法优化，CUDA 优化关注的是算子效率与硬件利用率。",
+        "engineering": "优先定位瓶颈算子，再决定是算子融合、并行策略还是内存布局优化。",
+    },
+    "mixed_precision": {
+        "principle": "混合精度在保持关键数值稳定的前提下降低计算精度，换取吞吐和显存收益。",
+        "compare": "相比全精度训练，混合精度速度更快但需要 loss scaling 防止下溢。",
+        "engineering": "关注 NaN/Inf、梯度溢出与收敛速度差异，确保快而不坏。",
+    },
+    "diffusion": {
+        "principle": "扩散模型通过前向加噪和反向去噪学习数据分布，逐步生成高质量样本。",
+        "compare": "相比自回归生成，扩散模型通常采样更慢但细节质量更稳定。",
+        "engineering": "噪声调度和采样步数是关键超参，直接影响质量与推理耗时。",
+    },
+    "dit": {
+        "principle": "DiT 用 Transformer 作为扩散模型的去噪骨干，在大规模训练下具备强生成能力。",
+        "compare": "相比 U-Net 扩散骨干，DiT 更适配 Transformer 生态与并行训练栈。",
+        "engineering": "注意 patch/token 规模对显存和速度的影响，训练前先做小配置验证。",
+    },
+    "megatron": {
+        "principle": "Megatron 通过张量并行、流水并行等策略把超大模型分摊到多设备协同训练。",
+        "compare": "相比单机单卡方案，Megatron 的核心收益在于可扩展性与大模型可训练性。",
+        "engineering": "并行切分策略决定通信成本，需平衡显存占用与跨卡带宽压力。",
     },
     "blip2": {
         "principle": "通过 Q-Former 把视觉特征压缩成语言模型可用表示，实现图文对齐。",
