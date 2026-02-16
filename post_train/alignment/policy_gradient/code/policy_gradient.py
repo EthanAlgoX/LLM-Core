@@ -173,6 +173,10 @@ def run_train(factory_dir: Path, config_path: Path) -> None:
     """执行训练，优先使用 CLI，失败时回退到模块入口。"""
     env = os.environ.copy()
     env["FORCE_TORCHRUN"] = "1"
+    # 兼容说明：当前学习环境中的 TRL 版本较新（如 0.24.x），
+    # LLaMA-Factory 的 PPO 分支会触发严格版本校验并直接退出。
+    # 这里默认关闭版本门禁，仅用于教学/演示链路跑通。
+    env.setdefault("DISABLE_VERSION_CHECK", "1")
     src_dir = str(factory_dir / "src")
     env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
 
@@ -279,24 +283,43 @@ def _extract_series(rows: list[dict[str, Any]], keys: list[str]) -> tuple[list[i
     return [], []
 
 
+def _export_placeholder_artifacts(metrics_dir: Path, keys: list[str], note: str) -> None:
+    """当训练日志不可用时，导出占位版 JSON/CSV/曲线，保证学习链路不中断。"""
+    (metrics_dir / "log_history.json").write_text("[]\n", encoding="utf-8")
+
+    with (metrics_dir / "training_metrics.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+
+    try:
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.axis("off")
+        ax.text(0.02, 0.6, "Policy Gradient Toy Placeholder", fontsize=16, weight="bold")
+        ax.text(0.02, 0.35, note, fontsize=11)
+        fig.tight_layout()
+        fig.savefig(metrics_dir / "training_curves.png", dpi=160)
+        plt.close(fig)
+    except Exception:
+        pass
+
+    summary = {
+        "total_steps": 0,
+        "final_step": None,
+        "final_loss": None,
+        "final_reward": None,
+        "best_reward": None,
+        "status": "placeholder",
+        "note": note,
+    }
+    (metrics_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+
+
 def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha: float) -> Path:
     """导出训练日志、CSV、曲线图与摘要，返回产物目录路径。"""
-    state_path = find_trainer_state(checkpoints_dir)
-    if state_path is None:
-        raise FileNotFoundError(f"No trainer_state.json found under: {checkpoints_dir}")
-
-    state = json.loads(state_path.read_text(encoding="utf-8"))
-    log_history = state.get("log_history", [])
-    if not log_history:
-        raise RuntimeError(f"log_history is empty in: {state_path}")
-
     metrics_dir = output_dir / "policy_gradient_metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
-
-    (metrics_dir / "log_history.json").write_text(
-        json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
     keys = [
         "step",
         "epoch",
@@ -308,6 +331,29 @@ def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha
         "ppo/loss/total",
         "ppo/learning_rate",
     ]
+
+    state_path = find_trainer_state(checkpoints_dir)
+    if state_path is None:
+        _export_placeholder_artifacts(
+            metrics_dir=metrics_dir,
+            keys=keys,
+            note=f"未找到 trainer_state.json（{checkpoints_dir}）。可能是 TRL/LLaMA-Factory 版本不兼容导致训练提前退出。",
+        )
+        return metrics_dir
+
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    log_history = state.get("log_history", [])
+    if not log_history:
+        _export_placeholder_artifacts(
+            metrics_dir=metrics_dir,
+            keys=keys,
+            note=f"log_history 为空（{state_path}）。建议检查训练依赖与 PPO 配置。",
+        )
+        return metrics_dir
+
+    (metrics_dir / "log_history.json").write_text(
+        json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     rows = []
     for item in log_history:
@@ -396,8 +442,15 @@ def main() -> None:
     config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}")
 
-    run_train(factory_dir=factory_dir, config_path=config_path)
-    move_model_artifacts(checkpoints_dir=layout["checkpoints"], models_dir=layout["models"])
+    train_ok = True
+    try:
+        run_train(factory_dir=factory_dir, config_path=config_path)
+    except Exception as exc:
+        train_ok = False
+        print(f"[WARN] Policy Gradient training failed, fallback to placeholder artifacts: {exc}")
+
+    if train_ok:
+        move_model_artifacts(checkpoints_dir=layout["checkpoints"], models_dir=layout["models"])
     metrics_dir = export_learning_artifacts(
         checkpoints_dir=layout["checkpoints"],
         output_dir=layout["output"],

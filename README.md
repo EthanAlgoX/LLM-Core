@@ -12,6 +12,9 @@
 ```bash
 python scripts/interview_brief.py --module sft
 python scripts/interview_brief.py --module mdp
+
+# 批量导出所有模块口述稿
+python scripts/export_interview_briefs.py
 ```
 
 ## 一键入口（面试模式）
