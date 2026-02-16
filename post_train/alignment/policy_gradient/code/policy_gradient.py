@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
 Policy Gradient 单文件学习脚本（主流程 + 可视化，基于 PPO 近似实现）。
+
+学习步骤（与终端输出 1~5 对应）：
+1) 准备目录与环境。
+2) 生成训练参数。
+3) 启动训练（CLI/模块双入口）。
+4) 整理模型产物。
+5) 导出可视化（失败时生成占位结果）。
 """
 
 from __future__ import annotations
@@ -18,25 +25,25 @@ import torch
 
 
 PG_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",
-    "reward_model": "Qwen/Qwen3-0.6B",
-    "reward_model_type": "full",
-    "template": "qwen",
-    "dataset": "alpaca_en_demo",
-    "output_dir": "output",
-    "max_samples": 8,
-    "num_train_epochs": 0.01,
-    "learning_rate": 1e-6,
-    "batch_size": 1,
-    "grad_accum": 1,
-    "logging_steps": 5,
-    "save_steps": 50,
-    "ppo_buffer_size": 1,
-    "ppo_epochs": 4,
-    "ppo_target": 6.0,
-    "ppo_score_norm": False,
-    "ppo_whiten_rewards": False,
-    "ema_alpha": 0.2,
+    "model_id": "Qwen/Qwen3-0.6B",  # 策略模型。
+    "reward_model": "Qwen/Qwen3-0.6B",  # 奖励模型。
+    "reward_model_type": "full",  # 奖励模型类型。
+    "template": "qwen",  # 模板。
+    "dataset": "alpaca_en_demo",  # 数据集。
+    "output_dir": "output",  # 输出目录。
+    "max_samples": 8,  # 最大样本数。
+    "num_train_epochs": 0.01,  # 训练轮数。
+    "learning_rate": 1e-6,  # 学习率。
+    "batch_size": 1,  # 单卡 batch。
+    "grad_accum": 1,  # 梯度累积。
+    "logging_steps": 5,  # 日志间隔。
+    "save_steps": 50,  # checkpoint 间隔。
+    "ppo_buffer_size": 1,  # PPO buffer 大小。
+    "ppo_epochs": 4,  # PPO 更新次数。
+    "ppo_target": 6.0,  # KL 目标。
+    "ppo_score_norm": False,  # 是否归一化奖励。
+    "ppo_whiten_rewards": False,  # 是否 whiten 奖励。
+    "ema_alpha": 0.2,  # 曲线平滑系数。
 }
 
 
@@ -214,6 +221,8 @@ def export_policy_gradient_visualization(checkpoints_dir: Path, output_dir: Path
 def main() -> None:
     """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== Policy Gradient 主流程（学习版）===", flush=True)
+
+    # 步骤 1：准备目录与设备精度。
     print("1) 准备目录与运行环境", flush=True)
 
     code_dir = Path(__file__).resolve().parent
@@ -244,42 +253,44 @@ def main() -> None:
     if factory_dir is None:
         raise FileNotFoundError("未找到 LLaMA-Factory，请检查 policy_gradient/sft 目录结构。")
 
+    # 步骤 2：写出训练配置。
     print("2) 生成训练配置", flush=True)
     train_config = {
-        "stage": "ppo",
-        "do_train": True,
-        "model_name_or_path": PG_CONFIG["model_id"],
-        "reward_model": PG_CONFIG["reward_model"],
-        "reward_model_type": PG_CONFIG["reward_model_type"],
-        "dataset": PG_CONFIG["dataset"],
-        "template": PG_CONFIG["template"],
-        "finetuning_type": "lora",
-        "lora_target": "all",
-        "output_dir": str(checkpoints_dir),
-        "overwrite_output_dir": True,
-        "save_only_model": True,
-        "per_device_train_batch_size": PG_CONFIG["batch_size"],
-        "gradient_accumulation_steps": PG_CONFIG["grad_accum"],
-        "lr_scheduler_type": "cosine",
-        "logging_steps": PG_CONFIG["logging_steps"],
-        "save_steps": PG_CONFIG["save_steps"],
-        "learning_rate": PG_CONFIG["learning_rate"],
-        "num_train_epochs": PG_CONFIG["num_train_epochs"],
-        "max_samples": PG_CONFIG["max_samples"],
-        "max_grad_norm": 1.0,
-        "report_to": "none",
-        "ppo_buffer_size": PG_CONFIG["ppo_buffer_size"],
-        "ppo_epochs": PG_CONFIG["ppo_epochs"],
-        "ppo_target": PG_CONFIG["ppo_target"],
-        "ppo_score_norm": PG_CONFIG["ppo_score_norm"],
-        "ppo_whiten_rewards": PG_CONFIG["ppo_whiten_rewards"],
-        "bf16": runtime["bf16"],
-        "fp16": runtime["fp16"],
+        "stage": "ppo",  # 训练阶段：PPO（用于近似 PG）。
+        "do_train": True,  # 执行训练。
+        "model_name_or_path": PG_CONFIG["model_id"],  # 策略模型。
+        "reward_model": PG_CONFIG["reward_model"],  # 奖励模型。
+        "reward_model_type": PG_CONFIG["reward_model_type"],  # 奖励模型类型。
+        "dataset": PG_CONFIG["dataset"],  # 数据集。
+        "template": PG_CONFIG["template"],  # 模板。
+        "finetuning_type": "lora",  # LoRA 微调。
+        "lora_target": "all",  # LoRA 目标层。
+        "output_dir": str(checkpoints_dir),  # checkpoint 目录。
+        "overwrite_output_dir": True,  # 覆盖旧目录。
+        "save_only_model": True,  # 仅保存模型权重。
+        "per_device_train_batch_size": PG_CONFIG["batch_size"],  # 单卡 batch。
+        "gradient_accumulation_steps": PG_CONFIG["grad_accum"],  # 梯度累积。
+        "lr_scheduler_type": "cosine",  # 学习率调度器。
+        "logging_steps": PG_CONFIG["logging_steps"],  # 日志间隔。
+        "save_steps": PG_CONFIG["save_steps"],  # 保存间隔。
+        "learning_rate": PG_CONFIG["learning_rate"],  # 学习率。
+        "num_train_epochs": PG_CONFIG["num_train_epochs"],  # 训练轮数。
+        "max_samples": PG_CONFIG["max_samples"],  # 最大样本数。
+        "max_grad_norm": 1.0,  # 梯度裁剪。
+        "report_to": "none",  # 关闭外部上报。
+        "ppo_buffer_size": PG_CONFIG["ppo_buffer_size"],  # PPO buffer。
+        "ppo_epochs": PG_CONFIG["ppo_epochs"],  # PPO 更新次数。
+        "ppo_target": PG_CONFIG["ppo_target"],  # KL 目标。
+        "ppo_score_norm": PG_CONFIG["ppo_score_norm"],  # 奖励归一化开关。
+        "ppo_whiten_rewards": PG_CONFIG["ppo_whiten_rewards"],  # whiten 奖励开关。
+        "bf16": runtime["bf16"],  # bf16 开关。
+        "fp16": runtime["fp16"],  # fp16 开关。
     }
     config_path = output_dir / "train_policy_gradient_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
 
+    # 步骤 3：执行训练，失败时回退第二入口。
     print("3) 启动 Policy Gradient 训练", flush=True)
     env = os.environ.copy()
     env["FORCE_TORCHRUN"] = "1"
@@ -299,6 +310,7 @@ def main() -> None:
         except Exception as exc:  # noqa: PERF203
             print(f"[WARN] 训练入口失败：{' '.join(cmd)} -> {exc}", flush=True)
 
+    # 步骤 4：训练成功时整理模型产物。
     print("4) 整理模型产物", flush=True)
     if train_ok:
         for name in [
@@ -325,6 +337,7 @@ def main() -> None:
                     shutil.rmtree(dst)
             shutil.move(str(src), str(dst))
 
+    # 步骤 5：导出可视化（包括失败占位场景）。
     metrics_dir = export_policy_gradient_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"Policy Gradient done. Visualization exported to: {metrics_dir}", flush=True)
 

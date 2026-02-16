@@ -60,4 +60,11 @@ python scripts/smoke_test.py --modules sft,grpo,mdp
 - `post_train/systems/`: 工程优化（`deepspeed`、`cuda`、`mixed_precision`）
 - `assets/`: 示例数据与历史实验产物归档
 
+## 模块内标准目录含义
+- `code/`: 主流程代码，直接运行即可看到训练/推理过程。
+- `data/`: 样本数据、数据索引与配置。
+- `models/`: 训练完成后的最终模型文件（用于推理和部署）。
+- `checkpoints/`: 训练过程中的中间状态（用于断点续训和回溯）。
+- `output/`: 可视化图、指标表、日志与总结（常见为 `csv/png/json`）。
+
 详细原理、区别、运行与产物说明见各子目录 README。

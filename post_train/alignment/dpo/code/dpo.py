@@ -5,6 +5,13 @@ DPO 单文件学习脚本（主流程 + 可视化）。
 结构约定：
 1) `main`：主训练流程。
 2) `export_dpo_visualization`：唯一可视化函数。
+
+学习步骤（与终端输出 1~5 对应）：
+1) 准备目录与运行环境。
+2) 生成 DPO 训练配置。
+3) 启动训练。
+4) 整理模型产物。
+5) 导出指标与可视化。
 """
 
 from __future__ import annotations
@@ -22,20 +29,20 @@ import torch
 
 
 DPO_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",
-    "template": "qwen",
-    "dataset": "dpo_zh_demo",
-    "output_dir": "output",
-    "max_samples": 8,
-    "num_train_epochs": 0.01,
-    "learning_rate": 5e-6,
-    "batch_size": 1,
-    "grad_accum": 1,
-    "logging_steps": 5,
-    "save_steps": 500,
-    "pref_beta": 0.1,
-    "pref_loss": "sigmoid",
-    "ema_alpha": 0.2,
+    "model_id": "Qwen/Qwen3-0.6B",  # 基座模型名称或路径。
+    "template": "qwen",  # 对话模板。
+    "dataset": "dpo_zh_demo",  # 偏好数据集（chosen/rejected）。
+    "output_dir": "output",  # 输出目录。
+    "max_samples": 8,  # 最大样本数（教学快跑）。
+    "num_train_epochs": 0.01,  # 训练轮数。
+    "learning_rate": 5e-6,  # 学习率。
+    "batch_size": 1,  # 单设备 batch。
+    "grad_accum": 1,  # 梯度累积。
+    "logging_steps": 5,  # 日志间隔。
+    "save_steps": 500,  # checkpoint 间隔。
+    "pref_beta": 0.1,  # DPO β，控制偏好约束强度。
+    "pref_loss": "sigmoid",  # 偏好损失类型。
+    "ema_alpha": 0.2,  # 可视化平滑系数。
 }
 
 
@@ -185,6 +192,8 @@ def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 def main() -> None:
     """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== DPO 主流程（学习版）===", flush=True)
+
+    # 步骤 1：准备目录与设备精度配置。
     print("1) 准备目录与运行环境", flush=True)
 
     code_dir = Path(__file__).resolve().parent
@@ -215,36 +224,38 @@ def main() -> None:
     if factory_dir is None:
         raise FileNotFoundError("未找到 LLaMA-Factory，请检查 dpo/sft 目录结构。")
 
+    # 步骤 2：生成 DPO 参数配置文件。
     print("2) 生成训练配置", flush=True)
     train_config = {
-        "stage": "dpo",
-        "do_train": True,
-        "model_name_or_path": DPO_CONFIG["model_id"],
-        "dataset": DPO_CONFIG["dataset"],
-        "template": DPO_CONFIG["template"],
-        "finetuning_type": "lora",
-        "lora_target": "all",
-        "pref_beta": DPO_CONFIG["pref_beta"],
-        "pref_loss": DPO_CONFIG["pref_loss"],
-        "output_dir": str(checkpoints_dir),
-        "overwrite_output_dir": True,
-        "per_device_train_batch_size": DPO_CONFIG["batch_size"],
-        "gradient_accumulation_steps": DPO_CONFIG["grad_accum"],
-        "lr_scheduler_type": "cosine",
-        "logging_steps": DPO_CONFIG["logging_steps"],
-        "save_steps": DPO_CONFIG["save_steps"],
-        "learning_rate": DPO_CONFIG["learning_rate"],
-        "num_train_epochs": DPO_CONFIG["num_train_epochs"],
-        "max_samples": DPO_CONFIG["max_samples"],
-        "max_grad_norm": 1.0,
-        "report_to": "none",
-        "bf16": runtime["bf16"],
-        "fp16": runtime["fp16"],
+        "stage": "dpo",  # 训练阶段：DPO。
+        "do_train": True,  # 启用训练。
+        "model_name_or_path": DPO_CONFIG["model_id"],  # 基座模型。
+        "dataset": DPO_CONFIG["dataset"],  # 偏好数据。
+        "template": DPO_CONFIG["template"],  # 模板。
+        "finetuning_type": "lora",  # LoRA 微调。
+        "lora_target": "all",  # LoRA 注入目标。
+        "pref_beta": DPO_CONFIG["pref_beta"],  # DPO β 系数。
+        "pref_loss": DPO_CONFIG["pref_loss"],  # 偏好损失函数。
+        "output_dir": str(checkpoints_dir),  # checkpoint 目录。
+        "overwrite_output_dir": True,  # 覆盖旧输出。
+        "per_device_train_batch_size": DPO_CONFIG["batch_size"],  # 单卡 batch。
+        "gradient_accumulation_steps": DPO_CONFIG["grad_accum"],  # 梯度累积。
+        "lr_scheduler_type": "cosine",  # 学习率调度器。
+        "logging_steps": DPO_CONFIG["logging_steps"],  # 日志间隔。
+        "save_steps": DPO_CONFIG["save_steps"],  # 保存间隔。
+        "learning_rate": DPO_CONFIG["learning_rate"],  # 学习率。
+        "num_train_epochs": DPO_CONFIG["num_train_epochs"],  # 训练轮数。
+        "max_samples": DPO_CONFIG["max_samples"],  # 最大样本数。
+        "max_grad_norm": 1.0,  # 梯度裁剪。
+        "report_to": "none",  # 关闭外部上报。
+        "bf16": runtime["bf16"],  # bf16 开关。
+        "fp16": runtime["fp16"],  # fp16 开关。
     }
     config_path = output_dir / "train_dpo_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
 
+    # 步骤 3：执行 DPO 训练（CLI 优先，模块回退）。
     print("3) 启动 DPO 训练", flush=True)
     env = os.environ.copy()
     env["FORCE_TORCHRUN"] = "1"
@@ -267,6 +278,7 @@ def main() -> None:
     if last_error is not None:
         raise RuntimeError("DPO 训练未能启动，请检查 finetune 环境依赖。") from last_error
 
+    # 步骤 4：归档模型文件到 models。
     print("4) 整理模型产物", flush=True)
     for name in [
         "README.md",
@@ -291,6 +303,7 @@ def main() -> None:
                 shutil.rmtree(dst)
         shutil.move(str(src), str(dst))
 
+    # 步骤 5：导出 loss/奖励等可视化产物。
     metrics_dir = export_dpo_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"DPO done. Visualization exported to: {metrics_dir}", flush=True)
 

@@ -5,6 +5,13 @@ SFT 单文件学习脚本（极简版）。
 结构约定：
 1) `main`：主训练流程（准备环境 -> 训练 -> 整理模型）。
 2) `export_sft_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
+
+学习步骤（与终端输出 1~5 对应）：
+1) 准备目录与运行环境（code/data/models/output/checkpoints + 设备精度）。
+2) 生成训练配置（把教学参数写入 JSON，便于复现）。
+3) 启动训练（优先 CLI，失败回退模块入口）。
+4) 整理模型产物（把最终模型文件移动到 models）。
+5) 导出可视化（loss/lr/grad 等曲线 + summary）。
 """
 
 from __future__ import annotations
@@ -23,18 +30,18 @@ import torch
 
 # 固定默认配置：不依赖命令行参数，直接 `python sft.py` 即可。
 SFT_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",
-    "template": "qwen",
-    "dataset": "identity,alpaca_en_demo",
-    "output_dir": "output",
-    "max_samples": 8,
-    "num_train_epochs": 0.01,
-    "learning_rate": 5e-5,
-    "batch_size": 1,
-    "grad_accum": 1,
-    "logging_steps": 5,
-    "save_steps": 1000,
-    "ema_alpha": 0.2,
+    "model_id": "Qwen/Qwen3-0.6B",  # 基座模型名称或本地路径。
+    "template": "qwen",  # 对话模板；必须与模型家族匹配。
+    "dataset": "identity,alpaca_en_demo",  # 训练数据集名称，可写多个并用逗号分隔。
+    "output_dir": "output",  # 运行输出目录（保存配置、可视化等）。
+    "max_samples": 8,  # 最多采样训练样本数；用于教学快跑。
+    "num_train_epochs": 0.01,  # 训练轮数；教学模式设为极小值。
+    "learning_rate": 5e-5,  # 学习率；控制参数更新步长。
+    "batch_size": 1,  # 单设备 batch size；显存紧张时保持 1。
+    "grad_accum": 1,  # 梯度累积步数；等效扩大 batch。
+    "logging_steps": 5,  # 每多少 step 打印一次日志。
+    "save_steps": 1000,  # 每多少 step 保存一次 checkpoint。
+    "ema_alpha": 0.2,  # 曲线平滑系数（EMA）；仅用于可视化。
 }
 
 
@@ -167,6 +174,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 def main() -> None:
     """主训练流程：准备目录与环境 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== SFT 主流程（学习版）===", flush=True)
+
+    # 步骤 1：准备目录结构与运行时设备配置。
     print("1) 准备目录与运行环境", flush=True)
 
     code_dir = Path(__file__).resolve().parent
@@ -192,34 +201,36 @@ def main() -> None:
     if factory_dir is None:
         raise FileNotFoundError("未找到 LLaMA-Factory，请检查 sft 目录结构。")
 
+    # 步骤 2：把训练参数固化为 JSON，便于回看和复现。
     print("2) 生成训练配置", flush=True)
     train_config = {
-        "stage": "sft",
-        "do_train": True,
-        "model_name_or_path": SFT_CONFIG["model_id"],
-        "dataset": SFT_CONFIG["dataset"],
-        "template": SFT_CONFIG["template"],
-        "finetuning_type": "lora",
-        "lora_target": "all",
-        "output_dir": str(checkpoints_dir),
-        "overwrite_output_dir": True,
-        "per_device_train_batch_size": SFT_CONFIG["batch_size"],
-        "gradient_accumulation_steps": SFT_CONFIG["grad_accum"],
-        "lr_scheduler_type": "cosine",
-        "logging_steps": SFT_CONFIG["logging_steps"],
-        "save_steps": SFT_CONFIG["save_steps"],
-        "learning_rate": SFT_CONFIG["learning_rate"],
-        "num_train_epochs": SFT_CONFIG["num_train_epochs"],
-        "max_samples": SFT_CONFIG["max_samples"],
-        "max_grad_norm": 1.0,
-        "report_to": "none",
-        "bf16": runtime["bf16"],
-        "fp16": runtime["fp16"],
+        "stage": "sft",  # 训练阶段：监督微调。
+        "do_train": True,  # 是否执行训练。
+        "model_name_or_path": SFT_CONFIG["model_id"],  # 基座模型。
+        "dataset": SFT_CONFIG["dataset"],  # 训练集。
+        "template": SFT_CONFIG["template"],  # 模板。
+        "finetuning_type": "lora",  # 微调方式：LoRA。
+        "lora_target": "all",  # LoRA 注入目标层。
+        "output_dir": str(checkpoints_dir),  # checkpoint 输出目录。
+        "overwrite_output_dir": True,  # 允许覆盖旧输出。
+        "per_device_train_batch_size": SFT_CONFIG["batch_size"],  # 单卡 batch。
+        "gradient_accumulation_steps": SFT_CONFIG["grad_accum"],  # 梯度累积。
+        "lr_scheduler_type": "cosine",  # 学习率调度器。
+        "logging_steps": SFT_CONFIG["logging_steps"],  # 日志间隔。
+        "save_steps": SFT_CONFIG["save_steps"],  # 保存间隔。
+        "learning_rate": SFT_CONFIG["learning_rate"],  # 学习率。
+        "num_train_epochs": SFT_CONFIG["num_train_epochs"],  # 训练轮数。
+        "max_samples": SFT_CONFIG["max_samples"],  # 最大样本数。
+        "max_grad_norm": 1.0,  # 梯度裁剪阈值。
+        "report_to": "none",  # 关闭 wandb 等外部上报。
+        "bf16": runtime["bf16"],  # 是否启用 bf16。
+        "fp16": runtime["fp16"],  # 是否启用 fp16。
     }
     config_path = output_dir / "train_sft_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
 
+    # 步骤 3：执行训练命令（CLI -> 模块入口双回退）。
     print("3) 启动 SFT 训练", flush=True)
     env = os.environ.copy()
     env["FORCE_TORCHRUN"] = "1"
@@ -242,6 +253,7 @@ def main() -> None:
     if last_error is not None:
         raise RuntimeError("SFT 训练未能启动，请检查 finetune 环境依赖。") from last_error
 
+    # 步骤 4：把最终模型文件从 checkpoints 归档到 models。
     print("4) 整理模型产物", flush=True)
     for name in [
         "README.md",
@@ -266,6 +278,7 @@ def main() -> None:
                 shutil.rmtree(dst)
         shutil.move(str(src), str(dst))
 
+    # 步骤 5：导出学习可视化产物，便于复盘训练过程。
     metrics_dir = export_sft_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"SFT done. Visualization exported to: {metrics_dir}", flush=True)
 
