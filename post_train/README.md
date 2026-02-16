@@ -10,6 +10,14 @@
 - `policy_gradient`
 - `actor_critic`
 - `rlhf`
+- `mdp`
+- `td_learning`
+- `gae`
+- `advantage`
+- `cql`
+- `bcq`
+- `deepspeed`
+- `cuda`
 
 通用目录规范（每个模块内）：
 - `code/`: 单文件运行脚本

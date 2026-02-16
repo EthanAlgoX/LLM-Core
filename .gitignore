@@ -73,3 +73,58 @@ checkpoint-*/
 **/dit/checkpoints/
 **/dit/models/
 **/dit/output/
+
+# TD Learning ignore rules
+**/td_learning/checkpoints/
+**/td_learning/models/
+**/td_learning/output/
+
+# Advantage ignore rules
+**/advantage/checkpoints/
+**/advantage/models/
+**/advantage/output/
+
+# BCQ ignore rules
+**/bcq/checkpoints/
+**/bcq/models/
+**/bcq/output/
+
+# CQL ignore rules
+**/cql/checkpoints/
+**/cql/models/
+**/cql/output/
+
+# CUDA ignore rules
+**/cuda/checkpoints/
+**/cuda/models/
+**/cuda/output/
+
+# DeepSpeed ignore rules
+**/deepspeed/checkpoints/
+**/deepspeed/models/
+**/deepspeed/output/
+
+# GAE ignore rules
+**/gae/checkpoints/
+**/gae/models/
+**/gae/output/
+
+# MDP ignore rules
+**/mdp/checkpoints/
+**/mdp/models/
+**/mdp/output/
+
+# Flamingo ignore rules
+**/flamingo/checkpoints/
+**/flamingo/models/
+**/flamingo/output/
+
+# LLaVA ignore rules
+**/llava/checkpoints/
+**/llava/models/
+**/llava/output/
+
+# BLIP2 ignore rules
+**/blip2/checkpoints/
+**/blip2/models/
+**/blip2/output/
