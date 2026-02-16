@@ -128,3 +128,17 @@ checkpoint-*/
 **/blip2/checkpoints/
 **/blip2/models/
 **/blip2/output/
+
+# Mixed Precision ignore rules
+**/mixed_precision/checkpoints/
+**/mixed_precision/models/
+**/mixed_precision/output/
+
+# Megatron ignore rules
+**/megatron/checkpoints/
+**/megatron/models/
+**/megatron/output/
+**/megatron/data/
+
+# GRPO ignore rules
+**/grpo/models/

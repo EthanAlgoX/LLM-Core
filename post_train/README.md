@@ -18,6 +18,7 @@
 - `bcq`
 - `deepspeed`
 - `cuda`
+- `mixed_precision`
 
 通用目录规范（每个模块内）：
 - `code/`: 单文件运行脚本

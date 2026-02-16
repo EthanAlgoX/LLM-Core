@@ -1,9 +1,9 @@
 {
-  "num_transitions": 1382,
-  "dataset_episodes": 120,
-  "behavior_success_rate": 0.725,
-  "action_left_ratio": 0.3907380607814761,
-  "action_right_ratio": 0.6092619392185239,
-  "reward_mean": 0.03925470635294914,
-  "reward_std": 0.2756362557411194
+  "num_transitions": 286,
+  "dataset_episodes": 24,
+  "behavior_success_rate": 0.6666666666666666,
+  "action_left_ratio": 0.3916083916083916,
+  "action_right_ratio": 0.6083916083916084,
+  "reward_mean": 0.02919580601155758,
+  "reward_std": 0.2695678770542145
 }

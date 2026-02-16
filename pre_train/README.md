@@ -10,6 +10,7 @@
 - `blip2`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/blip2`
 - `llava`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/llava`
 - `flamingo`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/flamingo`
+- `megatron`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/megatron`
 
 ## 快速开始（nanoGPT）
 
@@ -64,6 +65,15 @@ cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/flamingo
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
 python code/flamingo.py --dry-run
+```
+
+## 快速开始（Megatron）
+
+```bash
+cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/megatron
+source /opt/anaconda3/etc/profile.d/conda.sh
+conda activate finetune
+python code/megatron.py
 ```
 
 > 说明：以上命令与原始 `nanoGPT` 用法一致，只是路径迁移到了 `Finetune/pre_train/nanoGPT`。
