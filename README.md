@@ -2,6 +2,18 @@
 
 这个项目用于快速学习并复现 LLM、VLM 与后训练核心流程，面向面试准备场景。
 
+## 新手学习入口（推荐）
+从这里开始：
+- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/README.md`
+- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/ROADMAP_14_DAYS.md`
+- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/LEVEL_CHECKPOINTS.md`
+
+每次跑完模块后生成口述稿：
+```bash
+python scripts/interview_brief.py --module sft
+python scripts/interview_brief.py --module mdp
+```
+
 ## 一键入口（面试模式）
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune
