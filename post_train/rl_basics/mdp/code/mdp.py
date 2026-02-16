@@ -10,7 +10,7 @@ MDP（马尔可夫决策过程）最小可运行示例：GridWorld + Value Itera
 5) 目标：找到最优策略 pi*(s)，使长期折扣回报最大。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取网格与迭代参数。
+1) `build_default_args`：读取网格与迭代参数。
 2) `build_grid_mdp`：构建状态空间、转移和奖励规则。
 3) `value_iteration`：求解状态价值函数 V(s)。
 4) `extract_policy`：由 V(s) 提取贪心策略。
@@ -42,7 +42,7 @@ ACTION_DELTA = {
 ARROW = {"U": "↑", "D": "↓", "L": "←", "R": "→"}
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 MDP 求解配置。"""
     parser = argparse.ArgumentParser(description="Run MDP value iteration and export visualization artifacts.")
     parser.add_argument("--output-dir", default="output")
@@ -66,7 +66,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-iters", type=int, default=300)
     parser.add_argument("--tol", type=float, default=1e-6)
     parser.add_argument("--save-every-iters", type=int, default=50)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def resolve_output_dir(base_dir: Path, output_dir: str) -> Path:
@@ -357,7 +357,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：构建 MDP、执行值迭代并导出可视化结果。"""
-    args = parse_args()
+    args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)

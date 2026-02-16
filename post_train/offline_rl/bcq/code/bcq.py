@@ -12,7 +12,7 @@ BCQ（Batch-Constrained Q-learning）最小可运行示例：LineWorld Offline R
 4) 这样可减小离线数据覆盖不足导致的过估计。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取环境、数据和训练参数。
+1) `build_default_args`：读取环境、数据和训练参数。
 2) `collect_offline_dataset`：构建离线行为数据集。
 3) `train_bcq`：训练 Q 网络与行为模型。
 4) `evaluate_policy`：评估 BCQ 约束下的贪心策略。
@@ -44,7 +44,7 @@ DEFAULT_OUTPUT_DIR = "output"
 ACTION_TEXT = {0: "L", 1: "R"}
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 BCQ 配置。"""
     parser = argparse.ArgumentParser(description="Run BCQ demo training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -77,7 +77,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-episodes", type=int, default=30)
     parser.add_argument("--log-every", type=int, default=20)
     parser.add_argument("--save-every", type=int, default=200)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def detect_device() -> torch.device:
@@ -599,7 +599,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：离线数据构建 + BCQ 训练 + 可视化导出。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")

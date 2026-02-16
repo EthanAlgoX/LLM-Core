@@ -79,9 +79,15 @@ MODULES: dict[str, ModuleSpec] = {
         "组相对策略优化",
         (
             "--train-size",
-            "8",
+            "4",
             "--num-train-epochs",
-            "0.2",
+            "0.05",
+            "--num-generations",
+            "2",
+            "--generation-batch-size",
+            "2",
+            "--max-completion-length",
+            "32",
             "--logging-steps",
             "1",
             "--save-steps",
@@ -406,7 +412,7 @@ MODULES: dict[str, ModuleSpec] = {
 }
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Unified learning entrypoint for interview-friendly demos.")
     parser.add_argument("--list", action="store_true", help="列出所有可用模块。")
     parser.add_argument("--module", choices=sorted(MODULES.keys()), help="要运行的模块。")
@@ -417,7 +423,7 @@ def parse_args() -> argparse.Namespace:
         default="",
         help='附加参数字符串，例如 --extra="--learning-rate 1e-5 --seed 7"',
     )
-    return parser.parse_args()
+    return parser.parse_known_args()[0]
 
 
 def print_module_list() -> None:
@@ -442,7 +448,7 @@ def build_command(module: str, toy: bool, extra: str) -> list[str]:
 
 
 def main() -> None:
-    args = parse_args()
+    args = build_default_args()
 
     if args.list:
         print_module_list()

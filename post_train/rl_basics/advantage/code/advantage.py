@@ -11,7 +11,7 @@ Advantage（优势函数）最小可运行示例：MC / TD / GAE 三种估计方
    - GAE: 对多步 TD 残差做指数加权和。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取环境与训练参数。
+1) `build_default_args`：读取环境与训练参数。
 2) `LineWorld`：轻量环境。
 3) `compute_advantages_*`：三种优势估计实现。
 4) `train_loop`：Actor-Critic 训练（可切换 advantage 方式）。
@@ -44,7 +44,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 Advantage 训练配置。"""
     parser = argparse.ArgumentParser(description="Run advantage-estimation demo and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--log-every", type=int, default=10)
     parser.add_argument("--save-every", type=int, default=50)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def detect_device() -> torch.device:
@@ -559,7 +559,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}, method={args.advantage_method}")

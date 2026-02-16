@@ -11,7 +11,7 @@ CUDA 学习示例：环境检测 + 基准测试 + 简单训练曲线。
    - 在当前设备上跑一个可视化的 toy 训练过程。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取测试参数。
+1) `build_default_args`：读取测试参数。
 2) `collect_cuda_info`：采集 CUDA 设备信息。
 3) `run_matmul_benchmark`：执行矩阵乘 benchmark。
 4) `run_toy_train`：执行简化训练并记录 loss。
@@ -43,7 +43,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="Run CUDA diagnostics and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=2e-3)
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--log-every", type=int, default=10)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def set_seed(seed: int) -> None:
@@ -326,7 +326,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
 
     code_dir = Path(__file__).resolve().parent

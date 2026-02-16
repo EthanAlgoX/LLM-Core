@@ -9,7 +9,7 @@
 4) 采样阶段：从随机噪声出发，按时间步反向迭代得到生成样本。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取训练与可视化参数。
+1) `build_default_args`：读取训练与可视化参数。
 2) `build_noise_schedule`：构造 beta/alpha/alpha_bar 噪声调度。
 3) `train_loop`：执行训练并保存 checkpoint。
 4) `sample_reverse_process`：执行反向去噪采样。
@@ -38,7 +38,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 Diffusion 训练与可视化配置。"""
     parser = argparse.ArgumentParser(description="Run toy diffusion training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
 
     # 可视化参数。
     parser.add_argument("--num-vis-samples", type=int, default=2000)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def detect_device() -> torch.device:
@@ -369,7 +369,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 toy diffusion 并导出可视化结果。"""
-    args = parse_args()
+    args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)

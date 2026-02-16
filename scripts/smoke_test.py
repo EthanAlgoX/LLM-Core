@@ -59,7 +59,7 @@ class CaseResult:
     stderr_tail: str = ""
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run smoke tests for interview learning flows.")
     parser.add_argument(
         "--modules",
@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--toy-timeout", type=int, default=240)
     parser.add_argument("--startup-timeout", type=int, default=60)
     parser.add_argument("--allow-fail", action="store_true", help="即使失败也返回 0。")
-    return parser.parse_args()
+    return parser.parse_known_args()[0]
 
 
 def iter_modules(selected: str) -> list[str]:
@@ -211,7 +211,7 @@ def save_report(results: list[CaseResult]) -> Path:
 
 
 def main() -> None:
-    args = parse_args()
+    args = build_default_args()
     modules = iter_modules(args.modules)
 
     print(f"[smoke] modules={len(modules)}")

@@ -10,7 +10,7 @@ GAE（Generalized Advantage Estimation）最小可运行示例。
 4) lambda 越大，估计更接近蒙特卡洛回报；越小更接近一步 TD。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取环境与训练参数。
+1) `build_default_args`：读取环境与训练参数。
 2) `LineWorld`：构建轻量环境采样轨迹。
 3) `compute_gae`：根据 rewards/values 计算 advantage 与 return。
 4) `train_loop`：执行 Actor-Critic + GAE 训练。
@@ -41,7 +41,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 GAE 训练配置。"""
     parser = argparse.ArgumentParser(description="Run GAE demo training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--log-every", type=int, default=10)
     parser.add_argument("--save-every", type=int, default=50)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def detect_device() -> torch.device:
@@ -472,7 +472,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：执行 GAE 训练并导出可视化结果。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")

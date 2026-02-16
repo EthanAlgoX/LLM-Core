@@ -9,7 +9,7 @@
 4) 本示例支持 auto/no_amp/fp16/bf16，自动回退到稳定配置。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取训练与 AMP 参数。
+1) `build_default_args`：读取训练与 AMP 参数。
 2) `resolve_amp`：根据设备和参数确定最终 AMP 配置。
 3) `run_train_loop`：执行训练，记录 loss/吞吐/缩放因子。
 4) `export_artifacts`：导出 JSON/CSV/曲线图/summary。
@@ -43,7 +43,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="Run mixed-precision training demo and export artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         help="混合精度模式。",
     )
     parser.add_argument("--grad-clip", type=float, default=1.0)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def set_seed(seed: int) -> None:
@@ -398,7 +398,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = choose_device()
     amp_cfg = resolve_amp(args.amp_mode, device)

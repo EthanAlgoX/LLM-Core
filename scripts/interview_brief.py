@@ -131,12 +131,12 @@ NOTES: dict[str, dict[str, str]] = {
 }
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate interview-ready oral brief from run artifacts.")
     parser.add_argument("--module", required=True, choices=sorted(interview_run.MODULES.keys()))
     parser.add_argument("--summary", default="", help="可选：指定 summary/result JSON 路径。")
     parser.add_argument("--save", default="", help="可选：把生成内容保存到文件。")
-    return parser.parse_args()
+    return parser.parse_known_args()[0]
 
 
 def module_output_dir(module: str) -> Path | None:
@@ -264,7 +264,7 @@ def build_brief(module: str, summary_path: Path | None, data: dict[str, Any]) ->
 
 
 def main() -> None:
-    args = parse_args()
+    args = build_default_args()
     summary_path, data = load_summary(args.module, args.summary)
     text = build_brief(args.module, summary_path, data)
 

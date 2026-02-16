@@ -10,7 +10,7 @@ TD Learning 最小可运行示例：GridWorld + Tabular Q-Learning。
 4) 通过 epsilon-greedy 探索，最终得到近似最优策略。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取环境与训练参数。
+1) `build_default_args`：读取环境与训练参数。
 2) `GridWorld`：定义状态、动作、转移与奖励。
 3) `train_q_learning`：执行 TD 学习。
 4) `extract_policy`：从 Q 表提取贪心策略。
@@ -46,7 +46,7 @@ ACTION_DELTA = {
 ARROW = {"U": "↑", "D": "↓", "L": "←", "R": "→"}
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 TD Learning 配置。"""
     parser = argparse.ArgumentParser(description="Run TD Learning (Q-learning) and export visualization artifacts.")
     parser.add_argument("--output-dir", default="output")
@@ -74,7 +74,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epsilon-decay", type=float, default=0.995)
     parser.add_argument("--log-every-episodes", type=int, default=10)
     parser.add_argument("--save-every-episodes", type=int, default=100)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def resolve_output_dir(base_dir: Path, output_dir: str) -> Path:
@@ -365,7 +365,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 TD Learning 并导出可视化结果。"""
-    args = parse_args()
+    args = build_default_args()
     random.seed(args.seed)
     np.random.seed(args.seed)
 

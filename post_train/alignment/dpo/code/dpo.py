@@ -1,28 +1,14 @@
 #!/usr/bin/env python3
 """
-LLaMA-Factory 的单模式 DPO 流程。
+DPO 单文件学习脚本（主流程 + 可视化）。
 
-一、DPO 原理（面向实现）
-1) 每条样本包含 prompt、chosen（偏好回答）、rejected（非偏好回答）。
-2) DPO 直接优化“chosen 相对 rejected 的偏好概率”，不显式训练奖励模型。
-3) `pref_beta` 控制偏好强度，值越大通常更新更激进。
-4) 通过 loss、reward margin、reward accuracy 等指标观察对齐效果。
-
-二、代码框架（从入口到结果）
-1) `parse_args`：读取训练与可视化参数。
-2) `detect_device_and_precision`：自动选择设备与混合精度。
-3) `build_train_config`：构建最小可用 DPO 配置。
-4) `run_train`：执行训练（含 CLI 与模块入口回退）。
-5) `export_learning_artifacts`：导出 JSON/CSV/曲线图/summary。
-6) `main`：串联完整流程并输出结果目录。
-
-用法：
-  python code/dpo.py
+结构约定：
+1) `main`：主训练流程。
+2) `export_dpo_visualization`：唯一可视化函数。
 """
 
 from __future__ import annotations
 
-import argparse
 import csv
 import json
 import os
@@ -31,233 +17,58 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
 
 import torch
 
-DEFAULT_OUTPUT_DIR = "output"
+
+DPO_CONFIG = {
+    "model_id": "Qwen/Qwen3-0.6B",
+    "template": "qwen",
+    "dataset": "dpo_zh_demo",
+    "output_dir": "output",
+    "max_samples": 8,
+    "num_train_epochs": 0.01,
+    "learning_rate": 5e-6,
+    "batch_size": 1,
+    "grad_accum": 1,
+    "logging_steps": 5,
+    "save_steps": 500,
+    "pref_beta": 0.1,
+    "pref_loss": "sigmoid",
+    "ema_alpha": 0.2,
+}
 
 
-def parse_args() -> argparse.Namespace:
-    """解析命令行参数，返回 DPO 训练与可视化所需配置。"""
-    parser = argparse.ArgumentParser(description="Run DPO and always export visualization artifacts.")
-    # 模型与数据：尽量选用 LLaMA-Factory 自带 DPO 演示集，开箱可跑。
-    parser.add_argument("--model-id", default="Qwen/Qwen3-0.6B")
-    parser.add_argument("--template", default="qwen")
-    parser.add_argument("--dataset", default="dpo_zh_demo")
-    parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
+def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
+    """导出 DPO 可视化：JSON、CSV、曲线图、summary。"""
+    print("5) 导出可视化结果", flush=True)
 
-    # 训练核心超参：保留最关键参数，便于学习与快速实验。
-    parser.add_argument("--max-samples", type=int, default=300)
-    parser.add_argument("--num-train-epochs", type=float, default=1.0)
-    parser.add_argument("--learning-rate", type=float, default=5e-6)
-    parser.add_argument("--batch-size", type=int, default=1)
-    parser.add_argument("--grad-accum", type=int, default=8)
-    parser.add_argument("--logging-steps", type=int, default=5)
-    parser.add_argument("--save-steps", type=int, default=500)
-    parser.add_argument("--pref-beta", type=float, default=0.1)
-    parser.add_argument(
-        "--pref-loss",
-        default="sigmoid",
-        choices=["sigmoid", "orpo", "simpo"],
-        help="偏好损失类型。",
-    )
-    # 可视化参数：用于平滑 loss 曲线，降低训练噪声。
-    parser.add_argument("--ema-alpha", type=float, default=0.2, help="EMA smoothing factor for plotting curves.")
-    return parser.parse_args()
-
-
-def detect_device_and_precision() -> dict[str, Any]:
-    """检测可用设备并选择推荐混合精度配置。"""
-    if torch.cuda.is_available():
-        return {"device": "cuda", "bf16": True, "fp16": False}
-    if torch.backends.mps.is_available():
-        return {"device": "mps", "bf16": False, "fp16": True}
-    return {"device": "cpu", "bf16": False, "fp16": False}
-
-
-def resolve_factory_dir(base_dir: Path) -> Path:
-    """定位 LLaMA-Factory 目录：优先 dpo 本地，其次复用 sft 目录。"""
-    candidates = [
-        base_dir / "LLaMA-Factory",
-        base_dir.parent.parent / "sft" / "LLaMA-Factory",
-        base_dir.parent.parent / "sft" / "code" / "LLaMA-Factory",
-    ]
-    for path in candidates:
-        if path.exists():
-            return path
-    raise FileNotFoundError(
-        "LLaMA-Factory directory not found. Expected one of:\n"
-        f"- {candidates[0]}\n"
-        f"- {candidates[1]}"
-    )
-
-
-def resolve_output_dir(base_dir: Path, output_dir: str) -> Path:
-    """解析输出目录：相对路径按 dpo 目录解析，绝对路径原样使用。"""
-    out = Path(output_dir)
-    if not out.is_absolute():
-        out = (base_dir / out).resolve()
-    return out
-
-
-def ensure_layout_dirs(module_dir: Path, output_arg: str) -> dict[str, Path]:
-    """创建并返回标准目录布局：code/data/models/output/checkpoints。"""
-    output_dir = resolve_output_dir(module_dir, output_arg)
-    layout = {
-        "code": module_dir / "code",
-        "data": module_dir / "data",
-        "models": module_dir / "models",
-        "output": output_dir,
-        "checkpoints": module_dir / "checkpoints",
-    }
-    for path in layout.values():
-        path.mkdir(parents=True, exist_ok=True)
-    return layout
-
-
-def move_model_artifacts(checkpoints_dir: Path, models_dir: Path) -> None:
-    """将最终模型文件从 checkpoints 根目录移动到 models 目录。"""
-    artifact_names = [
-        "README.md",
-        "adapter_config.json",
-        "adapter_model.safetensors",
-        "config.json",
-        "generation_config.json",
-        "tokenizer.json",
-        "tokenizer_config.json",
-        "special_tokens_map.json",
-        "chat_template.jinja",
-        "training_args.bin",
-    ]
-    for name in artifact_names:
-        src = checkpoints_dir / name
-        if not src.exists():
-            continue
-        dst = models_dir / name
-        if dst.exists():
-            if dst.is_file():
-                dst.unlink()
-            else:
-                shutil.rmtree(dst)
-        shutil.move(str(src), str(dst))
-
-
-def build_train_config(args: argparse.Namespace, runtime: dict[str, Any], output_path: Path) -> dict[str, Any]:
-    """根据参数与运行时环境构造最小可用的 LLaMA-Factory DPO 配置。"""
-    return {
-        "stage": "dpo",  # 训练阶段：直接偏好优化。
-        "do_train": True,  # 启用训练流程。
-        "model_name_or_path": args.model_id,  # 基座模型名称或路径。
-        "dataset": args.dataset,  # 偏好数据集（包含 chosen/rejected）。
-        "template": args.template,  # 对话模板。
-        "finetuning_type": "lora",  # 参数高效微调。
-        "lora_target": "all",  # 尽量覆盖可注入线性层。
-        "pref_beta": args.pref_beta,  # DPO 偏好强度系数。
-        "pref_loss": args.pref_loss,  # 偏好损失类型。
-        "output_dir": str(output_path),  # 模型与日志输出目录。
-        "overwrite_output_dir": True,  # 复用同一输出目录，避免目录膨胀。
-        "per_device_train_batch_size": args.batch_size,  # 单设备 batch。
-        "gradient_accumulation_steps": args.grad_accum,  # 梯度累积。
-        "lr_scheduler_type": "cosine",  # 学习率调度策略。
-        "logging_steps": args.logging_steps,  # 日志记录间隔。
-        "save_steps": args.save_steps,  # checkpoint 保存间隔。
-        "learning_rate": args.learning_rate,  # 初始学习率。
-        "num_train_epochs": args.num_train_epochs,  # 训练轮数。
-        "max_samples": args.max_samples,  # 样本上限（用于快速实验）。
-        "max_grad_norm": 1.0,  # 梯度裁剪阈值。
-        "report_to": "none",  # 关闭外部实验平台上报。
-        "bf16": runtime["bf16"],  # 是否启用 bfloat16。
-        "fp16": runtime["fp16"],  # 是否启用 float16。
-    }
-
-
-def run_train(factory_dir: Path, config_path: Path) -> None:
-    """执行 DPO 训练，优先使用 CLI，失败时回退到模块入口。"""
-    env = os.environ.copy()
-    env["FORCE_TORCHRUN"] = "1"
-
-    src_dir = str(factory_dir / "src")
-    env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
-
-    commands: list[list[str]] = []
-    if shutil.which("llamafactory-cli") is not None:
-        commands.append(["llamafactory-cli", "train", str(config_path)])
-    commands.append([sys.executable, "-m", "llamafactory.cli", "train", str(config_path)])
-
-    last_error: Exception | None = None
-    for cmd in commands:
-        try:
-            subprocess.run(cmd, cwd=str(factory_dir), check=True, env=env)
-            return
-        except Exception as exc:
-            last_error = exc
-            print(f"[WARN] Training command failed: {' '.join(cmd)}")
-
-    raise RuntimeError(
-        "Failed to start DPO training via both CLI and module entrypoints. "
-        "Please check LLaMA-Factory dependencies in your `finetune` environment."
-    ) from last_error
-
-
-def _to_float(v: Any) -> float | None:
-    """将任意日志值转换为 float，无法转换时返回 None。"""
-    if isinstance(v, (int, float)):
-        return float(v)
-    if isinstance(v, str):
-        try:
-            return float(v)
-        except ValueError:
-            return None
-    return None
-
-
-def _ema(values: list[float], alpha: float) -> list[float]:
-    """计算序列的指数滑动平均（EMA）并返回平滑后的新序列。"""
-    out, prev = [], None
-    for x in values:
-        prev = x if prev is None else alpha * x + (1.0 - alpha) * prev
-        out.append(prev)
-    return out
-
-
-def find_trainer_state(checkpoints_dir: Path) -> Path | None:
-    """查找 trainer_state.json，优先根目录，其次最新 checkpoint。"""
-    direct = checkpoints_dir / "trainer_state.json"
-    if direct.exists():
-        return direct
-
-    checkpoints = []
-    for d in checkpoints_dir.glob("checkpoint-*"):
-        if d.is_dir():
+    state_path = checkpoints_dir / "trainer_state.json"
+    if not state_path.exists():
+        candidates: list[tuple[int, Path]] = []
+        for d in checkpoints_dir.glob("checkpoint-*"):
+            if not d.is_dir():
+                continue
             m = re.match(r"checkpoint-(\d+)$", d.name)
             if m:
-                checkpoints.append((int(m.group(1)), d))
-    checkpoints.sort(key=lambda x: x[0], reverse=True)
-    for _, ckpt in checkpoints:
-        candidate = ckpt / "trainer_state.json"
-        if candidate.exists():
-            return candidate
-    return None
+                candidates.append((int(m.group(1)), d / "trainer_state.json"))
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        for _, p in candidates:
+            if p.exists():
+                state_path = p
+                break
 
-
-def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha: float) -> Path:
-    """导出训练日志、CSV、曲线图与摘要，返回产物目录路径。"""
-    state_path = find_trainer_state(checkpoints_dir)
-    if state_path is None:
-        raise FileNotFoundError(f"No trainer_state.json found under: {checkpoints_dir}")
+    if not state_path.exists():
+        raise FileNotFoundError(f"未找到 trainer_state.json：{checkpoints_dir}")
 
     state = json.loads(state_path.read_text(encoding="utf-8"))
     log_history = state.get("log_history", [])
     if not log_history:
-        raise RuntimeError(f"log_history is empty in: {state_path}")
+        raise RuntimeError(f"log_history 为空：{state_path}")
 
     metrics_dir = output_dir / "dpo_metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
-
-    (metrics_dir / "log_history.json").write_text(
-        json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (metrics_dir / "log_history.json").write_text(json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8")
 
     keys = [
         "step",
@@ -274,16 +85,22 @@ def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha
         "logps/rejected",
     ]
 
-    rows = []
+    rows: list[dict[str, float | int | None]] = []
     for item in log_history:
         if "step" not in item:
             continue
-        row = {}
-        for key in keys:
-            if key == "step":
-                row[key] = int(item.get(key, 0))
+        row: dict[str, float | int | None] = {"step": int(item.get("step", 0))}
+        for k in keys[1:]:
+            v = item.get(k)
+            if isinstance(v, (int, float)):
+                row[k] = float(v)
+            elif isinstance(v, str):
+                try:
+                    row[k] = float(v)
+                except ValueError:
+                    row[k] = None
             else:
-                row[key] = _to_float(item.get(key))
+                row[k] = None
         rows.append(row)
 
     with (metrics_dir / "training_metrics.csv").open("w", encoding="utf-8", newline="") as f:
@@ -293,24 +110,32 @@ def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha
 
     try:
         import matplotlib.pyplot as plt
-    except Exception as exc:
-        raise RuntimeError(f"`matplotlib` is required to generate visualization: {exc}") from exc
+    except Exception as exc:  # noqa: PERF203
+        raise RuntimeError(f"缺少 matplotlib，无法导出曲线：{exc}") from exc
 
     def series(metric: str) -> tuple[list[int], list[float]]:
         x, y = [], []
         for r in rows:
-            if r.get(metric) is None:
+            v = r.get(metric)
+            if v is None:
                 continue
             x.append(int(r["step"]))
-            y.append(float(r[metric]))
+            y.append(float(v))
         return x, y
+
+    def ema(values: list[float], alpha: float) -> list[float]:
+        out, prev = [], None
+        for v in values:
+            prev = v if prev is None else alpha * v + (1 - alpha) * prev
+            out.append(prev)
+        return out
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 
     x, y = series("loss")
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
-        axes[0, 0].plot(x, _ema(y, ema_alpha), linewidth=2, label=f"loss(ema={ema_alpha})")
+        axes[0, 0].plot(x, ema(y, DPO_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={DPO_CONFIG['ema_alpha']})")
     axes[0, 0].set_title("Train Loss")
     axes[0, 0].set_xlabel("step")
     axes[0, 0].grid(True, alpha=0.3)
@@ -348,43 +173,126 @@ def export_learning_artifacts(checkpoints_dir: Path, output_dir: Path, ema_alpha
     summary = {
         "total_steps": len(rows),
         "final_step": rows[-1]["step"] if rows else None,
-        "final_loss": next((r["loss"] for r in reversed(rows) if r["loss"] is not None), None),
-        "final_reward_margin": next(
-            (r["rewards/margins"] for r in reversed(rows) if r["rewards/margins"] is not None), None
-        ),
-        "final_reward_accuracy": next(
-            (r["rewards/accuracies"] for r in reversed(rows) if r["rewards/accuracies"] is not None), None
-        ),
-        "best_reward_margin": max((r["rewards/margins"] for r in rows if r["rewards/margins"] is not None), default=None),
+        "final_loss": next((r["loss"] for r in reversed(rows) if r.get("loss") is not None), None),
+        "final_reward_margin": next((r["rewards/margins"] for r in reversed(rows) if r.get("rewards/margins") is not None), None),
+        "final_reward_accuracy": next((r["rewards/accuracies"] for r in reversed(rows) if r.get("rewards/accuracies") is not None), None),
+        "best_reward_margin": max((r["rewards/margins"] for r in rows if r.get("rewards/margins") is not None), default=None),
     }
-    (metrics_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    (metrics_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return metrics_dir
 
 
 def main() -> None:
-    """主流程入口：生成配置、执行训练、导出可视化结果。"""
-    args = parse_args()
+    """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
+    print("=== DPO 主流程（学习版）===", flush=True)
+    print("1) 准备目录与运行环境", flush=True)
+
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
-    factory_dir = resolve_factory_dir(code_dir)
-    config_path = layout["output"] / "train_dpo_auto.json"
+    output_dir = (module_dir / DPO_CONFIG["output_dir"]).resolve()
+    checkpoints_dir = module_dir / "checkpoints"
+    models_dir = module_dir / "models"
+    for p in [module_dir / "code", module_dir / "data", models_dir, output_dir, checkpoints_dir]:
+        p.mkdir(parents=True, exist_ok=True)
 
-    runtime = detect_device_and_precision()
-    print(f"Runtime: device={runtime['device']}, bf16={runtime['bf16']}, fp16={runtime['fp16']}")
+    runtime = {"device": "cpu", "bf16": False, "fp16": False}
+    if torch.cuda.is_available():
+        runtime = {"device": "cuda", "bf16": True, "fp16": False}
+    elif torch.backends.mps.is_available():
+        runtime = {"device": "mps", "bf16": False, "fp16": True}
+    print(f"Runtime: device={runtime['device']}, bf16={runtime['bf16']}, fp16={runtime['fp16']}", flush=True)
 
-    config = build_train_config(args=args, runtime=runtime, output_path=layout["checkpoints"])
-    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Config written: {config_path}")
+    factory_dir = None
+    for c in [
+        code_dir / "LLaMA-Factory",
+        module_dir / "LLaMA-Factory",
+        module_dir.parent / "sft" / "LLaMA-Factory",
+        module_dir.parent / "sft" / "code" / "LLaMA-Factory",
+    ]:
+        if c.exists():
+            factory_dir = c
+            break
+    if factory_dir is None:
+        raise FileNotFoundError("未找到 LLaMA-Factory，请检查 dpo/sft 目录结构。")
 
-    run_train(factory_dir=factory_dir, config_path=config_path)
-    move_model_artifacts(checkpoints_dir=layout["checkpoints"], models_dir=layout["models"])
-    metrics_dir = export_learning_artifacts(
-        checkpoints_dir=layout["checkpoints"],
-        output_dir=layout["output"],
-        ema_alpha=args.ema_alpha,
-    )
-    print(f"DPO done. Visualization exported to: {metrics_dir}")
+    print("2) 生成训练配置", flush=True)
+    train_config = {
+        "stage": "dpo",
+        "do_train": True,
+        "model_name_or_path": DPO_CONFIG["model_id"],
+        "dataset": DPO_CONFIG["dataset"],
+        "template": DPO_CONFIG["template"],
+        "finetuning_type": "lora",
+        "lora_target": "all",
+        "pref_beta": DPO_CONFIG["pref_beta"],
+        "pref_loss": DPO_CONFIG["pref_loss"],
+        "output_dir": str(checkpoints_dir),
+        "overwrite_output_dir": True,
+        "per_device_train_batch_size": DPO_CONFIG["batch_size"],
+        "gradient_accumulation_steps": DPO_CONFIG["grad_accum"],
+        "lr_scheduler_type": "cosine",
+        "logging_steps": DPO_CONFIG["logging_steps"],
+        "save_steps": DPO_CONFIG["save_steps"],
+        "learning_rate": DPO_CONFIG["learning_rate"],
+        "num_train_epochs": DPO_CONFIG["num_train_epochs"],
+        "max_samples": DPO_CONFIG["max_samples"],
+        "max_grad_norm": 1.0,
+        "report_to": "none",
+        "bf16": runtime["bf16"],
+        "fp16": runtime["fp16"],
+    }
+    config_path = output_dir / "train_dpo_auto.json"
+    config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Config written: {config_path}", flush=True)
+
+    print("3) 启动 DPO 训练", flush=True)
+    env = os.environ.copy()
+    env["FORCE_TORCHRUN"] = "1"
+    env["PYTHONPATH"] = str(factory_dir / "src") + os.pathsep + env.get("PYTHONPATH", "")
+
+    commands: list[list[str]] = []
+    if shutil.which("llamafactory-cli"):
+        commands.append(["llamafactory-cli", "train", str(config_path)])
+    commands.append([sys.executable, "-m", "llamafactory.cli", "train", str(config_path)])
+
+    last_error: Exception | None = None
+    for cmd in commands:
+        try:
+            subprocess.run(cmd, cwd=str(factory_dir), check=True, env=env)
+            last_error = None
+            break
+        except Exception as exc:  # noqa: PERF203
+            last_error = exc
+            print(f"[WARN] 训练入口失败：{' '.join(cmd)}", flush=True)
+    if last_error is not None:
+        raise RuntimeError("DPO 训练未能启动，请检查 finetune 环境依赖。") from last_error
+
+    print("4) 整理模型产物", flush=True)
+    for name in [
+        "README.md",
+        "adapter_config.json",
+        "adapter_model.safetensors",
+        "config.json",
+        "generation_config.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "chat_template.jinja",
+        "training_args.bin",
+    ]:
+        src = checkpoints_dir / name
+        if not src.exists():
+            continue
+        dst = models_dir / name
+        if dst.exists():
+            if dst.is_file():
+                dst.unlink()
+            else:
+                shutil.rmtree(dst)
+        shutil.move(str(src), str(dst))
+
+    metrics_dir = export_dpo_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
+    print(f"DPO done. Visualization exported to: {metrics_dir}", flush=True)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ DeepSpeed 最小可运行示例：Toy Regression + 可视化。
 3) 训练流程本质仍是前向、反向、参数更新，只是由 DeepSpeed Engine 管理执行细节。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取训练和 DeepSpeed 参数。
+1) `build_default_args`：读取训练和 DeepSpeed 参数。
 2) `build_deepspeed_config`：生成最小可用 DeepSpeed 配置。
 3) `run_train_loop`：优先尝试 DeepSpeed，失败自动回退 Torch。
 4) `export_learning_artifacts`：导出日志、CSV、曲线图、summary。
@@ -39,7 +39,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回训练与 DeepSpeed 配置。"""
     parser = argparse.ArgumentParser(description="Run DeepSpeed demo training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -59,7 +59,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--zero-stage", type=int, default=2, choices=[0, 1, 2, 3])
     parser.add_argument("--fp16", action="store_true")
     parser.add_argument("--bf16", action="store_true")
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def set_seed(seed: int) -> None:
@@ -344,7 +344,7 @@ def export_learning_artifacts(
 
 def main() -> None:
     """主流程入口：生成配置、训练并导出可视化。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")

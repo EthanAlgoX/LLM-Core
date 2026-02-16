@@ -11,7 +11,7 @@ Megatron 学习示例：并行配置 + Toy Causal LM 训练 + 可视化。
    - 导出训练曲线，便于学习并行配置与训练过程的关系。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取训练与并行参数。
+1) `build_default_args`：读取训练与并行参数。
 2) `build_megatron_config`：生成并行配置快照。
 3) `run_train_loop`：优先尝试 Megatron 依赖检查，训练路径默认 Torch。
 4) `export_artifacts`：导出 JSON/CSV/曲线图/summary。
@@ -42,7 +42,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="Run Megatron demo training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data-parallel-size", type=int, default=1)
     parser.add_argument("--micro-batch-size", type=int, default=4)
     parser.add_argument("--global-batch-size", type=int, default=32)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def set_seed(seed: int) -> None:
@@ -329,7 +329,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口。"""
-    args = parse_args()
+    args = build_default_args()
     set_seed(args.seed)
     device = choose_device()
     print(f"Runtime: device={device.type}")

@@ -8,7 +8,7 @@ Flamingo 最小可运行示例（图像描述 / 视觉问答）。
 3) 在多层语言网络中周期性插入视觉条件，完成图文联合生成。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取推理参数。
+1) `build_default_args`：读取推理参数。
 2) `ensure_layout_dirs`：创建统一目录结构。
 3) `run_inference`：加载 Flamingo 风格模型并执行生成。
 4) `export_artifacts`：导出 JSON 与可视化图。
@@ -32,7 +32,7 @@ import torch
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 Flamingo 推理配置。"""
     parser = argparse.ArgumentParser(description="Run Flamingo-style inference and export artifacts.")
     parser.add_argument(
@@ -56,7 +56,9 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="仅测试目录与导出流程，不加载模型。",
     )
-    return parser.parse_args()
+    args = parser.parse_known_args([])[0]
+    args.dry_run = True
+    return args
 
 
 def detect_device() -> torch.device:
@@ -211,7 +213,7 @@ def export_artifacts(result: dict[str, Any], output_dir: Path) -> Path:
 
 def main() -> None:
     """主流程入口：执行 Flamingo 推理并导出产物。"""
-    args = parse_args()
+    args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)

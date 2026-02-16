@@ -9,7 +9,7 @@
 4) 反向采样：从高斯噪声出发，逐步去噪生成图像。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取训练与可视化参数。
+1) `build_default_args`：读取训练与可视化参数。
 2) `build_noise_schedule`：构造扩散噪声调度。
 3) `ToyDiT`：最小可运行的 DiT 网络（patchify + Transformer）。
 4) `train_loop`：执行训练并保存 checkpoint。
@@ -38,7 +38,7 @@ import torch.nn.functional as F
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 DiT 训练与可视化配置。"""
     parser = argparse.ArgumentParser(description="Run toy DiT training and export visualization artifacts.")
     parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
 
     # 可视化参数。
     parser.add_argument("--num-vis-samples", type=int, default=16)
-    return parser.parse_args()
+    return parser.parse_known_args([])[0]
 
 
 def detect_device() -> torch.device:
@@ -453,7 +453,7 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 toy DiT 并导出可视化结果。"""
-    args = parse_args()
+    args = build_default_args()
     if args.image_size % args.patch_size != 0:
         raise ValueError("--image-size must be divisible by --patch-size")
 

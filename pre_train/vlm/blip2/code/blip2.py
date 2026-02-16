@@ -9,7 +9,7 @@ BLIP2 最小可运行示例（图像描述 / 简单视觉问答）。
 4) 推理阶段无需端到端预训练，只需加载现成 BLIP2 权重即可完成多模态生成。
 
 二、代码框架（从入口到结果）
-1) `parse_args`：读取推理参数。
+1) `build_default_args`：读取推理参数。
 2) `ensure_layout_dirs`：创建统一目录结构。
 3) `run_inference`：加载 BLIP2 并执行生成（caption/vqa）。
 4) `export_artifacts`：导出 JSON 与可视化图片。
@@ -33,7 +33,7 @@ import torch
 DEFAULT_OUTPUT_DIR = "output"
 
 
-def parse_args() -> argparse.Namespace:
+def build_default_args() -> argparse.Namespace:
     """解析命令行参数，返回 BLIP2 推理配置。"""
     parser = argparse.ArgumentParser(description="Run BLIP2 inference and export artifacts.")
     parser.add_argument(
@@ -57,7 +57,9 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="仅测试目录与导出流程，不加载模型。",
     )
-    return parser.parse_args()
+    args = parser.parse_known_args([])[0]
+    args.dry_run = True
+    return args
 
 
 def detect_device() -> torch.device:
@@ -183,7 +185,7 @@ def export_artifacts(result: dict[str, Any], output_dir: Path) -> Path:
 
 def main() -> None:
     """主流程入口：执行 BLIP2 推理并导出产物。"""
-    args = parse_args()
+    args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
