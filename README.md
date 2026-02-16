@@ -36,7 +36,13 @@ python scripts/smoke_test.py --modules sft,grpo,mdp
 - `output/smoke_reports/*.json`
 
 ## 目录说明
-- `pre_train/`: 预训练与多模态建模（nanoGPT、diffusion、dit、blip2、llava、flamingo、megatron）
-- `post_train/`: 后训练与强化学习（sft、dpo、grpo、ppo、rlhf、mdp、td_learning、gae、advantage、cql、bcq 等）
+- `pre_train/llm/`: 语言模型预训练（`nanoGPT`、`megatron`）
+- `pre_train/generation/`: 生成模型（`diffusion`、`dit`）
+- `pre_train/vlm/`: 多模态模型（`blip2`、`llava`、`flamingo`）
+- `post_train/alignment/`: 对齐训练（`sft`、`dpo`、`grpo`、`ppo`、`policy_gradient`、`actor_critic`、`rlhf`）
+- `post_train/rl_basics/`: RL 基础（`mdp`、`td_learning`、`gae`、`advantage`）
+- `post_train/offline_rl/`: 离线 RL（`cql`、`bcq`）
+- `post_train/systems/`: 工程优化（`deepspeed`、`cuda`、`mixed_precision`）
+- `assets/`: 示例数据与历史实验产物归档
 
 详细原理、区别、运行与产物说明见各子目录 README。

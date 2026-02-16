@@ -5,10 +5,10 @@
 
 当前模块按学习主题分为四类：
 
-1. 监督与偏好对齐：`sft`、`dpo`、`grpo`、`ppo`、`policy_gradient`、`actor_critic`、`rlhf`
-2. RL 基础理论：`mdp`、`td_learning`、`gae`、`advantage`
-3. 离线强化学习：`cql`、`bcq`
-4. 工程加速专题：`deepspeed`、`cuda`、`mixed_precision`
+1. 监督与偏好对齐：`alignment/{sft,dpo,grpo,ppo,policy_gradient,actor_critic,rlhf}`
+2. RL 基础理论：`rl_basics/{mdp,td_learning,gae,advantage}`
+3. 离线强化学习：`offline_rl/{cql,bcq}`
+4. 工程加速专题：`systems/{deepspeed,cuda,mixed_precision}`
 
 ## 分类区别（学习路径）
 1. `SFT -> DPO -> PPO/GRPO/RLHF`：从监督学习逐步过渡到偏好优化与在线强化学习。
@@ -25,7 +25,7 @@
 
 ## 通用运行方式
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/<module>
+cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/<category>/<module>
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
 python code/<module>.py

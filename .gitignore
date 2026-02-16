@@ -7,11 +7,11 @@
 __pycache__/
 .gradio/
 qwen3_lora/
-qwen3_grpo_out/
+assets/history/qwen3_grpo_out/
 # **/LLaMA-Factory/
 **/qwen3_grpo_out*/
 **/qwen3_lora*/
-dummy_data.jsonl
+assets/data/dummy_data.jsonl
 test_io.log
 debug_grpo.py
 test_out/
@@ -37,108 +37,12 @@ checkpoint-*/
 **/python-wheels/
 **/.eggs/
 **/*.egg-info/
-**/*.egg
+# General ML artifacts
+**/checkpoints/
+**/models/
+**/output/
+**/data/
+**/wandb/
+**/runs/
 
-# DPO ignore rules
-**/dpo/checkpoints/
-**/dpo/models/
-**/dpo/output/
-
-# Policy Gradient ignore rules
-**/policy_gradient/checkpoints/
-**/policy_gradient/models/
-**/policy_gradient/output/
-
-# PPO ignore rules
-**/ppo/checkpoints/
-**/ppo/models/
-**/ppo/output/
-
-# RLHF ignore rules
-**/rlhf/checkpoints/
-**/rlhf/models/
-**/rlhf/output/
-
-# Actor-Critic ignore rules
-**/actor_critic/checkpoints/
-**/actor_critic/models/
-**/actor_critic/output/
-
-# Diffusion ignore rules
-**/diffusion/checkpoints/
-**/diffusion/models/
-**/diffusion/output/
-
-# DiT ignore rules
-**/dit/checkpoints/
-**/dit/models/
-**/dit/output/
-
-# TD Learning ignore rules
-**/td_learning/checkpoints/
-**/td_learning/models/
-**/td_learning/output/
-
-# Advantage ignore rules
-**/advantage/checkpoints/
-**/advantage/models/
-**/advantage/output/
-
-# BCQ ignore rules
-**/bcq/checkpoints/
-**/bcq/models/
-**/bcq/output/
-
-# CQL ignore rules
-**/cql/checkpoints/
-**/cql/models/
-**/cql/output/
-
-# CUDA ignore rules
-**/cuda/checkpoints/
-**/cuda/models/
-**/cuda/output/
-
-# DeepSpeed ignore rules
-**/deepspeed/checkpoints/
-**/deepspeed/models/
-**/deepspeed/output/
-
-# GAE ignore rules
-**/gae/checkpoints/
-**/gae/models/
-**/gae/output/
-
-# MDP ignore rules
-**/mdp/checkpoints/
-**/mdp/models/
-**/mdp/output/
-
-# Flamingo ignore rules
-**/flamingo/checkpoints/
-**/flamingo/models/
-**/flamingo/output/
-
-# LLaVA ignore rules
-**/llava/checkpoints/
-**/llava/models/
-**/llava/output/
-
-# BLIP2 ignore rules
-**/blip2/checkpoints/
-**/blip2/models/
-**/blip2/output/
-
-# Mixed Precision ignore rules
-**/mixed_precision/checkpoints/
-**/mixed_precision/models/
-**/mixed_precision/output/
-
-# Megatron ignore rules
-**/megatron/checkpoints/
-**/megatron/models/
-**/megatron/output/
-**/megatron/data/
-
-# GRPO ignore rules
-**/grpo/models/
+# Specific exceptions (if any, though usually we want to ignore all data/models/output)

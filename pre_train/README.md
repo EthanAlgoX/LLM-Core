@@ -5,9 +5,9 @@
 
 当前模块按学习主题分为四类：
 
-1. 语言模型预训练：`nanoGPT`、`megatron`
-2. 图像生成建模：`diffusion`、`dit`
-3. 视觉语言模型（VLM）：`blip2`、`llava`、`flamingo`
+1. 语言模型预训练：`llm/{nanoGPT,megatron}`
+2. 图像生成建模：`generation/{diffusion,dit}`
+3. 视觉语言模型（VLM）：`vlm/{blip2,llava,flamingo}`
 4. 工程扩展：可与 `post_train` 中 `deepspeed/cuda/mixed_precision` 联动学习
 
 ## 分类区别（学习路径）
@@ -24,7 +24,7 @@
 
 ## 通用运行方式
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/<module>
+cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/<category>/<module>
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
 python code/<module>.py

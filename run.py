@@ -33,7 +33,7 @@ MODULES: dict[str, ModuleSpec] = {
     # post_train: alignment / rl / systems
     "sft": ModuleSpec(
         "post_train/alignment",
-        "post_train/sft/code/sft.py",
+        "post_train/alignment/sft/code/sft.py",
         "监督微调，后训练起点",
         (
             "--max-samples",
@@ -54,7 +54,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "dpo": ModuleSpec(
         "post_train/alignment",
-        "post_train/dpo/code/dpo.py",
+        "post_train/alignment/dpo/code/dpo.py",
         "直接偏好优化",
         (
             "--max-samples",
@@ -75,7 +75,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "grpo": ModuleSpec(
         "post_train/alignment",
-        "post_train/grpo/code/grpo_demo.py",
+        "post_train/alignment/grpo/code/grpo_demo.py",
         "组相对策略优化",
         (
             "--train-size",
@@ -92,7 +92,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "ppo": ModuleSpec(
         "post_train/alignment",
-        "post_train/ppo/code/ppo.py",
+        "post_train/alignment/ppo/code/ppo.py",
         "PPO 对齐训练",
         (
             "--reward-model",
@@ -115,7 +115,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "policy_gradient": ModuleSpec(
         "post_train/alignment",
-        "post_train/policy_gradient/code/policy_gradient.py",
+        "post_train/alignment/policy_gradient/code/policy_gradient.py",
         "策略梯度对齐训练",
         (
             "--reward-model",
@@ -138,7 +138,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "actor_critic": ModuleSpec(
         "post_train/alignment",
-        "post_train/actor_critic/code/actor_critic.py",
+        "post_train/alignment/actor_critic/code/actor_critic.py",
         "Actor-Critic 对齐训练",
         (
             "--reward-model",
@@ -161,7 +161,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "rlhf": ModuleSpec(
         "post_train/alignment",
-        "post_train/rlhf/code/rlhf.py",
+        "post_train/alignment/rlhf/code/rlhf.py",
         "RLHF 闭环训练",
         (
             "--reward-model",
@@ -184,7 +184,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "mdp": ModuleSpec(
         "post_train/rl_basics",
-        "post_train/mdp/code/mdp.py",
+        "post_train/rl_basics/mdp/code/mdp.py",
         "MDP 值迭代",
         (
             "--max-iters",
@@ -197,7 +197,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "td_learning": ModuleSpec(
         "post_train/rl_basics",
-        "post_train/td_learning/code/td_learning.py",
+        "post_train/rl_basics/td_learning/code/td_learning.py",
         "TD/Q-learning 基础",
         (
             "--episodes",
@@ -214,7 +214,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "gae": ModuleSpec(
         "post_train/rl_basics",
-        "post_train/gae/code/gae.py",
+        "post_train/rl_basics/gae/code/gae.py",
         "GAE 优势估计",
         (
             "--iterations",
@@ -231,7 +231,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "advantage": ModuleSpec(
         "post_train/rl_basics",
-        "post_train/advantage/code/advantage.py",
+        "post_train/rl_basics/advantage/code/advantage.py",
         "优势函数估计对比",
         (
             "--iterations",
@@ -248,7 +248,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "cql": ModuleSpec(
         "post_train/offline_rl",
-        "post_train/cql/code/cql.py",
+        "post_train/offline_rl/cql/code/cql.py",
         "离线 RL：CQL",
         (
             "--dataset-episodes",
@@ -267,7 +267,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "bcq": ModuleSpec(
         "post_train/offline_rl",
-        "post_train/bcq/code/bcq.py",
+        "post_train/offline_rl/bcq/code/bcq.py",
         "离线 RL：BCQ",
         (
             "--dataset-episodes",
@@ -286,7 +286,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "deepspeed": ModuleSpec(
         "post_train/systems",
-        "post_train/deepspeed/code/deepspeed.py",
+        "post_train/systems/deepspeed/code/deepspeed.py",
         "训练系统优化：DeepSpeed",
         (
             "--steps",
@@ -301,7 +301,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "cuda": ModuleSpec(
         "post_train/systems",
-        "post_train/cuda/code/cuda.py",
+        "post_train/systems/cuda/code/cuda.py",
         "CUDA 与吞吐观察",
         (
             "--benchmark-iters",
@@ -318,7 +318,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "mixed_precision": ModuleSpec(
         "post_train/systems",
-        "post_train/mixed_precision/code/mixed_precision.py",
+        "post_train/systems/mixed_precision/code/mixed_precision.py",
         "混合精度训练",
         (
             "--steps",
@@ -334,7 +334,7 @@ MODULES: dict[str, ModuleSpec] = {
     # pre_train
     "diffusion": ModuleSpec(
         "pre_train/generation",
-        "pre_train/diffusion/code/diffusion.py",
+        "pre_train/generation/diffusion/code/diffusion.py",
         "扩散模型基础",
         (
             "--epochs",
@@ -353,7 +353,7 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "dit": ModuleSpec(
         "pre_train/generation",
-        "pre_train/dit/code/dit.py",
+        "pre_train/generation/dit/code/dit.py",
         "DiT 训练示例",
         (
             "--epochs",
@@ -372,25 +372,25 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     "blip2": ModuleSpec(
         "pre_train/vlm",
-        "pre_train/blip2/code/blip2.py",
+        "pre_train/vlm/blip2/code/blip2.py",
         "BLIP2 推理示例",
         ("--dry-run", "--output-dir", "output/interview_toy_blip2"),
     ),
     "llava": ModuleSpec(
         "pre_train/vlm",
-        "pre_train/llava/code/llava.py",
+        "pre_train/vlm/llava/code/llava.py",
         "LLaVA 推理示例",
         ("--dry-run", "--output-dir", "output/interview_toy_llava"),
     ),
     "flamingo": ModuleSpec(
         "pre_train/vlm",
-        "pre_train/flamingo/code/flamingo.py",
+        "pre_train/vlm/flamingo/code/flamingo.py",
         "Flamingo 推理示例",
         ("--dry-run", "--output-dir", "output/interview_toy_flamingo"),
     ),
     "megatron": ModuleSpec(
         "pre_train/llm",
-        "pre_train/megatron/code/megatron.py",
+        "pre_train/llm/megatron/code/megatron.py",
         "Megatron 并行训练示例",
         (
             "--steps",
