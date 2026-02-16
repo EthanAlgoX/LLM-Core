@@ -1,13 +1,21 @@
-# Policy Gradient
+# Policy Gradient（策略梯度）
 
-目录结构：
-- `code/`: 训练代码（`code/policy_gradient.py`）
-- `data/`: 数据目录（自定义 prompt 数据可放这里）
-- `models/`: 最终导出的模型文件
-- `checkpoints/`: 训练过程 checkpoint
-- `output/`: 指标、曲线图、日志与配置快照
+## 定位与分类
+- 阶段：后训练（策略优化基础）
+- 类型：强化学习基础方法
+- 作用：直接沿策略梯度方向提升期望奖励
 
-运行：
+## 核心原理
+1. 通过采样轨迹估计 `∇J(θ)`。
+2. 依据回报信号增大高回报动作概率。
+3. 可配合 baseline 降低梯度方差。
+
+## 与相近方法区别
+1. 相比 `Actor-Critic`：Policy Gradient 不显式学习 value critic（或弱依赖）。
+2. 相比 `PPO`：Policy Gradient 通常没有 clip 约束，更新稳定性更依赖超参。
+3. 相比 `RLHF`：这里只是优化算法视角，不是完整人类反馈流水线。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/policy_gradient
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -15,7 +23,9 @@ conda activate finetune
 python code/policy_gradient.py --reward-model <奖励模型路径或名称>
 ```
 
-说明：
-- 本实现使用 LLaMA-Factory 的 `stage=ppo` 作为 Policy Gradient 的稳定近似实现。
-- `--reward-model` 为必填参数。
-- 默认会复用 `post_train/sft/LLaMA-Factory` 作为训练框架源码。
+## 输出结果
+默认输出到 `output/policy_gradient_metrics`，包含：
+- `training_metrics.csv`
+- `training_curves.png`
+- `summary.json`
+- `log_history.json`

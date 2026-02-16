@@ -1,13 +1,21 @@
-# CQL
+# CQL（Conservative Q-Learning）
 
-目录结构：
-- `code/`: 代码（`code/cql.py`）
-- `data/`: 离线数据集与统计信息
-- `models/`: 最终 Q 网络参数
-- `checkpoints/`: 训练中间 checkpoint
-- `output/`: 指标、曲线图、配置快照
+## 定位与分类
+- 阶段：离线强化学习
+- 类型：保守值函数学习
+- 作用：在离线数据上抑制 OOD 动作的过高 Q 值估计
 
-运行：
+## 核心原理
+1. 在 Bellman 误差之外加入 conservative regularization。
+2. 降低策略对数据分布外动作的乐观估计。
+3. 提升离线部署时的稳健性。
+
+## 与相近方法区别
+1. 相比 `BCQ`：CQL 通过值函数约束保守化；BCQ 通过行为策略约束动作空间。
+2. 相比在线 `PPO`：CQL 只使用静态数据，不与环境实时交互。
+3. 相比 `TD Learning`：CQL 面向离线分布偏移问题，TD 常用于在线学习。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/cql
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -15,11 +23,10 @@ conda activate finetune
 python code/cql.py
 ```
 
-说明：
-- 这是 CQL 的教学示例：先构建离线数据，再离线训练 Q 网络。
-- 输出目录 `output/cql_metrics` 包含：
-  - `training_metrics.csv`
-  - `training_log.json`
-  - `training_curves.png`
-  - `policy.json`
-  - `summary.json`
+## 输出结果
+默认输出到 `output/cql_metrics`，包含：
+- `training_metrics.csv`
+- `training_curves.png`
+- `policy.json`
+- `qmax_by_state.json`
+- `summary.json`

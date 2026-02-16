@@ -1,30 +1,32 @@
-# Megatron
+# Megatron 专题
 
-目录结构：
-- `code/`: 代码（`code/megatron.py`）
-- `data/`: toy 语料与数据统计
-- `models/`: 最终模型参数
-- `checkpoints/`: 训练中间 checkpoint
-- `output/`: 指标、曲线图、配置快照
+## 定位与分类
+- 阶段：LLM 预训练工程
+- 类型：大模型并行训练（张量并行/流水并行/数据并行）
+- 作用：理解如何在多设备上高效训练更大模型
 
-运行：
+## 核心原理
+1. Tensor Parallel：按矩阵维度切分参数与计算。
+2. Pipeline Parallel：按层切分网络并流水执行。
+3. Data Parallel：多副本并行处理不同批次。
+4. 多并行策略可组合实现规模扩展。
+
+## 与相近方法区别
+1. 相比 `nanoGPT`：Megatron 更偏分布式工程，不是最小教学实现。
+2. 相比 `DeepSpeed`：Megatron偏模型并行，DeepSpeed偏 ZeRO 与系统优化。
+3. 相比 `mixed_precision`：并行策略解决规模问题，精度策略解决效率问题。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/megatron
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
-
-# 默认可运行（Torch 训练路径）
 python code/megatron.py
-
-# 尝试检测 Megatron 依赖并导出并行配置
-python code/megatron.py --use-megatron --tensor-model-parallel-size 2 --pipeline-model-parallel-size 2
 ```
 
-说明：
-- 该脚本用于学习 Megatron 并行配置思路（TP/PP/DP），并提供可直接运行的 toy Causal LM 训练。
-- 输出目录 `output/megatron_metrics` 包含：
-  - `training_metrics.csv`
-  - `training_log.json`
-  - `training_curves.png`
-  - `summary.json`
-- 并行配置快照在 `output/megatron_config_auto.json`。
+## 输出结果
+默认输出到 `output/megatron_metrics`，包含：
+- `training_metrics.csv`
+- `training_curves.png`
+- `summary.json`
+- `megatron_config_auto.json`

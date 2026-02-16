@@ -1,13 +1,21 @@
-# DiT
+# DiT（Diffusion Transformer）
 
-目录结构：
-- `code/`: 训练代码（`code/dit.py`）
-- `data/`: 数据目录（预留）
-- `models/`: 最终导出的模型文件
-- `checkpoints/`: 训练过程 checkpoint
-- `output/`: 指标、曲线图、日志与采样结果
+## 定位与分类
+- 阶段：预训练/生成建模
+- 类型：Transformer 架构扩散模型
+- 作用：学习如何用 Transformer 替代 U-Net 做扩散去噪
 
-运行：
+## 核心原理
+1. 将图像切为 patch token。
+2. 注入时间步嵌入并做 Transformer 编码。
+3. 预测噪声并按扩散反演过程采样。
+
+## 与相近方法区别
+1. 相比 `Diffusion` 基础实现：DiT 更强调 token 化与全局注意力。
+2. 相比 CNN-U-Net：DiT 通常更易扩展到大模型规模。
+3. 相比 LLM：DiT 处理图像/latent token，不是自然语言 token。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/dit
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -15,10 +23,10 @@ conda activate finetune
 python code/dit.py
 ```
 
-说明：
-- 该脚本是一个可快速跑通的 toy DiT（Diffusion Transformer）示例。
-- 会在 `output/dit_metrics` 下生成：
-  - `training_metrics.csv`
-  - `training_curves.png`
-  - `summary.json`
-  - `generated_samples.pt` / `target_samples.pt`
+## 输出结果
+默认输出到 `output/dit_metrics`，包含：
+- `training_metrics.csv`
+- `training_curves.png`
+- `generated_samples.pt`
+- `target_samples.pt`
+- `summary.json`

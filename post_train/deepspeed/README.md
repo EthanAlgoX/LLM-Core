@@ -1,29 +1,31 @@
-# DeepSpeed
+# DeepSpeed 专题
 
-目录结构：
-- `code/`: 代码（`code/deepspeed.py`）
-- `data/`: 数据目录（预留）
-- `models/`: 最终模型参数
-- `checkpoints/`: 训练中间 checkpoint
-- `output/`: 指标、曲线图、配置快照
+## 定位与分类
+- 阶段：训练工程优化
+- 类型：大模型训练系统
+- 作用：提升吞吐、降低显存占用、支持更大规模训练
 
-运行：
+## 核心原理
+1. ZeRO 对优化器状态/梯度/参数分片。
+2. 多种并行与通信优化提升训练效率。
+3. 与混合精度协同降低成本。
+
+## 与相近方法区别
+1. 相比 `Megatron`：DeepSpeed 侧重系统优化与 ZeRO；Megatron强调模型并行切分。
+2. 相比 `CUDA`：CUDA 是底层硬件与算子；DeepSpeed 是训练系统层。
+3. 相比 `mixed_precision`：混合精度是技术点，DeepSpeed 是整体训练框架。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/deepspeed
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
-
-# 默认可运行（若无 deepspeed 自动回退 Torch）
 python code/deepspeed.py
-
-# 尝试 DeepSpeed 引擎
-python code/deepspeed.py --use-deepspeed --zero-stage 2
 ```
 
-说明：
-- 输出目录 `output/deepspeed_metrics` 包含：
-  - `training_metrics.csv`
-  - `training_log.json`
-  - `training_curves.png`
-  - `summary.json`
-- 同时会生成 `output/deepspeed_config_auto.json` 作为 DeepSpeed 配置参考。
+## 输出结果
+默认输出到 `output/deepspeed_metrics`，包含：
+- `training_metrics.csv`
+- `training_curves.png`
+- `summary.json`
+- `deepspeed_config_auto.json`

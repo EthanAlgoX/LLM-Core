@@ -1,13 +1,21 @@
-# TD Learning
+# TD Learning（时序差分学习）
 
-目录结构：
-- `code/`: 代码（`code/td_learning.py`）
-- `data/`: 数据目录（预留）
-- `models/`: 最终 Q 表与策略文件
-- `checkpoints/`: 训练过程 checkpoint
-- `output/`: 指标、曲线图、配置快照
+## 定位与分类
+- 阶段：RL 基础理论
+- 类型：无模型价值学习
+- 作用：边交互边更新价值估计，避免完整回合结束后才学习
 
-运行：
+## 核心原理
+1. 使用 bootstrap 目标：`r + γ V(s')` 或 `r + γ max_a Q(s',a)`。
+2. 典型算法：TD(0)、Q-learning、SARSA。
+3. 在在线学习场景下通常比纯 MC 更高效。
+
+## 与相近方法区别
+1. 相比 `MDP` 规划：TD 不依赖显式转移概率模型。
+2. 相比 `GAE`：GAE 是优势估计方法，TD 是更基础的价值更新思想。
+3. 相比 `Policy Gradient`：TD 主要学习值函数，PG 直接优化策略。
+
+## 运行
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/td_learning
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -15,11 +23,10 @@ conda activate finetune
 python code/td_learning.py
 ```
 
-说明：
-- 这是 GridWorld 上的表格型 Q-learning（TD Learning）示例。
-- 输出目录 `output/td_learning_metrics` 包含：
-  - `episode_log.csv/json`
-  - `q_table.json`
-  - `policy.json`
-  - `training_curves.png`（奖励/TD误差/epsilon/策略热力图）
-  - `summary.json`
+## 输出结果
+默认输出到 `output/td_learning_metrics`，包含：
+- `episode_log.csv`
+- `training_curves.png`
+- `q_table.json`
+- `policy.json`
+- `summary.json`

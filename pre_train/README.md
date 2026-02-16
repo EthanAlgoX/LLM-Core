@@ -1,79 +1,46 @@
-# Pretrain
+# Pre-Train 学习总览
 
-该目录用于放置预训练相关项目。
+## 定位与分类
+`pre_train` 用于学习模型预训练与多模态建模，覆盖 LLM、VLM 和生成模型。
 
-## 已整合项目
+当前模块按学习主题分为四类：
 
-- `nanoGPT`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/nanoGPT`
-- `diffusion`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/diffusion`
-- `dit`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/dit`
-- `blip2`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/blip2`
-- `llava`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/llava`
-- `flamingo`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/flamingo`
-- `megatron`: `/Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/megatron`
+1. 语言模型预训练：`nanoGPT`、`megatron`
+2. 图像生成建模：`diffusion`、`dit`
+3. 视觉语言模型（VLM）：`blip2`、`llava`、`flamingo`
+4. 工程扩展：可与 `post_train` 中 `deepspeed/cuda/mixed_precision` 联动学习
 
-## 快速开始（nanoGPT）
+## 分类区别（学习路径）
+1. `nanoGPT -> Megatron`：先理解单机简洁训练，再理解大规模并行训练。
+2. `Diffusion -> DiT`：先理解扩散思想，再理解 Transformer 化扩散架构。
+3. `BLIP2/LLaVA/Flamingo`：对比不同视觉-语言融合路线。
 
+## 通用目录规范（每个模块）
+- `code/`: 单文件可运行脚本
+- `data/`: 数据目录
+- `models/`: 导出模型
+- `checkpoints/`: 训练中间状态
+- `output/`: 指标、曲线图、结果文件
+
+## 通用运行方式
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/nanoGPT
-pip install torch numpy transformers datasets tiktoken wandb tqdm
-python data/shakespeare_char/prepare.py
-python train.py config/train_shakespeare_char.py
-python sample.py --out_dir=out-shakespeare-char
-```
-
-## 快速开始（diffusion）
-
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/diffusion
+cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/<module>
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
-python code/diffusion.py
+python code/<module>.py
 ```
 
-## 快速开始（DiT）
+> 注：`nanoGPT` 为原始项目结构，入口是 `train.py / sample.py`。
+
+## 统一入口（推荐）
+在项目根目录可使用统一入口，便于面试时快速切换模块：
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/dit
+cd /Users/yunxuanhan/Documents/workspace/ai/Finetune
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate finetune
-python code/dit.py
+
+python run.py --list
+python run.py --module diffusion --toy
+python run.py --module llava --toy
 ```
-
-## 快速开始（BLIP2）
-
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/blip2
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/blip2.py --dry-run
-```
-
-## 快速开始（LLaVA）
-
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/llava
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/llava.py --dry-run
-```
-
-## 快速开始（Flamingo）
-
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/flamingo
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/flamingo.py --dry-run
-```
-
-## 快速开始（Megatron）
-
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/megatron
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/megatron.py
-```
-
-> 说明：以上命令与原始 `nanoGPT` 用法一致，只是路径迁移到了 `Finetune/pre_train/nanoGPT`。
