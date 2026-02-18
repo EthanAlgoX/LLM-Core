@@ -29,6 +29,27 @@
    - **Advantage 公式**：$A_i = \frac{Reward_i - \text{Mean}(Rewards)}{\text{Std}(Rewards)}$
 3. **原理**：只要你的回答比同组的其他“兄弟”好，你就获得正向激励。这种横向对比天然抹平了题目难度的干扰。
 
+## 核心原理与数学公式
+
+### 1. 组内优势函数 (Group Relative Advantage)
+
+这是 GRPO 的核心数学创新。对于针对同一个 Prompt 生成的一组回答 $\{o_1, o_2, \dots, o_G\}$，每个回答的优势 $A_i$ 计算如下：
+
+$$A_i = \frac{r_i - \text{mean}(r_1, r_2, \dots, r_G)}{\text{std}(r_1, r_2, \dots, r_G)}$$
+
+- **$r_i$**：第 $i$ 个回答获得的显式奖励分数。
+- **$\text{mean}$ 与 $\text{std}$**：这组回答奖励分的平均值和标准差。
+- **直觉理解**：这是一种**归一化**操作。它将绝对分数转化为了“在该组中的表现排名”。
+
+### 2. 目标优化函数 (Objective Function)
+
+GRPO 沿用了 PPO 的剪切（Clipped）思想，但在计算期望时是在组内进行的：
+
+$$J_{GRPO}(\theta) = \mathbb{E} \left[ q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}} \right] \left( \frac{1}{G} \sum_{i=1}^G L_i^{CLIP}(\theta) - \beta D_{KL}(\pi_\theta || \pi_{ref}) \right)$$
+
+- **$\frac{1}{G} \sum$**：对整组回答的损失进行平均。
+- **KL 散度约束**：同样保留了 KL 惩罚，防止模型为了赢得组内竞争而写出乱码。
+
 ### 场景分析：组内对比如何奏效？
 
 - **题目极难时**：
