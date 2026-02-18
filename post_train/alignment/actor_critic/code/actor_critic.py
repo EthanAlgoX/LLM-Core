@@ -6,6 +6,11 @@ Actor-Critic 单文件学习脚本（主流程 + 可视化）。
 1) `main`：主训练流程（准备环境 -> 训练 -> 整理模型）。
 2) `export_actor_critic_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
+新人阅读顺序（建议）：
+1) 先看 `ACTOR_CRITIC_CONFIG`：理解策略/奖励模型和 PPO 关键参数。
+2) 再看 `main`：掌握训练入口、回退机制和模型归档流程。
+3) 最后看 `export_actor_critic_visualization`：学会看 loss/reward/value 三类指标。
+
 学习步骤（与终端输出 1~5 对应）：
 1) 准备目录与运行环境。
 2) 生成 Actor-Critic（PPO 近似）配置。
@@ -56,6 +61,8 @@ def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -
 
     metrics_dir = output_dir / "actor_critic_metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
+    # 新手优先关注：
+    # loss(总体优化), reward(策略效果), value_loss(价值网络质量), lr(训练节奏)。
     keys = [
         "step",
         "epoch",
@@ -245,6 +252,7 @@ def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -
 def main() -> None:
     """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== Actor-Critic 主流程（学习版）===", flush=True)
+    # 新手提示：终端步骤号（1~5）可对照阅读本函数每段注释。
 
     # 步骤 1：准备目录与设备精度。
     print("1) 准备目录与运行环境", flush=True)
@@ -313,6 +321,7 @@ def main() -> None:
     config_path = output_dir / "train_actor_critic_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
+    # train_actor_critic_auto.json 是这次训练的可复现实验快照。
 
     # 步骤 3：执行训练，失败则回退第二入口。
     print("3) 启动 Actor-Critic 训练", flush=True)
@@ -326,6 +335,7 @@ def main() -> None:
     if shutil.which("llamafactory-cli"):
         commands.append(["llamafactory-cli", "train", str(config_path)])
     commands.append([sys.executable, "-m", "llamafactory.cli", "train", str(config_path)])
+    # 双入口回退，减少环境差异导致的启动失败。
     for cmd in commands:
         try:
             subprocess.run(cmd, cwd=str(factory_dir), check=True, env=env)
@@ -364,6 +374,7 @@ def main() -> None:
     # 步骤 5：导出指标与曲线（含占位兜底）。
     metrics_dir = export_actor_critic_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"Actor-Critic done. Visualization exported to: {metrics_dir}", flush=True)
+    # 建议的结果阅读顺序：summary.json -> training_curves.png -> training_metrics.csv。
 
 
 if __name__ == "__main__":

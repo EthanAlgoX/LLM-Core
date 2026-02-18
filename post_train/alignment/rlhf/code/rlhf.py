@@ -6,6 +6,11 @@ RLHF 单文件学习脚本（主流程 + 可视化）。
 1) `main`：主训练流程（准备环境 -> 训练 -> 整理模型）。
 2) `export_rlhf_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
+新人阅读顺序（建议）：
+1) 先看 `RLHF_CONFIG`：明确策略模型、奖励模型和 PPO 超参。
+2) 再看 `main`：理解“配置写入 -> 训练执行 -> 模型归档”的主链路。
+3) 最后看 `export_rlhf_visualization`：理解如何从日志读取训练效果。
+
 学习步骤（与终端输出 1~5 对应）：
 1) 准备目录与运行环境。
 2) 生成 RLHF（PPO）配置。
@@ -56,6 +61,8 @@ def export_rlhf_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 
     metrics_dir = output_dir / "rlhf_metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
+    # 新手优先关注：
+    # reward/kl/objective_kl 反映策略更新是否稳，loss/lr 用于判断优化过程。
     keys = [
         "step",
         "epoch",
@@ -229,6 +236,7 @@ def export_rlhf_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 def main() -> None:
     """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== RLHF 主流程（学习版）===", flush=True)
+    # 新手提示：终端步骤号（1~5）和本函数注释是一一对应关系。
 
     # 步骤 1：准备目录与设备精度配置。
     print("1) 准备目录与运行环境", flush=True)
@@ -297,6 +305,7 @@ def main() -> None:
     config_path = output_dir / "train_rlhf_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
+    # 该配置文件可作为“实验记录单”，便于后续复现与对比。
 
     # 步骤 3：执行训练（支持入口回退）。
     print("3) 启动 RLHF 训练", flush=True)
@@ -310,6 +319,7 @@ def main() -> None:
     if shutil.which("llamafactory-cli"):
         commands.append(["llamafactory-cli", "train", str(config_path)])
     commands.append([sys.executable, "-m", "llamafactory.cli", "train", str(config_path)])
+    # 双入口回退：优先 CLI，失败再尝试模块入口。
     for cmd in commands:
         try:
             subprocess.run(cmd, cwd=str(factory_dir), check=True, env=env)
@@ -348,6 +358,7 @@ def main() -> None:
     # 步骤 5：导出学习指标与可视化。
     metrics_dir = export_rlhf_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"RLHF done. Visualization exported to: {metrics_dir}", flush=True)
+    # 建议的结果阅读顺序：summary.json -> training_curves.png -> training_metrics.csv。
 
 
 if __name__ == "__main__":

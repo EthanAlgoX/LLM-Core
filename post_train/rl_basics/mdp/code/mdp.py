@@ -9,6 +9,11 @@ MDP（马尔可夫决策过程）最小可运行示例：GridWorld + Value Itera
 4) 奖励 R(s,a,s')：每一步的即时反馈（到达目标奖励高，陷阱奖励低）。
 5) 目标：找到最优策略 pi*(s)，使长期折扣回报最大。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取网格与迭代参数。
 2) `build_grid_mdp`：构建状态空间、转移和奖励规则。
@@ -357,17 +362,21 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：构建 MDP、执行值迭代并导出可视化结果。"""
+    print("=== MDP 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并创建目录结构。
     args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
 
-    # 保存运行配置，方便复现实验。
+    # 步骤 2：保存运行配置，方便复现实验。
     (layout["output"] / "mdp_run_config.json").write_text(
         json.dumps(vars(args), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
+    # 步骤 3：构建环境并执行值迭代，得到价值函数与迭代日志。
     mdp = build_grid_mdp(args)
     v, logs = value_iteration(
         mdp=mdp,
@@ -376,11 +385,12 @@ def main() -> None:
         tol=args.tol,
     )
 
-    # 按固定间隔保存 checkpoint。
+    # 步骤 4：按固定间隔保存 checkpoint，便于观察价值函数收敛过程。
     for idx, item in enumerate(logs, start=1):
         if idx % args.save_every_iters == 0 or idx == len(logs):
             save_checkpoint(layout["checkpoints"], idx, v, item["delta"])
 
+    # 步骤 5：从价值函数提取策略并导出可视化产物。
     policy = extract_policy(mdp, v, args.discount)
     metrics_dir = export_artifacts(
         mdp=mdp,

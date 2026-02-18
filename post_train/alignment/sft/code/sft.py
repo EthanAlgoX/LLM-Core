@@ -6,6 +6,11 @@ SFT 单文件学习脚本（极简版）。
 1) `main`：主训练流程（准备环境 -> 训练 -> 整理模型）。
 2) `export_sft_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
+新人阅读顺序（建议）：
+1) 先看 `SFT_CONFIG`：理解“这次训练跑什么参数”。
+2) 再看 `main`：理解“训练流程是如何串起来的”。
+3) 最后看 `export_sft_visualization`：理解“如何把日志变成可视化”。
+
 学习步骤（与终端输出 1~5 对应）：
 1) 准备目录与运行环境（code/data/models/output/checkpoints + 设备精度）。
 2) 生成训练配置（把教学参数写入 JSON，便于复现）。
@@ -29,6 +34,7 @@ import torch
 
 
 # 固定默认配置：不依赖命令行参数，直接 `python sft.py` 即可。
+# 按“模型/数据/训练超参/可视化”分组给出，便于新人对照学习。
 SFT_CONFIG = {
     "model_id": "Qwen/Qwen3-0.6B",  # 基座模型名称或本地路径。
     "template": "qwen",  # 对话模板；必须与模型家族匹配。
@@ -68,6 +74,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     if not state_path.exists():
         raise FileNotFoundError(f"未找到 trainer_state.json：{checkpoints_dir}")
 
+    # trainer_state.json 是 HuggingFace Trainer 的核心状态文件：
+    # 其中 log_history 记录了训练过程中每次日志打印的指标。
     state = json.loads(state_path.read_text(encoding="utf-8"))
     log_history = state.get("log_history", [])
     if not log_history:
@@ -79,9 +87,13 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
         json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
+    # 这些字段是新手最值得先看的最小指标集：
+    # step(训练步数), loss(训练损失), eval_loss(验证损失), learning_rate(学习率), grad_norm(梯度范数)。
     keys = ["step", "epoch", "loss", "eval_loss", "learning_rate", "grad_norm"]
     rows: list[dict[str, float | int | None]] = []
     for item in log_history:
+        # 只保留含 step 的项：
+        # 某些日志（如纯评估汇总）可能没有 step，直接跳过可以避免画图错位。
         if "step" not in item:
             continue
         row: dict[str, float | int | None] = {"step": int(item.get("step", 0))}
@@ -109,6 +121,7 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
         raise RuntimeError(f"缺少 matplotlib，无法导出曲线：{exc}") from exc
 
     def series(metric: str) -> tuple[list[int], list[float]]:
+        # 取出指定指标的一维序列，作为画图输入。
         x, y = [], []
         for r in rows:
             v = r.get(metric)
@@ -119,6 +132,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
         return x, y
 
     def ema(values: list[float], alpha: float) -> list[float]:
+        # EMA 用于平滑噪声，方便新人看到“整体趋势”。
+        # alpha 越大越跟随最新值，越小越平滑。
         out, prev = [], None
         for v in values:
             prev = v if prev is None else alpha * v + (1 - alpha) * prev
@@ -128,6 +143,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 
     x, y = series("loss")
+    # Loss 曲线：
+    # 新手重点看“是否总体下降”，不必追求每个点都下降。
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
         axes[0, 0].plot(x, ema(y, SFT_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={SFT_CONFIG['ema_alpha']})")
@@ -137,6 +154,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     axes[0, 0].legend()
 
     x, y = series("eval_loss")
+    # Eval loss 曲线：
+    # 用来观察泛化趋势；若持续明显高于 train loss，通常说明过拟合风险在上升。
     axes[0, 1].plot(x, y, marker="o", alpha=0.7, color="#d62728", label="eval_loss")
     axes[0, 1].set_title("Eval Loss")
     axes[0, 1].set_xlabel("step")
@@ -144,6 +163,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     axes[0, 1].legend()
 
     x, y = series("learning_rate")
+    # 学习率曲线：
+    # 主要用于确认调度器是否按预期工作（本例默认 cosine）。
     axes[1, 0].plot(x, y, marker="o", color="#2ca02c", label="lr")
     axes[1, 0].set_title("Learning Rate")
     axes[1, 0].set_xlabel("step")
@@ -151,6 +172,8 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     axes[1, 0].legend()
 
     x, y = series("grad_norm")
+    # 梯度范数曲线：
+    # 主要看是否出现长期异常尖峰（可能意味着训练不稳定）。
     axes[1, 1].plot(x, y, marker="o", color="#9467bd", label="grad_norm")
     axes[1, 1].set_title("Gradient Norm")
     axes[1, 1].set_xlabel("step")
@@ -161,6 +184,7 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     fig.savefig(metrics_dir / "training_curves.png", dpi=160)
     plt.close(fig)
 
+    # summary 给出“最关键结论”，便于面试时快速口述训练结果。
     summary = {
         "total_steps": len(rows),
         "final_step": rows[-1]["step"] if rows else None,
@@ -174,6 +198,7 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 def main() -> None:
     """主训练流程：准备目录与环境 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== SFT 主流程（学习版）===", flush=True)
+    # 新手提示：每一步都会在终端打印编号（1~5），可直接对照本函数中的步骤注释阅读。
 
     # 步骤 1：准备目录结构与运行时设备配置。
     print("1) 准备目录与运行环境", flush=True)
@@ -193,6 +218,8 @@ def main() -> None:
         runtime = {"device": "mps", "bf16": False, "fp16": True}
     print(f"Runtime: device={runtime['device']}, bf16={runtime['bf16']}, fp16={runtime['fp16']}", flush=True)
 
+    # LLaMA-Factory 是实际执行训练的底层框架目录。
+    # 这里优先在当前模块内查找；找不到就报错，避免“静默失败”。
     factory_dir = None
     for c in [code_dir / "LLaMA-Factory", module_dir / "LLaMA-Factory"]:
         if c.exists():
@@ -229,6 +256,7 @@ def main() -> None:
     config_path = output_dir / "train_sft_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
+    # 这个 JSON 是“可复现实验单据”：新人调参时可先改 SFT_CONFIG，再检查这里是否生效。
 
     # 步骤 3：执行训练命令（CLI -> 模块入口双回退）。
     print("3) 启动 SFT 训练", flush=True)
@@ -236,6 +264,10 @@ def main() -> None:
     env["FORCE_TORCHRUN"] = "1"
     env["PYTHONPATH"] = str(factory_dir / "src") + os.pathsep + env.get("PYTHONPATH", "")
 
+    # 训练入口有两种：
+    # 1) llamafactory-cli train ...
+    # 2) python -m llamafactory.cli train ...
+    # 这样可以减少“环境里没有安装 CLI”导致的阻塞。
     commands: list[list[str]] = []
     if shutil.which("llamafactory-cli"):
         commands.append(["llamafactory-cli", "train", str(config_path)])
@@ -271,6 +303,7 @@ def main() -> None:
         if not src.exists():
             continue
         dst = models_dir / name
+        # 如果 models 下已有同名文件，先删除再移动，保证“当前结果”为最新训练产物。
         if dst.exists():
             if dst.is_file():
                 dst.unlink()
@@ -281,6 +314,10 @@ def main() -> None:
     # 步骤 5：导出学习可视化产物，便于复盘训练过程。
     metrics_dir = export_sft_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"SFT done. Visualization exported to: {metrics_dir}", flush=True)
+    # 新手建议的结果阅读顺序：
+    # 1) 先看 summary.json（总览）；
+    # 2) 再看 training_curves.png（趋势）；
+    # 3) 最后看 training_metrics.csv（逐步细节）。
 
 
 if __name__ == "__main__":

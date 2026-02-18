@@ -9,6 +9,11 @@ CQL（Conservative Q-Learning）最小可运行示例：LineWorld Offline RL。
    L_cql = E_s[logsumexp_a Q(s,a)] - E_(s,a~D)[Q(s,a)]
 4) 该项会压低未见动作 Q 值，减小分布外过估计风险。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取环境、离线数据和训练参数。
 2) `collect_offline_dataset`：构建行为策略数据集。
@@ -497,11 +502,15 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：离线数据构建 + CQL 训练 + 可视化导出。"""
+    print("=== CQL 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
 
+    # 步骤 2：创建标准目录并落盘运行配置。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -510,15 +519,18 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：构建离线数据，后续训练只使用这份静态数据。
     env = LineWorld(args)
     dataset = collect_offline_dataset(env, args, layout["data"])
     dataset_stats = json.loads((layout["data"] / "dataset_stats.json").read_text(encoding="utf-8"))
 
+    # 步骤 4：初始化 Q 网络与目标网络。
     qnet = QNet().to(device)
     target_qnet = QNet().to(device)
     target_qnet.load_state_dict(qnet.state_dict())
     optimizer = torch.optim.Adam(qnet.parameters(), lr=args.learning_rate)
 
+    # 步骤 5：执行 CQL 训练（Bellman 误差 + 保守项）。
     logs = train_cql(
         env=env,
         dataset=dataset,
@@ -530,6 +542,7 @@ def main() -> None:
         checkpoints_dir=layout["checkpoints"],
     )
 
+    # 步骤 6：导出指标和可视化，便于观察保守学习效果。
     metrics_dir = export_artifacts(
         logs=logs,
         dataset_stats=dataset_stats,

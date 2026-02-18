@@ -7,6 +7,11 @@ LLaVA 最小可运行示例（图像问答 / 图像描述）。
 2) 输入图像经过视觉编码后，与文本提示一起送入语言模型。
 3) 模型根据图像与问题联合生成回答，可用于 VQA 与图像描述。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取推理参数。
 2) `ensure_layout_dirs`：创建统一目录结构。
@@ -187,14 +192,19 @@ def export_artifacts(result: dict[str, Any], output_dir: Path) -> Path:
 
 def main() -> None:
     """主流程入口：执行 LLaVA 推理并导出产物。"""
+    print("=== LLaVA 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并创建目录结构。
     args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
 
+    # 步骤 2：保存运行配置，便于复盘。
     config_path = layout["output"] / "llava_run_config.json"
     config_path.write_text(json.dumps(vars(args), ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # 步骤 3：dry-run 分支，只检查流程与输出格式。
     if args.dry_run:
         result = {
             "task": args.task,
@@ -208,9 +218,11 @@ def main() -> None:
         print(f"LLaVA dry-run done. Artifacts exported to: {metrics_dir}")
         return
 
+    # 步骤 4：真实推理前校验输入图片。
     if not args.image:
         raise ValueError("`--image` is required unless `--dry-run` is used.")
 
+    # 步骤 5：执行真实推理并导出结果。
     device = detect_device()
     print(f"Runtime: device={device.type}")
     result = run_inference(

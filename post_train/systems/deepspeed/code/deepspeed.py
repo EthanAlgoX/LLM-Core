@@ -7,6 +7,11 @@ DeepSpeed 最小可运行示例：Toy Regression + 可视化。
 2) ZeRO 会分片优化器状态/梯度/参数，降低显存占用。
 3) 训练流程本质仍是前向、反向、参数更新，只是由 DeepSpeed Engine 管理执行细节。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取训练和 DeepSpeed 参数。
 2) `build_deepspeed_config`：生成最小可用 DeepSpeed 配置。
@@ -344,11 +349,15 @@ def export_learning_artifacts(
 
 def main() -> None:
     """主流程入口：生成配置、训练并导出可视化。"""
+    print("=== DeepSpeed 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
 
+    # 步骤 2：创建目录并落盘运行配置与 DeepSpeed 自动配置。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -363,6 +372,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：初始化 toy 模型并执行训练（可自动回退普通 torch 路径）。
     model = ToyRegressor(hidden_dim=args.hidden_dim)
     logs, backend = run_train_loop(
         model=model,
@@ -371,6 +381,8 @@ def main() -> None:
         ds_config=ds_config,
         checkpoints_dir=layout["checkpoints"],
     )
+
+    # 步骤 4：导出曲线图/summary，并记录实际使用的后端。
     metrics_dir = export_learning_artifacts(
         logs=logs,
         output_dir=layout["output"],

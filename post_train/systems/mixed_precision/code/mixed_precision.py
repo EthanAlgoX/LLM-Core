@@ -8,6 +8,11 @@
 3) fp16 常配合 GradScaler 防止梯度下溢；bf16 通常不需要 scaler。
 4) 本示例支持 auto/no_amp/fp16/bf16，自动回退到稳定配置。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取训练与 AMP 参数。
 2) `resolve_amp`：根据设备和参数确定最终 AMP 配置。
@@ -397,7 +402,10 @@ def export_artifacts(
 
 
 def main() -> None:
-    """主流程入口。"""
+    """主流程入口：解析 AMP 配置、训练并导出可视化。"""
+    print("=== Mixed Precision 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、解析设备与 AMP 方案。
     args = build_default_args()
     set_seed(args.seed)
     device = choose_device()
@@ -408,6 +416,7 @@ def main() -> None:
         f"dtype={amp_cfg['dtype']}, scaler={amp_cfg['use_scaler']}"
     )
 
+    # 步骤 2：创建目录并保存运行配置和最终 AMP 决策。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -430,6 +439,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：初始化模型并执行训练，记录 loss/吞吐/缩放因子。
     model = ToyRegressor(hidden_dim=args.hidden_dim)
     logs, _ = run_train_loop(
         model=model,
@@ -438,6 +448,8 @@ def main() -> None:
         amp_cfg=amp_cfg,
         checkpoints_dir=layout["checkpoints"],
     )
+
+    # 步骤 4：导出指标和曲线，便于对比不同 AMP 模式。
     metrics_dir = export_artifacts(
         logs=logs,
         output_dir=layout["output"],

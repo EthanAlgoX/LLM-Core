@@ -11,6 +11,11 @@ BCQ（Batch-Constrained Q-learning）最小可运行示例：LineWorld Offline R
    - 选择动作时仅保留高概率动作集合，再从中选 Q 最大动作
 4) 这样可减小离线数据覆盖不足导致的过估计。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取环境、数据和训练参数。
 2) `collect_offline_dataset`：构建离线行为数据集。
@@ -599,11 +604,15 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：离线数据构建 + BCQ 训练 + 可视化导出。"""
+    print("=== BCQ 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
 
+    # 步骤 2：创建标准目录并保存运行配置，便于复现实验。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -612,10 +621,12 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：构建离线环境并采集/加载离线数据集。
     env = LineWorld(args)
     dataset = collect_offline_dataset(env, args, layout["data"])
     dataset_stats = json.loads((layout["data"] / "dataset_stats.json").read_text(encoding="utf-8"))
 
+    # 步骤 4：初始化 BCQ 所需网络（Q 网络 + 行为克隆网络）及其目标网络。
     qnet = QNet().to(device)
     target_qnet = QNet().to(device)
     target_qnet.load_state_dict(qnet.state_dict())
@@ -627,6 +638,7 @@ def main() -> None:
     q_optimizer = torch.optim.Adam(qnet.parameters(), lr=args.q_learning_rate)
     imit_optimizer = torch.optim.Adam(imit_net.parameters(), lr=args.imit_learning_rate)
 
+    # 步骤 5：执行 BCQ 训练，日志和 checkpoint 会持续写入磁盘。
     logs = train_bcq(
         env=env,
         dataset=dataset,
@@ -641,6 +653,7 @@ def main() -> None:
         checkpoints_dir=layout["checkpoints"],
     )
 
+    # 步骤 6：导出学习结果（曲线/指标/策略），用于复盘与面试讲解。
     metrics_dir = export_artifacts(
         logs=logs,
         dataset_stats=dataset_stats,

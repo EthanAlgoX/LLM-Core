@@ -10,6 +10,11 @@ Advantage（优势函数）最小可运行示例：MC / TD / GAE 三种估计方
    - TD(1-step): A_t = r_t + gamma*V(s_{t+1}) - V(s_t)
    - GAE: 对多步 TD 残差做指数加权和。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取环境与训练参数。
 2) `LineWorld`：轻量环境。
@@ -558,12 +563,16 @@ def export_artifacts(
 
 
 def main() -> None:
-    """主流程入口。"""
+    """主流程入口：训练优势函数估计并导出对比可视化。"""
+    print("=== Advantage 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}, method={args.advantage_method}")
 
+    # 步骤 2：创建目录并保存运行配置，确保实验可复现。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -572,10 +581,12 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：初始化环境、策略价值网络和优化器。
     env = LineWorld(args)
     model = TinyActorCritic().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
+    # 步骤 4：执行训练，得到 step 级别日志。
     logs = train_loop(
         env=env,
         model=model,
@@ -584,7 +595,11 @@ def main() -> None:
         device=device,
         checkpoints_dir=layout["checkpoints"],
     )
+
+    # 步骤 5：额外构建不同 advantage 方法的横向对比结果。
     comparison = build_method_comparison(env, model, args, device)
+
+    # 步骤 6：导出曲线、对比图和 summary，方便学习复盘。
     metrics_dir = export_artifacts(
         logs=logs,
         comparison=comparison,

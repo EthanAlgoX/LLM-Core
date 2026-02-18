@@ -8,6 +8,11 @@
 3) 训练目标：最小化“真实噪声 vs 预测噪声”的 MSE。
 4) 反向采样：从高斯噪声出发，逐步去噪生成图像。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取训练与可视化参数。
 2) `build_noise_schedule`：构造扩散噪声调度。
@@ -453,10 +458,14 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 toy DiT 并导出可视化结果。"""
+    print("=== DiT 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并做关键合法性检查（图像尺寸需被 patch 尺寸整除）。
     args = build_default_args()
     if args.image_size % args.patch_size != 0:
         raise ValueError("--image-size must be divisible by --patch-size")
 
+    # 步骤 2：创建目录并保存配置，便于复现实验。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -464,6 +473,7 @@ def main() -> None:
         json.dumps(vars(args), indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
+    # 步骤 3：设置随机种子、选择设备并构建扩散调度。
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
@@ -475,6 +485,7 @@ def main() -> None:
         device=device,
     )
 
+    # 步骤 4：初始化 DiT 模型与优化器。
     model = ToyDiT(
         image_size=args.image_size,
         patch_size=args.patch_size,
@@ -487,6 +498,7 @@ def main() -> None:
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
 
+    # 步骤 5：执行训练并保存最终模型权重。
     logs = train_loop(
         model=model,
         optimizer=optimizer,
@@ -500,6 +512,7 @@ def main() -> None:
     torch.save({"model_state_dict": model.state_dict(), "args": vars(args)}, model_path)
     print(f"Model saved: {model_path}")
 
+    # 步骤 6：执行反向采样并导出可视化。
     generated = sample_reverse_process(
         model=model,
         schedule=schedule,

@@ -8,6 +8,11 @@
 3) 训练目标：最小化“真实噪声 vs 预测噪声”的 MSE。
 4) 采样阶段：从随机噪声出发，按时间步反向迭代得到生成样本。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取训练与可视化参数。
 2) `build_noise_schedule`：构造 beta/alpha/alpha_bar 噪声调度。
@@ -369,11 +374,15 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 toy diffusion 并导出可视化结果。"""
+    print("=== Diffusion 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并创建标准目录结构。
     args = build_default_args()
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
 
+    # 步骤 2：设置随机种子、选择设备并构建噪声调度。
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
@@ -385,9 +394,11 @@ def main() -> None:
         device=device,
     )
 
+    # 步骤 3：初始化去噪模型与优化器。
     model = DenoiseMLP(hidden_dim=args.hidden_dim, time_dim=args.time_dim).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
 
+    # 步骤 4：执行训练并保存最终模型。
     logs = train_loop(
         model=model,
         optimizer=optimizer,
@@ -401,6 +412,7 @@ def main() -> None:
     torch.save({"model_state_dict": model.state_dict(), "args": vars(args)}, model_path)
     print(f"Model saved: {model_path}")
 
+    # 步骤 5：执行反向采样，并与真实分布样本做可视化对比。
     generated = sample_reverse_process(
         model=model,
         schedule=schedule,
@@ -414,6 +426,7 @@ def main() -> None:
         generated_samples=generated,
         target_samples=target,
     )
+    # 步骤 6：输出结果目录，便于新手按图索骥查看产物。
     print(f"Diffusion done. Visualization exported to: {metrics_dir}")
 
 

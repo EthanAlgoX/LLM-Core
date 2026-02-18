@@ -6,6 +6,11 @@ GRPO 单文件学习脚本（主流程 + 可视化）。
 1) `main`：主训练流程（准备数据 -> 训练 -> 保存模型）。
 2) `export_grpo_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
+新人阅读顺序（建议）：
+1) 先看 `GRPO_CONFIG`：理解采样、奖励和训练超参。
+2) 再看 `main`：理解“合成数据 -> 奖励函数 -> 训练器 -> 训练”主链路。
+3) 最后看 `export_grpo_visualization`：理解如何分析奖励与 loss 曲线。
+
 学习步骤（与终端输出 1~5 对应）：
 1) 准备目录与合成训练数据。
 2) 构建奖励函数与 GRPO 参数。
@@ -67,6 +72,8 @@ def export_grpo_visualization(trainer: GRPOTrainer, output_dir: Path, train_metr
         json.dumps(train_metrics, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
+    # 新手优先关注：
+    # loss/reward/reward_std 先判断学习是否有效，再看各 reward 分量贡献。
     keys = [
         "step",
         "epoch",
@@ -190,6 +197,7 @@ def export_grpo_visualization(trainer: GRPOTrainer, output_dir: Path, train_metr
 def main() -> None:
     """主训练流程：准备目录和数据 -> 构建配置 -> 执行训练 -> 导出可视化。"""
     print("=== GRPO 主流程（学习版）===", flush=True)
+    # 新手提示：终端步骤号（1~5）可直接对应本函数注释。
 
     # 步骤 1：准备目录、随机种子与教学用合成数据。
     print("1) 准备目录与训练数据", flush=True)
@@ -206,7 +214,7 @@ def main() -> None:
     set_seed(GRPO_CONFIG["seed"])
     rng = random.Random(GRPO_CONFIG["seed"])
 
-    # 内部小工具：仅在主流程里使用，避免新增顶层函数，减少初学者阅读跳转。
+    # 内部小工具：仅在主流程里使用，减少新手在文件内来回跳转。
     strict_format_pattern = re.compile(r"^\s*<reasoning>.*?</reasoning>\s*<answer>\s*[-+]?\d+\s*</answer>\s*$", re.S)
     answer_pattern = re.compile(r"<answer>\s*([-+]?\d+)\s*</answer>", re.S)
 
@@ -391,6 +399,7 @@ def main() -> None:
         json.dumps({**GRPO_CONFIG, "reward_weights": reward_weights}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    # run_config.json 用于记录本次实验超参，便于复现实验与参数对比。
 
     # 步骤 5：导出学习指标、曲线图和 summary。
     metrics_dir = export_grpo_visualization(
@@ -399,6 +408,7 @@ def main() -> None:
         train_metrics=dict(train_output.metrics),
     )
     print(f"GRPO done. Visualization exported to: {metrics_dir}", flush=True)
+    # 建议的结果阅读顺序：summary.json -> training_curves.png -> training_metrics.csv。
 
 
 if __name__ == "__main__":

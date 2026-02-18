@@ -6,6 +6,11 @@ DPO 单文件学习脚本（主流程 + 可视化）。
 1) `main`：主训练流程。
 2) `export_dpo_visualization`：唯一可视化函数。
 
+新人阅读顺序（建议）：
+1) 先看 `DPO_CONFIG`：明确模型、数据、训练超参。
+2) 再看 `main`：理解“配置 -> 训练 -> 模型归档”的主链路。
+3) 最后看 `export_dpo_visualization`：理解如何读取日志并画图。
+
 学习步骤（与终端输出 1~5 对应）：
 1) 准备目录与运行环境。
 2) 生成 DPO 训练配置。
@@ -68,6 +73,7 @@ def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     if not state_path.exists():
         raise FileNotFoundError(f"未找到 trainer_state.json：{checkpoints_dir}")
 
+    # trainer_state.json 中的 log_history 是可视化的核心数据源。
     state = json.loads(state_path.read_text(encoding="utf-8"))
     log_history = state.get("log_history", [])
     if not log_history:
@@ -77,6 +83,10 @@ def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     metrics_dir.mkdir(parents=True, exist_ok=True)
     (metrics_dir / "log_history.json").write_text(json.dumps(log_history, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # 新手优先看这几类字段：
+    # 1) loss/eval_loss：收敛情况
+    # 2) rewards/*：偏好优化是否生效
+    # 3) learning_rate/grad_norm：训练稳定性
     keys = [
         "step",
         "epoch",
@@ -192,6 +202,7 @@ def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
 def main() -> None:
     """主训练流程：准备目录 -> 生成配置 -> 训练 -> 整理模型 -> 导出可视化。"""
     print("=== DPO 主流程（学习版）===", flush=True)
+    # 新手提示：终端中的步骤号（1~5）与本函数注释一一对应，可并排阅读。
 
     # 步骤 1：准备目录与设备精度配置。
     print("1) 准备目录与运行环境", flush=True)
@@ -254,6 +265,7 @@ def main() -> None:
     config_path = output_dir / "train_dpo_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
+    # 该配置文件是“实验记录单”，便于复现同一次训练。
 
     # 步骤 3：执行 DPO 训练（CLI 优先，模块回退）。
     print("3) 启动 DPO 训练", flush=True)
@@ -265,6 +277,7 @@ def main() -> None:
     if shutil.which("llamafactory-cli"):
         commands.append(["llamafactory-cli", "train", str(config_path)])
     commands.append([sys.executable, "-m", "llamafactory.cli", "train", str(config_path)])
+    # 双入口的目的是减少环境差异导致的启动失败。
 
     last_error: Exception | None = None
     for cmd in commands:
@@ -306,6 +319,7 @@ def main() -> None:
     # 步骤 5：导出 loss/奖励等可视化产物。
     metrics_dir = export_dpo_visualization(checkpoints_dir=checkpoints_dir, output_dir=output_dir)
     print(f"DPO done. Visualization exported to: {metrics_dir}", flush=True)
+    # 建议的结果阅读顺序：summary.json -> training_curves.png -> training_metrics.csv。
 
 
 if __name__ == "__main__":

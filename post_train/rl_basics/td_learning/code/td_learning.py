@@ -9,6 +9,11 @@ TD Learning 最小可运行示例：GridWorld + Tabular Q-Learning。
    Q(s,a) <- Q(s,a) + alpha * [r + gamma * max_a' Q(s',a') - Q(s,a)]。
 4) 通过 epsilon-greedy 探索，最终得到近似最优策略。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取环境与训练参数。
 2) `GridWorld`：定义状态、动作、转移与奖励。
@@ -365,10 +370,14 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：训练 TD Learning 并导出可视化结果。"""
+    print("=== TD Learning 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并设置随机种子。
     args = build_default_args()
     random.seed(args.seed)
     np.random.seed(args.seed)
 
+    # 步骤 2：创建标准目录并保存运行配置。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -378,9 +387,14 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：构建环境并执行 Q-learning 训练。
     env = GridWorld(args)
     q, logs = train_q_learning(env=env, args=args, checkpoints_dir=layout["checkpoints"])
+
+    # 步骤 4：从 Q 表提取贪心策略，便于直观理解学习结果。
     policy = extract_policy(env, q)
+
+    # 步骤 5：导出曲线与策略文件。
     metrics_dir = export_artifacts(
         env=env,
         q=q,

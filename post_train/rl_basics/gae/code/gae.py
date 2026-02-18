@@ -9,6 +9,11 @@ GAE（Generalized Advantage Estimation）最小可运行示例。
    A_t = delta_t + gamma * lambda * delta_{t+1} + ...
 4) lambda 越大，估计更接近蒙特卡洛回报；越小更接近一步 TD。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取环境与训练参数。
 2) `LineWorld`：构建轻量环境采样轨迹。
@@ -472,11 +477,15 @@ def export_artifacts(
 
 def main() -> None:
     """主流程入口：执行 GAE 训练并导出可视化结果。"""
+    print("=== GAE 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = detect_device()
     print(f"Runtime: device={device.type}")
 
+    # 步骤 2：创建目录并保存运行配置。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -485,10 +494,12 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：初始化环境、Actor-Critic 网络与优化器。
     env = LineWorld(args)
     model = TinyActorCritic().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
+    # 步骤 4：执行 GAE 训练，记录损失与优势统计。
     logs = train_loop(
         env=env,
         model=model,
@@ -497,6 +508,8 @@ def main() -> None:
         device=device,
         checkpoints_dir=layout["checkpoints"],
     )
+
+    # 步骤 5：导出曲线图和 summary，观察训练是否稳定收敛。
     metrics_dir = export_artifacts(
         logs=logs,
         output_dir=layout["output"],

@@ -10,6 +10,11 @@ Megatron 学习示例：并行配置 + Toy Causal LM 训练 + 可视化。
    - 训练一个最小 Causal LM；
    - 导出训练曲线，便于学习并行配置与训练过程的关系。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取训练与并行参数。
 2) `build_megatron_config`：生成并行配置快照。
@@ -328,12 +333,16 @@ def export_artifacts(
 
 
 def main() -> None:
-    """主流程入口。"""
+    """主流程入口：并行配置生成 + toy 训练 + 可视化导出。"""
+    print("=== Megatron 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数、设置随机种子、选择设备。
     args = build_default_args()
     set_seed(args.seed)
     device = choose_device()
     print(f"Runtime: device={device.type}")
 
+    # 步骤 2：创建目录并保存运行配置与 Megatron 并行配置快照。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -346,12 +355,14 @@ def main() -> None:
         json.dumps(megatron_cfg, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
+    # 步骤 3：检测 Megatron 依赖可用性（不可用时自动回退 torch 教学路径）。
     backend_note = "torch"
     if args.use_megatron:
         ok, msg = try_check_megatron()
         backend_note = "megatron_available(torch_demo)" if ok else "megatron_unavailable(torch_fallback)"
         print(f"[INFO] {msg}")
 
+    # 步骤 4：构造 toy 语料并初始化最小 Causal LM。
     data_ids, data_info = build_toy_corpus_ids(layout["data"])
     model = TinyCausalLM(
         vocab_size=data_info["vocab_size"],
@@ -362,6 +373,7 @@ def main() -> None:
         dropout=args.dropout,
     )
 
+    # 步骤 5：执行训练并导出可视化结果。
     logs = run_train_loop(
         model=model,
         data_ids=data_ids,

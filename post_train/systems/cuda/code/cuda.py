@@ -10,6 +10,11 @@ CUDA 学习示例：环境检测 + 基准测试 + 简单训练曲线。
    - 比较不同矩阵尺寸的 matmul 速度；
    - 在当前设备上跑一个可视化的 toy 训练过程。
 
+新人阅读顺序（建议）
+1) 先看 `build_default_args`：明确可调参数和默认值。
+2) 再看 `main`：把握执行主链路（准备 -> 训练/推理 -> 导出）。
+3) 最后看可视化导出函数（如 `export_artifacts`）理解输出文件。
+
 二、代码框架（从入口到结果）
 1) `build_default_args`：读取测试参数。
 2) `collect_cuda_info`：采集 CUDA 设备信息。
@@ -325,10 +330,14 @@ def export_artifacts(
 
 
 def main() -> None:
-    """主流程入口。"""
+    """主流程入口：执行 CUDA 信息采集、算子基准与 toy 训练。"""
+    print("=== CUDA 主流程（学习版）===", flush=True)
+
+    # 步骤 1：读取参数并设置随机种子。
     args = build_default_args()
     set_seed(args.seed)
 
+    # 步骤 2：创建目录并保存运行配置。
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
@@ -337,6 +346,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 步骤 3：采集 CUDA 设备信息，帮助理解硬件环境。
     cuda_info = collect_cuda_info()
     device = choose_device()
     print(
@@ -345,6 +355,7 @@ def main() -> None:
         f"cuda_devices={cuda_info['device_count']}"
     )
 
+    # 步骤 4：先跑矩阵乘 benchmark，再跑一个小训练任务观察端到端性能。
     sizes = parse_sizes(args.matmul_sizes)
     benchmark = run_matmul_benchmark(
         device=device,
@@ -361,6 +372,7 @@ def main() -> None:
         log_every=args.log_every,
     )
 
+    # 步骤 5：导出性能表格和可视化结果。
     metrics_dir = export_artifacts(
         cuda_info=cuda_info,
         benchmark=benchmark,
