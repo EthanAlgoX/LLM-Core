@@ -66,17 +66,19 @@ python run.py --module ppo --toy
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
+| 智能体总览 | [Agentic Overview](./modules/06_agent/06_agent.md) | 核心逻辑：**LLM + Planning + Memory + Toolkit** 深度解析 |
 | 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
-| 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Self-Ask** 模式 |
-| 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **Async Orchestration**、**复杂状态机** 与 **Conditional Routing** |
+| 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 |
+| 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** |
 | 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/06_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
 
 ### 6. 进阶课题：离线强化学习 (Advanced Topics: Offline RL)
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
-| 算法复现 | [Offline RL](./modules/04_advanced_topics/offline_rl/offline_rl.md) | **Offline RL 系统详述** 与数据分布偏移对抗策略 |
-| 代表算法 | [BCQ](./modules/04_advanced_topics/offline_rl/bcq/bcq.md) / [CQL](./modules/04_advanced_topics/offline_rl/cql/cql.md) | **BCQ (Batch Constrained Q-Learning)** 与 **CQL (Conservative Q-Learning)** |
+| 离线对齐总览 | [Offline RL Overview](./modules/04_advanced_topics/offline_rl/offline_rl.md) | 在无环境交互前提下，利用离线轨迹数据进行策略优化的核心范式 |
+| 算法复现 | [Offline RL](./modules/04_advanced_topics/offline_rl/offline_rl.md) | **Offline RL 系统详述** 与数据分布偏移（Distribution Shift）对抗策略 |
+| 代表算法 | [BCQ](./modules/04_advanced_topics/offline_rl/bcq/bcq.md) / [CQL](./modules/04_advanced_topics/offline_rl/cql/cql.md) | **外推误差 (Extrapolation Error) 抑制** 与 **下界 Q 学习 (Lower Bound Q-learning)** |
 
 ---
 
