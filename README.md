@@ -32,32 +32,34 @@ python run.py --module ppo --toy
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
-| 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
+| 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | **MHSA**、**Normalization (RMSNorm)** 与 **RoPE 旋转位置编码** |
 | 注意力内核 | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) | **MHA / GQA / MQA** 变体与 **Flash Attention** 工程实现 |
 | 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
 | 模态融合 | [VLM Mapping / Hub](./modules/02_architecture/vlm/vlm.md) | **MLP Projector**、**Cross-Attention** 与多模态对齐策略 |
 | 多媒体生成 | [Diffusion](./modules/02_architecture/generation/diffusion/diffusion.md) / [DiT](./modules/02_architecture/generation/dit/dit.md) | **Diffusion Transformer (DiT)**、**Stable Diffusion** 与生成控制 |
-| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** |
+| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | **KV Cache (PagedAttention)**、**解码策略** 与 **投机采样** |
 
 ### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
+| 对齐总览 | [Alignment Overview](./modules/03_alignment/03_alignment.md) | 后训练对齐全链路解析：从 SFT 到 RLHF 的演进路径 |
 | 监督学习 | [SFT 解析](./modules/03_alignment/sft/sft.md) | **Supervised Fine-Tuning**、数据质量初筛与指令遵循 |
 | 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
 | 偏好对齐 | [PPO](./modules/03_alignment/ppo/ppo.md) / [DPO](./modules/03_alignment/dpo/dpo.md) | **在线/离线对齐算法**、**奖励模型 (RM)** 与 **隐含偏好优化 (DPO)** |
 | 基础算法 | [PG](./modules/03_alignment/policy_gradient/policy_gradient.md) / [AC](./modules/03_alignment/actor_critic/actor_critic.md) | Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础 |
 | 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 |
-| 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
+| 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL 训练范式**、**基于模拟器的演练** 与 **多智能体博弈 (MARL)** |
 | 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
 
 ### 4. 系统性能：并发、并行与 PD 分离 (Engineering & Scaling)
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
-| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | TP/PP/EP (专家并行) 通信开销与 **PD 分离架构** |
-| 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **vLLM (PagedAttention)**、**sglang** 与算子融合调优 |
-| 算子与加速 | [CUDA](./modules/05_engineering/cuda/cuda.md) / [Precision](./modules/05_engineering/mixed_precision/mixed_precision.md) | **CUDA Kernel 优化**、**混合精度**与量化加速原理 |
+| 工程总览 | [Engineering Overview](./modules/05_engineering/05_engineering.md) | 模型并行、显存管理与大规模训练系统的技术演进入口 |
+| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | **3D Parallelism (TP/PP/DP)**、**专家并行 (EP)** 与通信优化 |
+| 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **Prefill-Decode 分离**、**PagedAttention** 与算子融合 |
+| 算子与加速 | [CUDA](./modules/05_engineering/cuda/cuda.md) / [Precision](./modules/05_engineering/mixed_precision/mixed_precision.md) | **CUDA Kernel 优化**、**混合精度 (FP16/BF16)** 与量化加速原理 |
 | 工程框架 | [DeepSpeed](./modules/05_engineering/deepspeed/deepspeed.md) | **DeepSpeed ZeRO** 系列显存优化与训练流水线 |
 
 ### 5. 应用闭环：自主智能体与多机协作 (Agents & Mesh)
