@@ -26,7 +26,7 @@ python run.py --module ppo --toy
 | 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组建模与 Bellman 备份方程 |
 | 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (Off-policy) 与 SARSA (On-policy) 差异 |
 | 优势估计 | [GAE](./modules/01_foundation_rl/gae/gae.md) & [Advantage](./modules/01_foundation_rl/advantage/advantage.md) | **GAE**、**多步回报** 与训练稳定性方差权衡 |
-| 偏好对齐 | [DPO](./modules/03_alignment/dpo/dpo.md) / [PPO](./modules/03_alignment/ppo/ppo.md) | **Bradley-Terry 模型**、**KL 散度约束** 与 **对数比例优化** |
+| 优势估计 | [GAE](./modules/01_foundation_rl/gae/gae.md) & [Advantage](./modules/01_foundation_rl/advantage/advantage.md) | **GAE**、**多步回报** 与训练稳定性方差权衡 |
 | 性能调优 | [Performance Tuning](./modules/05_engineering/inference/inference.md) | **CPU/GPU 性能调优**、算子融合与 IO 瓶颈分析 |
 
 ### 2. 架构核心：变压器、多模态与 MoE (Architecture & Scaling)
