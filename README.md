@@ -19,7 +19,7 @@ python run.py --module ppo --toy
 
 ## 🌐 LLM 核心知识图谱 (Core Knowledge Map)
 
-### 1. 强化学习基础 (RL Foundation)
+### 1. 理论根基：序贯决策与强化学习 (Theory & RL)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
@@ -29,14 +29,14 @@ python run.py --module ppo --toy
 | 价值协同 | [Actor-Critic](./modules/03_alignment/actor_critic/README.md) | Critic 网络对 Actor 策略更新的基准平滑作用 |
 | 优势估计 | [GAE 核心实现](./modules/01_foundation_rl/gae/README.md) | 广义优势估计 (λ 调节) 在偏差与方差间的数学权衡 |
 
-### 2. LLM 架构与生成 (LLM Architecture & Generation)
+### 2. 架构核心：变压器与生成机制 (Architecture & Generation)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
 | 核心架构 | [Transformer Core](./modules/02_architecture/llm/README.md) | Multi-Head Attention 计算、位置编码与 Pre-LN 稳定性 |
 | 生成推理 | [Generation & Decoding](./modules/02_architecture/generation/README.md) | Flash Attention IO 优化、KV Cache 管理与解码策略对比 |
 
-### 3. 多模态 VLM (Vision-Language Models)
+### 3. 架构扩展：多模态对齐与映射 (Multi-modal VLM)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ python run.py --module ppo --toy
 | 模态对齐 | [Q-Former / MLP](./modules/02_architecture/vlm/README.md) | 线性投影与交叉注意力层对齐视觉-语言空间 |
 | 深度融合 | [LLaVA / Flamingo](./modules/02_architecture/vlm/README.md) | 特征对齐预训练 (Stage 1) 与视觉指令微调 (Stage 2) |
 
-### 4. 后训练与偏好对齐 (Post-Training & Alignment)
+### 4. 能力塑造：指令遵循与偏好对齐 (Post-Training & Alignment)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ python run.py --module ppo --toy
 | 推理对齐 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 组内相对标准化 (Group Relative) 对 CoT 逻辑链生成的提升 |
 | 保守策略 | [离线 RL (CQL)](./modules/04_advanced_topics/offline_rl/README.md) | Conservative Q-Learning 对 OOD 动作价值的抑制机制 |
 
-### 5. 工程与系统性能 (Engineering & Scaling)
+### 5. 系统性能：大规模并行与推理加速 (Engineering & Scaling)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
@@ -64,7 +64,7 @@ python run.py --module ppo --toy
 | 推理加速 | [Inference 优化](./modules/05_engineering/inference/README.md) | 量化 (INT8/INT4)、投机采样与连续批处理 |
 | 算子开发 | [CUDA/Triton 基础](./modules/05_engineering/cuda/README.md) | GPU 内存层次、Warp 调度与高效算子编写规范 |
 
-### 6. 智能体系统 (Intelligent Agents)
+### 6. 应用闭环：自主智能体系统 (Intelligent Agents)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
@@ -110,12 +110,12 @@ python run.py --module ppo --toy
 ## 📂 项目结构 (Project Structure)
 
 - `modules/`: 核心知识组件
-  - `01_foundation_rl/`: 强化学习基础 (MDP, TD, GAE)
-  - `02_architecture/`: 模型架构 (LLM, VLM, Generation)
-  - `03_alignment/`: 对齐技术栈 (SFT, PG, Actor-Critic, PPO, DPO, GRPO)
-  - `04_advanced_topics/`: 进阶话题 (Offline RL / CQL)
-  - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA, Inference)
-  - `06_agent/`: 智能体推理专门模块 (Planning, Tools, Memory)
+  - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
+  - `02_architecture/`: 架构核心与扩展 (LLM, VLM, Generation)
+  - `03_alignment/`: 能力塑造与对齐技术 (SFT, PPO, DPO, GRPO)
+  - `04_advanced_topics/`: 算法扩展 (Offline RL / CQL)
+  - `05_engineering/`: 系统性能与工程 (DeepSpeed, Megatron, CUDA, Inference)
+  - `06_agent/`: 应用闭环与智能体 (Planning, Tools, Memory)
 - `tools/`: 技术摘要生成、自动化回归测试工具
 - `data/`: 模拟训练数据
 - `output/`: 训练产物、日志与测试报告
