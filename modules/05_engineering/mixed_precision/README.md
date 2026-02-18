@@ -30,6 +30,7 @@
 ### 1. 损失缩放公式
 
 $$\mathrm{Scaled\_Loss} = \mathrm{Loss} \times S$$
+
 $$\mathrm{Update\_Gradient} = \frac{\nabla_{\theta_{FP16}} (\mathrm{Scaled\_Loss})}{S}$$
 
 - 通过 $S$ 将微小的梯度“顶”回 FP16 的表示区间内。

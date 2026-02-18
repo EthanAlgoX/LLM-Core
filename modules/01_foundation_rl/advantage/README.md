@@ -19,7 +19,7 @@
 
 1. **采样 (Trajectory Generation)**：模型与环境交互，产生带有奖励 $r$ 的序列。
 2. **价值估计 (Value Estimation)**：通过 Critic 网络预测每个状态的期望分 $V(s)$。
-3. **计算残差 (TD Error)**：计算 $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$。
+3. **计算残差 (TD Error)**：计算 $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ 。
 4. **优势合成 (Advantage Combination)**：
    - **MC 方式**：直接用实际总分减去预估分。
    - **TD 方式**：只看一步的即时收益。
@@ -39,10 +39,13 @@ $$A(s, a) = Q(s, a) - V(s)$$
 
 - **MC (Monte Carlo)**：
   $$A_t = G_t - V(s_t)$$
+
 - **TD (One-step)**：
   $$A_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+
 - **GAE (Generalized Advantage Estimation)**：
   $$\hat{A}_t = \sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}$$
+
   - $\lambda$ 是折衷因子，用于平衡方差（Variance）与偏差（Bias）。
 
 ## 与相近方法区别

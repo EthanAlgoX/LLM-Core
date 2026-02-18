@@ -32,7 +32,7 @@ GAE（Generalized Advantage Estimation）是一种通过“折衷”来提升训
 ## 计算的关键步骤
 
 1. **TD 残差计算 (Compute Temporal Difference)**：
-   - 首先计算每一步的即时差异：$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$。
+   - 首先计算每一步的即时差异： $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ 。
 2. **指数加权累计 (Exponential Weighting)**：
    - 使用 $\lambda$ 对未来的残差进行加权求和。
 3. **优势赋值**：
@@ -51,10 +51,11 @@ $$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
 $$\hat{A}_t^{GAE(\gamma, \lambda)} = \sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}$$
 
 展开形式：
+
 $$\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots$$
 
-- **$\gamma$ (Gamma)**：折扣因子，决定了对未来奖励的重视程度。
-- **$\lambda$ (Lambda)**：GAE 特有因子。$\lambda=0$ 时退化为 1-step TD；$\lambda=1$ 时退化为 Monte Carlo。
+- ** $\gamma$ (Gamma)**：折扣因子，决定了对未来奖励的重视程度。
+- ** $\lambda$ (Lambda)**：GAE 特有因子。 $\lambda=0$ 时退化为 1-step TD； $\lambda=1$ 时退化为 Monte Carlo。
 
 ## 与相近方法区别
 

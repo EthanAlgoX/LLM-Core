@@ -18,7 +18,7 @@ CQL（Conservative Q-Learning）是解决离线强化学习中“过度乐观”
 3. **计算保守压制项 (Conservative Regularization)**：
    - 计算所有动作 Q 值的 Log-Sum-Exp（代表该状态下动作的平均“潜力”）。
    - 减去数据集里真实发生动作的 Q 值。
-4. **加权求和更新**：将 TD Loss 与压制项相加（乘以系数 $\alpha$），进行反向传播。
+4. **加权求和更新**：将 TD Loss 与压制项相加（乘以系数 $\alpha$ ），进行反向传播。
 5. **策略提取**：训练完成后，直接取 $a = \arg\max Q(s, a)$ 作为最优策略。
 
 ## 核心数学公式
@@ -35,7 +35,7 @@ $$L_{CQL\_reg} = \mathbb{E}_{s \sim D} \left[ \log \sum_a \exp(Q(s, a)) - \mathb
 
 $$L_{total} = L_{TD} + \alpha \cdot L_{CQL\_reg}$$
 
-- **$\alpha$ (Alpha)**：保守系数。$\alpha$ 越大，模型越“怂”（保守）；$\alpha$ 越小，模型越接近普通 DQN。
+- ** $\alpha$ (Alpha)**：保守系数。 $\alpha$ 越大，模型越“怂”（保守）； $\alpha$ 越小，模型越接近普通 DQN。
 
 ## 与相近方法区别
 

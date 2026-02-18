@@ -2,7 +2,7 @@
 
 LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件的设计动机是审计所有后续技术的基础。
 
-> **核心公式**：$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
+> **核心公式**： $\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
 
 ---
 
@@ -34,8 +34,8 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ### 4. FFN 层 (Feed-Forward Network)
 
-- **标准 FFN**：$\mathrm{FFN}(x) = \mathrm{ReLU}(xW_1 + b_1)W_2 + b_2$，隐层维度通常为 $4 \times d_{\mathrm{model}}$。
-- **SwiGLU**（LLaMA 系列）：$\mathrm{SwiGLU}(x) = (\mathrm{Swish}(xW_1) \odot xW_2)W_3$，门控机制提升表达能力。
+- **标准 FFN**： $\mathrm{FFN}(x) = \mathrm{ReLU}(xW_1 + b_1)W_2 + b_2$，隐层维度通常为 $4 \times d_{\mathrm{model}}$。
+- **SwiGLU**（LLaMA 系列）： $\mathrm{SwiGLU}(x) = (\mathrm{Swish}(xW_1) \odot xW_2)W_3$，门控机制提升表达能力。
 
 ### 5. KV Cache（推理关键）
 
@@ -47,8 +47,8 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ## 工程审计要点
 
-- **参数量估算**：$\approx 12 \times d_{\mathrm{model}}^2 \times n_{\mathrm{layers}}$（忽略 embedding）
-- **计算量估算**：$\approx 6 \times N \times T$ FLOPs（N=参数量，T=序列长度）
+- **参数量估算**： $\approx 12 \times d_{\mathrm{model}}^2 \times n_{\mathrm{layers}}$ （忽略 embedding）
+- **计算量估算**： $\approx 6 \times N \times T$ FLOPs（N=参数量，T=序列长度）
 - **显存分解**：权重 + 梯度 + 优化器状态 + 激活值，训练时约为推理的 12-16 倍
 
 ---

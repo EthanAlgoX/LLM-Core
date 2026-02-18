@@ -18,6 +18,7 @@
 
 - **显存占用公式**：
   $$\mathrm{Mem}_{KV} = 2 \times \mathrm{layers} \times \mathrm{heads} \times \mathrm{hidden\_dim} \times \mathrm{seq\_len} \times \mathrm{precision\_bytes}$$
+
 - **面试点**：Llama 7B (fp16) 处理 1024 长度约占用 0.5GB 显存。
 
 ## 量化技术 (Quantization)

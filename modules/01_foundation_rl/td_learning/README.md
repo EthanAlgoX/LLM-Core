@@ -17,9 +17,9 @@ TD（Temporal-Difference，时序差分）学习是强化学习的基石。其�
 ## 训练的关键步骤（以 Q-Learning 为例）
 
 1. **初始化**：创建一个 Q 表（Q-Table），记录每个“状态-动作”对的初始分值。
-2. **选择动作**：采用 $\epsilon$-greedy 策略，平衡探索（尝试新动作）与利用（选择已知最高分动作）。
+2. **选择动作**：采用 $\epsilon$ -greedy 策略，平衡探索（尝试新动作）与利用（选择已知最高分动作）。
 3. **执行并观测**：执行动作 $a$，观测奖励 $r$ 和新状态 $s'$。
-4. **计算目标 (TD Target)**：预估未来的最大收益：$Target = r + \gamma \max_{a'} Q(s', a')$。
+4. **计算目标 (TD Target)**：预估未来的最大收益： $Target = r + \gamma \max_{a'} Q(s', a')$。
 5. **更新 Q 值**：根据目标与当前值的差异（TD Error）进行修正。
 
 ## 核心数学公式
@@ -34,8 +34,8 @@ $$\delta_t = R_{t+1} + \gamma V(s_{t+1}) - V(s_t)$$
 
 $$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a') - Q(s, a)]}_{\mathrm{TD Error}}$$
 
-- **$\alpha$ (Learning Rate)**：学习率，决定了新知识覆盖旧知识的速度。
-- **$\gamma$ (Discount Factor)**：折扣因子，决定了我们多在乎长远利益。
+- ** $\alpha$ (Learning Rate)**：学习率，决定了新知识覆盖旧知识的速度。
+- ** $\gamma$ (Discount Factor)**：折扣因子，决定了我们多在乎长远利益。
 
 ## 与相近方法区别
 

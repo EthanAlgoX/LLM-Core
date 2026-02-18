@@ -28,8 +28,8 @@ BCQ 的核心在于如何计算下一步的标靶值（Target）：
 
 $$Q(s, a) \leftarrow r + \gamma \max_{a' \mathrm{ s.t. } \frac{\pi_b(a'|s')}{\max_{\hat{a}} \pi_b(\hat{a}|s')} > \tau} Q_{target}(s', a')$$
 
-- **$\pi_b(a'|s')$**：行为模型预测的动作概率。
-- **$\tau$ (Threshold)**：约束强度。$\tau=0$ 退化为普通 Q-learning，$\tau=1$ 则完全变成行为克隆（BC）。
+- ** $\pi_b(a'|s')$ **：行为模型预测的动作概率。
+- ** $\tau$ (Threshold)**：约束强度。 $\tau=0$ 退化为普通 Q-learning， $\tau=1$ 则完全变成行为克隆（BC）。
 - **逻辑**：只有当一个动作相对于该状态下“最可能动作”的比例超过 $\tau$ 时，才会被纳入 Q 值的最大化搜索范围。
 
 ### 2. 离线误差抑制

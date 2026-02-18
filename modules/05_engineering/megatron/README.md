@@ -33,6 +33,7 @@ $$WorldSize = TP_{size} \times PP_{size} \times DP_{size}$$
 ### 2. 梯度累加步数 (Gradient Accumulation)
 
 为了匹配硬件算力与目标 Batch Size：
+
 $$GradAccum = \frac{GlobalBatchSize}{MicroBatchSize \times DP_{size}}$$
 
 - **Micro Batch Size**：单张卡一次读入的数据量。

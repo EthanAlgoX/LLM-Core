@@ -18,6 +18,7 @@
    - **内容**：给同一个问题提供两个回答，让人类标出哪个更好（Rank），然后训练奖励模型去拟合这种偏好。
    - **关键公式（Bradley-Terry 模型）**：
      $$P(y_w \succ y_l | x) = \frac{\exp(r_\phi(x, y_w))}{\exp(r_\phi(x, y_w)) + \exp(r_\phi(x, y_l))}$$
+
      - 通过最小化其**负对数似然（Negative Log-Likelihood）**来学习。
 
 3. **第三阶段：RL (强化学习优化 - PPO/GRPO)**
@@ -31,8 +32,8 @@ RLHF 的最终优化目标是两者的平衡：
 
 $$\max_{\pi_\theta} \mathbb{E}_{x \sim D, y \sim \pi_\theta(y|x)} [r_\phi(x, y) - \beta D_{KL}(\pi_\theta || \pi_{ref})]$$
 
-- **第一部分 $r_\phi(x, y)$**：让生成的内容得到奖励模型尽可能高的打分。
-- **第二部分 $\beta D_{KL}$**：惩罚偏离参考模型太远的行为，确保语言依然通顺、符合基本分布。
+- **第一部分 $r_\phi(x, y)$ **：让生成的内容得到奖励模型尽可能高的打分。
+- **第二部分 $\beta D_{KL}$ **：惩罚偏离参考模型太远的行为，确保语言依然通顺、符合基本分布。
 
 ## RLHF vs. DPO: 选择哪一个？
 

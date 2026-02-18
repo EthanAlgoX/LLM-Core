@@ -33,6 +33,7 @@ $$X_{input} = [ \mathrm{MLP}(f_{vision}(I)), \mathrm{Embedding}(X_{text}) ]$$
 ### 2. 生成损失
 
 与 LLM 一致，采用自回归交叉熵损失：
+
 $$L = - \sum_{i=1}^L \log p_\theta(x_i | x_{<i}, I)$$
 
 - 模型在给定图像 $I$ 和上文 $x_{<i}$ 的条件下，预测下一个词 $x_i$。

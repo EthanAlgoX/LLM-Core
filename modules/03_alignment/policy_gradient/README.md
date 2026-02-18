@@ -23,19 +23,22 @@
 ### 1. 目标函数 (Objective)
 
 $$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [R(\tau)]$$
+
 我们的目标是最大化所有可能轨迹的期望奖励。
 
 ### 2. 策略梯度基本定理 (Policy Gradient Theorem)
 
 $$\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t | s_t) G_t \right]$$
 
-- **$\nabla_\theta \log \pi_\theta(a_t | s_t)$**：表示如何调整参数才能让某个动作概率变大。
-- **$G_t$ (Return)**：该动作带来的总回报。它是梯度的权重。
+- ** $\nabla_\theta \log \pi_\theta(a_t | s_t)$ **：表示如何调整参数才能让某个动作概率变大。
+- ** $G_t$ (Return)**：该动作带来的总回报。它是梯度的权重。
 
 ### 3. Log-Derivative Trick (对数微分技巧)
 
 这是实现公式转化的关键桥梁：
+
 $$\nabla_\theta \pi_\theta = \pi_\theta \frac{\nabla_\theta \pi_\theta}{\pi_\theta} = \pi_\theta \nabla_\theta \log \pi_\theta$$
+
 这使得我们可以直接通过采样（由于有 $\pi_\theta$ 项）来估计本来看似无法计算的期望梯度。
 
 ## 与相近方法区别

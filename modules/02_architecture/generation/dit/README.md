@@ -16,7 +16,7 @@ DiT（Diffusion Transformer）是扩散模型的一种新式变体。
 1. **Patchify (切片化)**：
    - 将输入的带噪图像（或潜在空间变量 Latent）切分成固定大小的 $p \times p$ 小块，并展平为序列。
 2. **Time/Condition Embedding (条件注入)**：
-   - 将当前的时间步 $t$（以及可能的分类标签或文本描述）通过多层感知机转为向量，注入到 Transformer 的每一层中。
+   - 将当前的时间步 $t$ （以及可能的分类标签或文本描述）通过多层感知机转为向量，注入到 Transformer 的每一层中。
 3. **Transformer Processing (注意力处理)**：
    - 使用多层 Self-Attention 块处理 Patch 序列，捕捉像素间的全局关联，这在生成大尺寸或复杂结构图像时比卷积更有优势。
 4. **Unpatchify (反向还原)**：
@@ -31,6 +31,7 @@ $$z_{tokens} = \mathrm{Patchify}(x_t) + \mathrm{PositionalEmbedding}$$
 ### 2. 条件注入 (Adaptive Layer Norm)
 
 DiT 常用如下方式将时间信息 $c$ 注入：
+
 $$\mathrm{adaLN}(h, c) = w_c \cdot \mathrm{LayerNorm}(h) + b_c$$
 
 - 其中 $w_c$ 和 $b_c$ 是基于时间步计算出的缩放和平移系数。
@@ -38,6 +39,7 @@ $$\mathrm{adaLN}(h, c) = w_c \cdot \mathrm{LayerNorm}(h) + b_c$$
 ### 3. 统一目标函数
 
 与标准 Diffusion 一致：
+
 $$\min_\theta \mathbb{E}_{x_0, \epsilon, t} [ \| \epsilon - \mathrm{DiT}_\theta(x_t, t) \|^2 ]$$
 
 ## 与相近方法区别

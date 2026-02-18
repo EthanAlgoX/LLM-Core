@@ -20,7 +20,7 @@ Actor-Critic 是一种将“策略梯度”与“价值评估”相结合的经�
 1. **采样 (Sampling)**：Actor 接受指令，生成一组对话。
 2. **打分 (Reward Calculation)**：模型获得一个奖励分（来自 RM 模型）。
 3. **估值 (Value Estimation)**：Critic 对当前的对话状态给出一个“预估分”。
-4. **计算优势 (Advantage Computation)**：计算真实得分比 Critic 预估的得分高出多少（$\mathrm{Reward} - \mathrm{Value}$）。
+4. **计算优势 (Advantage Computation)**：计算真实得分比 Critic 预估的得分高出多少（ $\mathrm{Reward} - \mathrm{Value}$ ）。
 5. **双向更新 (Update)**：
    - **更新 Actor**：如果优势为正，增加该生成行为出现的概率。
    - **更新 Critic**：减小其预估分与真实分数之间的误差，使其预测更准。
@@ -31,7 +31,7 @@ Actor-Critic 是一种将“策略梯度”与“价值评估”相结合的经�
 
 $$\hat{A}_t = \mathrm{Reward}_t - V_\phi(s_t)$$
 
-- 如果 $\hat{A}_t > 0$，说明 Actor 的表现优于预期，应当获得正反馈。
+- 如果 $\hat{A}_t > 0$ ，说明 Actor 的表现优于预期，应当获得正反馈。
 
 ### 2. Actor 目标 (策略梯度)
 
