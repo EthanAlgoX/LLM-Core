@@ -1,39 +1,51 @@
-# RLHF（Reinforcement Learning from Human Feedback）
+# RLHF (Reinforcement Learning from Human Feedback) 人类反馈强化学习
 
 ## 定位与分类
-- 阶段：后训练（完整对齐流程）
-- 类型：人类偏好驱动强化学习
-- 作用：让模型回答更符合“人类偏好”而不仅是“语料分布”
 
-## 核心原理
-1. 先有基础模型（通常经过 SFT）。
-2. 用偏好数据训练奖励模型。
-3. 用 PPO 等算法优化策略模型，使奖励上升并控制 KL 偏移。
+- **阶段**：大模型对齐的“终极方案”。
+- **类型**：多阶段复合架构（SFT + RM + RL）。
+- **作用**：解决 SFT 只能“字面对齐”的问题，通过引入人类偏好，让模型在逻辑、价值观和复杂任务处理上真正具备“灵感的跃迁”。
 
-## 与相近方法区别
-1. 相比 `SFT`：RLHF 优化的是偏好奖励，不是单一参考答案拟合。
-2. 相比 `DPO`：RLHF 常显式包含奖励模型与在线 RL 阶段。
-3. 相比 `PPO`：PPO 是算法，RLHF 是完整训练流程。
+## RLHF 的三大关键步骤
 
-## 运行
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/rlhf
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/rlhf.py --reward-model <奖励模型路径或名称>
-```
+1. **第一阶段：SFT (监督微调)**
+   - **目标**：冷启动。
+   - **内容**：在高质量的人类对话数据上进行监督学习，让模型学会如何得体地说话。
+   - **状态**：这是后续阶段的基石（Actor 的初始状态）。
 
-## 输出结果
-默认输出到 `output/rlhf_metrics`，包含：
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `log_history.json`
+2. **第二阶段：RM (奖励建模 - Reward Modeling)**
+   - **目标**：训练一个“电子裁判”。
+   - **内容**：给同一个问题提供两个回答，让人类标出哪个更好（Rank），然后训练奖励模型去拟合这种偏好。
+   - **关键公式（Bradley-Terry 模型）**：
+     $$P(y_w \succ y_l | x) = \frac{\exp(r_\phi(x, y_w))}{\exp(r_\phi(x, y_w)) + \exp(r_\phi(x, y_l))}$$
+     - 通过最小化其**负对数似然（Negative Log-Likelihood）**来学习。
 
+3. **第三阶段：RL (强化学习优化 - PPO/GRPO)**
+   - **目标**：终极对齐。
+   - **内容**：利用第二阶段训练好的 RM 给 Actor 打分，通过强化学习算法（PPO 或 GRPO）最大化期望奖励。
+   - **关键元素**：Reward（得分）、Critic（预估）、KL Penalty（防模型练废的紧箍咒）。
 
-## 目录文件说明（重点）
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。
+## 核心数学目标 (The RLHF Objective)
+
+RLHF 的最终优化目标是两者的平衡：
+
+$$\max_{\pi_\theta} \mathbb{E}_{x \sim D, y \sim \pi_\theta(y|x)} [r_\phi(x, y) - \beta D_{KL}(\pi_\theta || \pi_{ref})]$$
+
+- **第一部分 $r_\phi(x, y)$**：让生成的内容得到奖励模型尽可能高的打分。
+- **第二部分 $\beta D_{KL}$**：惩罚偏离参考模型太远的行为，确保语言依然通顺、符合基本分布。
+
+## RLHF vs. DPO: 选择哪一个？
+
+| 维度 | RLHF (经典方案) | DPO (平替方案) |
+| :--- | :--- | :--- |
+| **复杂度** | 高。需要维护 3-4 个模型，显存压力大。 | 低。只需要 2 个模型。 |
+| **性能极限** | 理论上限更高。在线采样让模型能探索出人类没见过的优秀答案。 | 受限于偏好数据集的离线分布。 |
+| **工程难度** | 调参地狱（PPO 超参极其敏感）。 | 简单，像 SFT 一样稳定。 |
+
+## 运行与输出
+
+1. **执行**：`python code/rlhf.py --reward-model <你的RM路径>`
+2. **指标解读**：
+   - `reward`：应随 Step 稳步上升。
+   - `kl`：应保持在稳定区间（如 1.0~5.0），如果过高说明模型在胡说八道。
+   - `loss`：PPO 的损失函数波动较大，重点看 Reward 趋势。
