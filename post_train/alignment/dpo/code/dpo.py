@@ -7,7 +7,7 @@ DPO 单文件学习脚本（主流程 + 可视化）。
 2) `export_dpo_visualization`：唯一可视化函数。
 
 新人阅读顺序（建议）：
-1) 先看 `DPO_CONFIG`：明确模型、数据、训练超参。
+1) 先看 `main` 里的训练参数段：明确模型、数据、训练超参。
 2) 再看 `main`：理解“配置 -> 训练 -> 模型归档”的主链路。
 3) 最后看 `export_dpo_visualization`：理解如何读取日志并画图。
 
@@ -31,24 +31,6 @@ import sys
 from pathlib import Path
 
 import torch
-
-
-DPO_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",  # 基座模型名称或路径。
-    "template": "qwen",  # 对话模板。
-    "dataset": "dpo_zh_demo",  # 偏好数据集（chosen/rejected）。
-    "output_dir": "output",  # 输出目录。
-    "max_samples": 8,  # 最大样本数（教学快跑）。
-    "num_train_epochs": 0.01,  # 训练轮数。
-    "learning_rate": 5e-6,  # 学习率。
-    "batch_size": 1,  # 单设备 batch。
-    "grad_accum": 1,  # 梯度累积。
-    "logging_steps": 5,  # 日志间隔。
-    "save_steps": 500,  # checkpoint 间隔。
-    "pref_beta": 0.1,  # DPO β，控制偏好约束强度。
-    "pref_loss": "sigmoid",  # 偏好损失类型。
-    "ema_alpha": 0.2,  # 可视化平滑系数。
-}
 
 
 def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
@@ -152,7 +134,7 @@ def export_dpo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     x, y = series("loss")
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
-        axes[0, 0].plot(x, ema(y, DPO_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={DPO_CONFIG['ema_alpha']})")
+        axes[0, 0].plot(x, ema(y, 0.2), linewidth=2, label="loss(ema=0.2)")
     axes[0, 0].set_title("Train Loss")
     axes[0, 0].set_xlabel("step")
     axes[0, 0].grid(True, alpha=0.3)
@@ -209,7 +191,7 @@ def main() -> None:
 
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    output_dir = (module_dir / DPO_CONFIG["output_dir"]).resolve()
+    output_dir = (module_dir / "output").resolve()
     checkpoints_dir = module_dir / "checkpoints"
     models_dir = module_dir / "models"
     for p in [module_dir / "code", module_dir / "data", models_dir, output_dir, checkpoints_dir]:
@@ -240,23 +222,23 @@ def main() -> None:
     train_config = {
         "stage": "dpo",  # 训练阶段：DPO。
         "do_train": True,  # 启用训练。
-        "model_name_or_path": DPO_CONFIG["model_id"],  # 基座模型。
-        "dataset": DPO_CONFIG["dataset"],  # 偏好数据。
-        "template": DPO_CONFIG["template"],  # 模板。
+        "model_name_or_path": "Qwen/Qwen3-0.6B",  # 基座模型。
+        "dataset": "dpo_zh_demo",  # 偏好数据。
+        "template": "qwen",  # 模板。
         "finetuning_type": "lora",  # LoRA 微调。
         "lora_target": "all",  # LoRA 注入目标。
-        "pref_beta": DPO_CONFIG["pref_beta"],  # DPO β 系数。
-        "pref_loss": DPO_CONFIG["pref_loss"],  # 偏好损失函数。
+        "pref_beta": 0.1,  # DPO β 系数。
+        "pref_loss": "sigmoid",  # 偏好损失函数。
         "output_dir": str(checkpoints_dir),  # checkpoint 目录。
         "overwrite_output_dir": True,  # 覆盖旧输出。
-        "per_device_train_batch_size": DPO_CONFIG["batch_size"],  # 单卡 batch。
-        "gradient_accumulation_steps": DPO_CONFIG["grad_accum"],  # 梯度累积。
+        "per_device_train_batch_size": 1,  # 单卡 batch。
+        "gradient_accumulation_steps": 1,  # 梯度累积。
         "lr_scheduler_type": "cosine",  # 学习率调度器。
-        "logging_steps": DPO_CONFIG["logging_steps"],  # 日志间隔。
-        "save_steps": DPO_CONFIG["save_steps"],  # 保存间隔。
-        "learning_rate": DPO_CONFIG["learning_rate"],  # 学习率。
-        "num_train_epochs": DPO_CONFIG["num_train_epochs"],  # 训练轮数。
-        "max_samples": DPO_CONFIG["max_samples"],  # 最大样本数。
+        "logging_steps": 5,  # 日志间隔。
+        "save_steps": 500,  # 保存间隔。
+        "learning_rate": 5e-6,  # 学习率。
+        "num_train_epochs": 0.01,  # 训练轮数。
+        "max_samples": 8,  # 最大样本数。
         "max_grad_norm": 1.0,  # 梯度裁剪。
         "report_to": "none",  # 关闭外部上报。
         "bf16": runtime["bf16"],  # bf16 开关。

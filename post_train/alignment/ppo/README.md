@@ -1,40 +1,52 @@
-# PPO（Proximal Policy Optimization）
+# PPO (Proximal Policy Optimization) 强化学习对齐
 
 ## 定位与分类
-- 阶段：后训练（在线策略优化）
-- 类型：强化学习（策略梯度 + KL 约束）
-- 作用：在奖励模型指导下提升回答质量，并控制策略漂移
 
-## 核心原理
-1. 策略模型生成回答，奖励模型打分。
-2. 使用 PPO clip 目标限制单次更新幅度。
-3. 通过参考模型 KL 项抑制分布偏移。
-4. 迭代更新使高奖励输出更高概率出现。
+- **阶段**：后训练（Post-training）之 RLHF 对齐阶段。
+- **类型**：强化学习（Policy Gradient + KL Constraint）。
+- **作用**：在奖励模型（RM）的指导下，通过“指令触发-自主生成-反馈优化”的循环，使模型行为符合人类偏好（如有用性、诚实性、无害性）。
 
-## 与相近方法区别
-1. 相比 `DPO`：PPO 需要在线采样与奖励评估，成本更高但灵活性更强。
-2. 相比 `SFT`：PPO 优化目标是奖励，不是 token-level teacher forcing。
-3. 相比 `GRPO`：PPO 是经典剪切策略梯度框架，GRPO更偏组内相对奖励。
+## 核心架构：四大角色
 
-## 运行
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/ppo
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/ppo.py --reward-model <奖励模型路径或名称>
-```
+PPO 训练背后涉及四个关键模型的协作：
 
-## 输出结果
-默认输出到 `output/ppo_metrics`，包含：
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `log_history.json`
+| 角色 | 模型名称 | 职责描述 | 状态 |
+| :--- | :--- | :--- | :--- |
+| **Actor** | 策略模型 (Policy) | 核心优化对象。负责根据指令生成回复，目标是获得最高奖励。 | **动态更新** |
+| **Reference** | 参考模型 (Ref) | 冻结的 SFT 原型。计算 KL 散度，防止 Actor 为了刷分而导致语言逻辑崩坏。 | **完全冻结** |
+| **Reward** | 奖励模型 (RM) | 裁判。根据学到的人类价值观偏好，为 Actor 的生成结果打分。 | **完全冻结** |
+| **Critic** | 价值模型 (Value) | 会计。预测当前状态的期望得分，辅助计算“超额回报（Advantage）”。 | **动态更新** |
 
+## 数据逻辑：Prompt-only
 
-## 目录文件说明（重点）
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。
+在 PPO 阶段，数据集的使用逻辑与 SFT 有本质区别：
+
+- **Instruction (问题) 是核心**：它是产生行为的“启动器（Prompt）”。PPO 只需要指令来驱动模型在线生成答案。
+- **Output (标签) 是弱依赖**：在 PPO 循环中，模型不看数据集里的 Output 学习，而是看奖励模型（RM）的实时打分。Output 在此处多作为格式兼容或评估参考。
+- **本质转向**：从 SFT 的“背书式学习（标签驱动）”转向了 PPO 的“实践式学习（反馈驱动）”。
+
+## 深度辨析：Reward vs. Critic
+
+这是理解 PPO 算法稳定性的关键：
+
+- **Reward Model (裁判)**：定性。决定了“什么是好”。它输出的是**实际得分**。
+- **Critic Model (会计)**：定量。决定了“好出多少”。它输出的是**期望得分**。
+- **Advantage (优势/超额回报)**：由 `实际得分 - 期望得分` 计算得出。
+  - 若 `Advantage > 0`：表示这次表现超出了平均水平，强化该行为。
+  - 若 `Advantage < 0`：表示这次表现低于平均水平，即使分数很高也要反思。
+  > **意义**：Critic 抹平了题目难度差异，让模型只关注纯粹的技术进步。
+
+## 关键训练配置
+
+| 参数 | 典型值 | 原理解读 |
+| :--- | :--- | :--- |
+| `learning_rate` | `1e-6` | 极低学习率，确保强化学习这种极不稳定的过程能平稳收敛。 |
+| `ppo_epochs` | `4` | 对同一批采样数据重复学习的次数，提高样本利用率。 |
+| `ppo_target` | `6.0` | KL 目标值。动态调整惩罚强度，确保模型不脱离人类语言分布。 |
+| `ppo_buffer_size` | `1` | 经验回放池大小，在资源受限时控制单次更新的数据量。 |
+
+## 运行与输出
+
+1. **启动**：`python code/ppo.py`
+2. **可视化**：默认输出至 `output/ppo_metrics`。
+   - 建议阅读顺序：`summary.json` (总揽) -> `training_curves.png` (趋势) -> `training_metrics.csv` (细节)。

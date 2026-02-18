@@ -7,7 +7,7 @@ GRPO 单文件学习脚本（主流程 + 可视化）。
 2) `export_grpo_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
 新人阅读顺序（建议）：
-1) 先看 `GRPO_CONFIG`：理解采样、奖励和训练超参。
+1) 先看 `main` 里的训练参数段：理解采样、奖励和训练超参。
 2) 再看 `main`：理解“合成数据 -> 奖励函数 -> 训练器 -> 训练”主链路。
 3) 最后看 `export_grpo_visualization`：理解如何分析奖励与 loss 曲线。
 
@@ -33,28 +33,6 @@ from typing import Any
 from datasets import Dataset
 from transformers import AutoTokenizer, set_seed
 from trl import GRPOConfig, GRPOTrainer
-
-
-GRPO_CONFIG = {
-    "model_name": "Qwen/Qwen3-0.6B",  # 策略模型名称或路径。
-    "output_dir": "output",  # 输出目录。
-    "seed": 42,  # 随机种子，保证复现。
-    "train_size": 4,  # 合成训练样本数量。
-    "learning_rate": 5e-7,  # 学习率。
-    "num_train_epochs": 0.05,  # 训练轮数。
-    "per_device_train_batch_size": 1,  # 单卡 batch。
-    "gradient_accumulation_steps": 1,  # 梯度累积步数。
-    "num_generations": 2,  # 每个 prompt 采样候选数。
-    "generation_batch_size": 2,  # 生成阶段 batch。
-    "max_prompt_length": 384,  # prompt 最大长度。
-    "max_completion_length": 56,  # completion 最大长度。
-    "logging_steps": 1,  # 日志间隔。
-    "save_steps": 100,  # 保存间隔。
-    "temperature": 1.1,  # 采样温度。
-    "top_p": 0.95,  # nucleus 采样阈值。
-    "reward_weights": [1.0, 0.3, 0.2, 0.05],  # 奖励权重 [correctness,distance,format,compact]。
-    "ema_alpha": 0.25,  # 可视化曲线平滑系数。
-}
 
 
 def export_grpo_visualization(trainer: GRPOTrainer, output_dir: Path, train_metrics: dict[str, Any]) -> Path:
@@ -139,7 +117,7 @@ def export_grpo_visualization(trainer: GRPOTrainer, output_dir: Path, train_metr
     x, y = series("loss")
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
-        axes[0, 0].plot(x, ema(y, GRPO_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={GRPO_CONFIG['ema_alpha']})")
+        axes[0, 0].plot(x, ema(y, 0.25), linewidth=2, label="loss(ema=0.25)")
     axes[0, 0].set_title("GRPO Loss")
     axes[0, 0].set_xlabel("step")
     axes[0, 0].grid(True, alpha=0.3)
@@ -150,9 +128,9 @@ def export_grpo_visualization(trainer: GRPOTrainer, output_dir: Path, train_metr
     if y:
         axes[0, 1].plot(
             x,
-            ema(y, GRPO_CONFIG["ema_alpha"]),
+            ema(y, 0.25),
             linewidth=2,
-            label=f"reward(ema={GRPO_CONFIG['ema_alpha']})",
+            label="reward(ema=0.25)",
         )
     axes[0, 1].set_title("Total Reward")
     axes[0, 1].set_xlabel("step")
@@ -204,15 +182,15 @@ def main() -> None:
 
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    output_dir = (module_dir / GRPO_CONFIG["output_dir"]).resolve()
+    output_dir = (module_dir / "output").resolve()
     checkpoints_dir = module_dir / "checkpoints"
     models_dir = module_dir / "models"
     data_dir = module_dir / "data"
     for p in [module_dir / "code", data_dir, models_dir, output_dir, checkpoints_dir]:
         p.mkdir(parents=True, exist_ok=True)
 
-    set_seed(GRPO_CONFIG["seed"])
-    rng = random.Random(GRPO_CONFIG["seed"])
+    set_seed(42)
+    rng = random.Random(42)
 
     # 内部小工具：仅在主流程里使用，减少新手在文件内来回跳转。
     strict_format_pattern = re.compile(r"^\s*<reasoning>.*?</reasoning>\s*<answer>\s*[-+]?\d+\s*</answer>\s*$", re.S)
@@ -272,7 +250,7 @@ def main() -> None:
         "<answer>整数答案</answer>\n\n"
     )
 
-    samples = [make_sample() for _ in range(GRPO_CONFIG["train_size"])]
+    samples = [make_sample() for _ in range(4)]
     train_dataset = Dataset.from_list(
         [
             {
@@ -332,47 +310,46 @@ def main() -> None:
         return rewards
 
     reward_funcs = [correctness_reward, distance_reward, format_reward, compact_output_reward]
-    reward_weights = GRPO_CONFIG["reward_weights"]
-
-    if GRPO_CONFIG["generation_batch_size"] % GRPO_CONFIG["num_generations"] != 0:
-        raise ValueError(
-            "generation_batch_size 必须能被 num_generations 整除："
-            f"{GRPO_CONFIG['generation_batch_size']} / {GRPO_CONFIG['num_generations']}"
-        )
+    reward_weights = [1.0, 0.3, 0.2, 0.05]
 
     desired = {
         "output_dir": str(checkpoints_dir),  # checkpoint 输出目录。
         "overwrite_output_dir": True,  # 覆盖旧输出。
-        "learning_rate": GRPO_CONFIG["learning_rate"],  # 学习率。
-        "per_device_train_batch_size": GRPO_CONFIG["per_device_train_batch_size"],  # 单卡 batch。
-        "gradient_accumulation_steps": GRPO_CONFIG["gradient_accumulation_steps"],  # 梯度累积。
-        "num_generations": GRPO_CONFIG["num_generations"],  # 每 prompt 采样数。
-        "generation_batch_size": GRPO_CONFIG["generation_batch_size"],  # 生成 batch。
-        "max_prompt_length": GRPO_CONFIG["max_prompt_length"],  # prompt 最大长度。
-        "max_completion_length": GRPO_CONFIG["max_completion_length"],  # completion 最大长度。
-        "num_train_epochs": GRPO_CONFIG["num_train_epochs"],  # 训练轮数。
-        "logging_steps": GRPO_CONFIG["logging_steps"],  # 日志间隔。
-        "save_steps": GRPO_CONFIG["save_steps"],  # 保存间隔。
+        "learning_rate": 5e-7,  # 学习率。
+        "per_device_train_batch_size": 1,  # 单卡 batch。
+        "gradient_accumulation_steps": 1,  # 梯度累积。
+        "num_generations": 2,  # 每 prompt 采样数。
+        "generation_batch_size": 2,  # 生成 batch。
+        "max_prompt_length": 384,  # prompt 最大长度。
+        "max_completion_length": 56,  # completion 最大长度。
+        "num_train_epochs": 0.05,  # 训练轮数。
+        "logging_steps": 1,  # 日志间隔。
+        "save_steps": 100,  # 保存间隔。
         "lr_scheduler_type": "cosine",  # 学习率调度器。
         "warmup_steps": 1,  # 预热步数。
-        "temperature": GRPO_CONFIG["temperature"],  # 采样温度。
-        "top_p": GRPO_CONFIG["top_p"],  # top-p 采样。
+        "temperature": 1.1,  # 采样温度。
+        "top_p": 0.95,  # top-p 采样。
         "reward_weights": reward_weights,  # 多奖励权重。
         "scale_rewards": "group",  # 组内奖励标准化，降低方差。
         "report_to": "none",  # 关闭外部上报。
     }
+    if desired["generation_batch_size"] % desired["num_generations"] != 0:
+        raise ValueError(
+            "generation_batch_size 必须能被 num_generations 整除："
+            f"{desired['generation_batch_size']} / {desired['num_generations']}"
+        )
     supported = set(inspect.signature(GRPOConfig.__init__).parameters)
     grpo_args = GRPOConfig(**{k: v for k, v in desired.items() if k in supported})
 
     # 步骤 3：构建训练器，兼容不同 TRL 版本参数名。
     print("3) 构建 GRPOTrainer", flush=True)
-    tokenizer = AutoTokenizer.from_pretrained(GRPO_CONFIG["model_name"])
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     init_params = inspect.signature(GRPOTrainer.__init__).parameters
     trainer_kwargs: dict[str, Any] = {
-        "model": GRPO_CONFIG["model_name"],
+        "model": "Qwen/Qwen3-0.6B",
         "args": grpo_args,
         "train_dataset": train_dataset,
     }
@@ -396,7 +373,30 @@ def main() -> None:
     trainer.save_model(str(models_dir))
 
     (output_dir / "run_config.json").write_text(
-        json.dumps({**GRPO_CONFIG, "reward_weights": reward_weights}, ensure_ascii=False, indent=2),
+        json.dumps(
+            {
+                "model_name": "Qwen/Qwen3-0.6B",
+                "output_dir": "output",
+                "seed": 42,
+                "train_size": 4,
+                "learning_rate": 5e-7,
+                "num_train_epochs": 0.05,
+                "per_device_train_batch_size": 1,
+                "gradient_accumulation_steps": 1,
+                "num_generations": 2,
+                "generation_batch_size": 2,
+                "max_prompt_length": 384,
+                "max_completion_length": 56,
+                "logging_steps": 1,
+                "save_steps": 100,
+                "temperature": 1.1,
+                "top_p": 0.95,
+                "reward_weights": reward_weights,
+                "ema_alpha": 0.25,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
     # run_config.json 用于记录本次实验超参，便于复现实验与参数对比。

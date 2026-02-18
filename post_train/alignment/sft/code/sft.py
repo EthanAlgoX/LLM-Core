@@ -7,7 +7,7 @@ SFT 单文件学习脚本（极简版）。
 2) `export_sft_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
 新人阅读顺序（建议）：
-1) 先看 `SFT_CONFIG`：理解“这次训练跑什么参数”。
+1) 先看 `main` 里的训练参数段：理解“这次训练跑什么参数”。
 2) 再看 `main`：理解“训练流程是如何串起来的”。
 3) 最后看 `export_sft_visualization`：理解“如何把日志变成可视化”。
 
@@ -31,24 +31,6 @@ import sys
 from pathlib import Path
 
 import torch
-
-
-# 固定默认配置：不依赖命令行参数，直接 `python sft.py` 即可。
-# 按“模型/数据/训练超参/可视化”分组给出，便于新人对照学习。
-SFT_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",  # 基座模型名称或本地路径。
-    "template": "qwen",  # 对话模板；必须与模型家族匹配。
-    "dataset": "identity,alpaca_en_demo",  # 训练数据集名称，可写多个并用逗号分隔。
-    "output_dir": "output",  # 运行输出目录（保存配置、可视化等）。
-    "max_samples": 8,  # 最多采样训练样本数；用于教学快跑。
-    "num_train_epochs": 0.01,  # 训练轮数；教学模式设为极小值。
-    "learning_rate": 5e-5,  # 学习率；控制参数更新步长。
-    "batch_size": 1,  # 单设备 batch size；显存紧张时保持 1。
-    "grad_accum": 1,  # 梯度累积步数；等效扩大 batch。
-    "logging_steps": 5,  # 每多少 step 打印一次日志。
-    "save_steps": 1000,  # 每多少 step 保存一次 checkpoint。
-    "ema_alpha": 0.2,  # 曲线平滑系数（EMA）；仅用于可视化。
-}
 
 
 def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
@@ -147,7 +129,7 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     # 新手重点看“是否总体下降”，不必追求每个点都下降。
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
-        axes[0, 0].plot(x, ema(y, SFT_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={SFT_CONFIG['ema_alpha']})")
+        axes[0, 0].plot(x, ema(y, 0.2), linewidth=2, label="loss(ema=0.2)")
     axes[0, 0].set_title("Train Loss")
     axes[0, 0].set_xlabel("step")
     axes[0, 0].grid(True, alpha=0.3)
@@ -205,7 +187,7 @@ def main() -> None:
 
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    output_dir = (module_dir / SFT_CONFIG["output_dir"]).resolve()
+    output_dir = (module_dir / "output").resolve()
     checkpoints_dir = module_dir / "checkpoints"
     models_dir = module_dir / "models"
     for p in [module_dir / "code", module_dir / "data", models_dir, output_dir, checkpoints_dir]:
@@ -233,21 +215,21 @@ def main() -> None:
     train_config = {
         "stage": "sft",  # 训练阶段：监督微调。
         "do_train": True,  # 是否执行训练。
-        "model_name_or_path": SFT_CONFIG["model_id"],  # 基座模型。
-        "dataset": SFT_CONFIG["dataset"],  # 训练集。
-        "template": SFT_CONFIG["template"],  # 模板。
+        "model_name_or_path": "Qwen/Qwen3-0.6B",  # 基座模型。
+        "dataset": "identity,alpaca_en_demo",  # 训练集。
+        "template": "qwen",  # 模板。
         "finetuning_type": "lora",  # 微调方式：LoRA。
         "lora_target": "all",  # LoRA 注入目标层。
         "output_dir": str(checkpoints_dir),  # checkpoint 输出目录。
         "overwrite_output_dir": True,  # 允许覆盖旧输出。
-        "per_device_train_batch_size": SFT_CONFIG["batch_size"],  # 单卡 batch。
-        "gradient_accumulation_steps": SFT_CONFIG["grad_accum"],  # 梯度累积。
+        "per_device_train_batch_size": 1,  # 单卡 batch。
+        "gradient_accumulation_steps": 1,  # 梯度累积。
         "lr_scheduler_type": "cosine",  # 学习率调度器。
-        "logging_steps": SFT_CONFIG["logging_steps"],  # 日志间隔。
-        "save_steps": SFT_CONFIG["save_steps"],  # 保存间隔。
-        "learning_rate": SFT_CONFIG["learning_rate"],  # 学习率。
-        "num_train_epochs": SFT_CONFIG["num_train_epochs"],  # 训练轮数。
-        "max_samples": SFT_CONFIG["max_samples"],  # 最大样本数。
+        "logging_steps": 5,  # 日志间隔。
+        "save_steps": 1000,  # 保存间隔。
+        "learning_rate": 5e-5,  # 学习率。
+        "num_train_epochs": 0.01,  # 训练轮数。
+        "max_samples": 8,  # 最大样本数。
         "max_grad_norm": 1.0,  # 梯度裁剪阈值。
         "report_to": "none",  # 关闭 wandb 等外部上报。
         "bf16": runtime["bf16"],  # 是否启用 bf16。
@@ -256,7 +238,7 @@ def main() -> None:
     config_path = output_dir / "train_sft_auto.json"
     config_path.write_text(json.dumps(train_config, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Config written: {config_path}", flush=True)
-    # 这个 JSON 是“可复现实验单据”：新人调参时可先改 SFT_CONFIG，再检查这里是否生效。
+    # 这个 JSON 是“可复现实验单据”：新人调参时可先改 train_config 默认值，再检查这里是否生效。
 
     # 步骤 3：执行训练命令（CLI -> 模块入口双回退）。
     print("3) 启动 SFT 训练", flush=True)

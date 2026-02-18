@@ -3,7 +3,7 @@
 PPO 单文件学习脚本（主流程 + 可视化）。
 
 新人阅读顺序（建议）：
-1) 先看 `PPO_CONFIG`：理解策略模型、奖励模型和 PPO 关键超参。
+1) 先看 `main` 里的训练参数段：理解策略模型、奖励模型和 PPO 关键超参。
 2) 再看 `main`：把握“配置生成 -> 训练执行 -> 模型整理”的流程。
 3) 最后看 `export_ppo_visualization`：理解如何看 loss/reward 曲线。
 
@@ -27,29 +27,6 @@ import sys
 from pathlib import Path
 
 import torch
-
-
-PPO_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",  # 策略模型。
-    "reward_model": "Qwen/Qwen3-0.6B",  # 奖励模型。
-    "reward_model_type": "full",  # 奖励模型类型（full/lora/api）。
-    "template": "qwen",  # 模板。
-    "dataset": "alpaca_en_demo",  # 训练数据。
-    "output_dir": "output",  # 输出目录。
-    "max_samples": 8,  # 最大样本数。
-    "num_train_epochs": 0.01,  # 训练轮数。
-    "learning_rate": 1e-6,  # 学习率。
-    "batch_size": 1,  # 单卡 batch。
-    "grad_accum": 1,  # 梯度累积。
-    "logging_steps": 5,  # 日志间隔。
-    "save_steps": 50,  # checkpoint 间隔。
-    "ppo_buffer_size": 1,  # PPO 经验缓冲区大小。
-    "ppo_epochs": 4,  # 每轮 PPO 更新次数。
-    "ppo_target": 6.0,  # PPO KL 目标。
-    "ppo_score_norm": False,  # 是否归一化奖励分数。
-    "ppo_whiten_rewards": False,  # 是否 whiten rewards。
-    "ema_alpha": 0.2,  # 可视化平滑系数。
-}
 
 
 def export_ppo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
@@ -169,7 +146,7 @@ def export_ppo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     x, y = series(["loss", "ppo/loss/total"])
     axes[0, 0].plot(x, y, marker="o", alpha=0.45, label="loss(raw)")
     if y:
-        axes[0, 0].plot(x, ema(y, PPO_CONFIG["ema_alpha"]), linewidth=2, label=f"loss(ema={PPO_CONFIG['ema_alpha']})")
+        axes[0, 0].plot(x, ema(y, 0.2), linewidth=2, label="loss(ema=0.2)")
     axes[0, 0].set_title("PPO Loss")
     axes[0, 0].set_xlabel("step")
     axes[0, 0].grid(True, alpha=0.3)
@@ -178,7 +155,7 @@ def export_ppo_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     x, y = series(["reward"])
     axes[0, 1].plot(x, y, marker="o", alpha=0.45, label="reward(raw)")
     if y:
-        axes[0, 1].plot(x, ema(y, PPO_CONFIG["ema_alpha"]), linewidth=2, label=f"reward(ema={PPO_CONFIG['ema_alpha']})")
+        axes[0, 1].plot(x, ema(y, 0.2), linewidth=2, label="reward(ema=0.2)")
     axes[0, 1].set_title("Reward")
     axes[0, 1].set_xlabel("step")
     axes[0, 1].grid(True, alpha=0.3)
@@ -227,7 +204,7 @@ def main() -> None:
 
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    output_dir = (module_dir / PPO_CONFIG["output_dir"]).resolve()
+    output_dir = (module_dir / "output").resolve()
     checkpoints_dir = module_dir / "checkpoints"
     models_dir = module_dir / "models"
     for p in [module_dir / "code", module_dir / "data", models_dir, output_dir, checkpoints_dir]:
@@ -258,31 +235,31 @@ def main() -> None:
     train_config = {
         "stage": "ppo",  # 阶段：PPO。
         "do_train": True,  # 执行训练。
-        "model_name_or_path": PPO_CONFIG["model_id"],  # 策略模型。
-        "reward_model": PPO_CONFIG["reward_model"],  # 奖励模型。
-        "reward_model_type": PPO_CONFIG["reward_model_type"],  # 奖励模型类型。
-        "dataset": PPO_CONFIG["dataset"],  # 数据集。
-        "template": PPO_CONFIG["template"],  # 模板。
+        "model_name_or_path": "Qwen/Qwen3-0.6B",  # 策略模型。
+        "reward_model": "Qwen/Qwen3-0.6B",  # 奖励模型。
+        "reward_model_type": "full",  # 奖励模型类型。
+        "dataset": "alpaca_en_demo",  # 数据集。
+        "template": "qwen",  # 模板。
         "finetuning_type": "lora",  # LoRA 微调。
         "lora_target": "all",  # LoRA 目标层。
         "output_dir": str(checkpoints_dir),  # checkpoint 目录。
         "overwrite_output_dir": True,  # 覆盖旧目录。
         "save_only_model": True,  # 仅保存模型权重。
-        "per_device_train_batch_size": PPO_CONFIG["batch_size"],  # 单卡 batch。
-        "gradient_accumulation_steps": PPO_CONFIG["grad_accum"],  # 梯度累积。
+        "per_device_train_batch_size": 1,  # 单卡 batch。
+        "gradient_accumulation_steps": 1,  # 梯度累积。
         "lr_scheduler_type": "cosine",  # 学习率调度器。
-        "logging_steps": PPO_CONFIG["logging_steps"],  # 日志间隔。
-        "save_steps": PPO_CONFIG["save_steps"],  # 保存间隔。
-        "learning_rate": PPO_CONFIG["learning_rate"],  # 学习率。
-        "num_train_epochs": PPO_CONFIG["num_train_epochs"],  # 训练轮数。
-        "max_samples": PPO_CONFIG["max_samples"],  # 最大样本数。
+        "logging_steps": 5,  # 日志间隔。
+        "save_steps": 50,  # 保存间隔。
+        "learning_rate": 1e-6,  # 学习率。
+        "num_train_epochs": 0.01,  # 训练轮数。
+        "max_samples": 8,  # 最大样本数。
         "max_grad_norm": 1.0,  # 梯度裁剪。
         "report_to": "none",  # 关闭外部上报。
-        "ppo_buffer_size": PPO_CONFIG["ppo_buffer_size"],  # PPO buffer 大小。
-        "ppo_epochs": PPO_CONFIG["ppo_epochs"],  # PPO 更新次数。
-        "ppo_target": PPO_CONFIG["ppo_target"],  # KL 目标。
-        "ppo_score_norm": PPO_CONFIG["ppo_score_norm"],  # 是否归一化奖励。
-        "ppo_whiten_rewards": PPO_CONFIG["ppo_whiten_rewards"],  # 是否 whiten 奖励。
+        "ppo_buffer_size": 1,  # PPO buffer 大小。
+        "ppo_epochs": 4,  # PPO 更新次数。
+        "ppo_target": 6.0,  # KL 目标。
+        "ppo_score_norm": False,  # 是否归一化奖励。
+        "ppo_whiten_rewards": False,  # 是否 whiten 奖励。
         "bf16": runtime["bf16"],  # bf16 开关。
         "fp16": runtime["fp16"],  # fp16 开关。
     }

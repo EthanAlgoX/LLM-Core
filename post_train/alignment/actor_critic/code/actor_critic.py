@@ -7,7 +7,7 @@ Actor-Critic 单文件学习脚本（主流程 + 可视化）。
 2) `export_actor_critic_visualization`：唯一可视化函数（导出 JSON/CSV/曲线图/summary）。
 
 新人阅读顺序（建议）：
-1) 先看 `ACTOR_CRITIC_CONFIG`：理解策略/奖励模型和 PPO 关键参数。
+1) 先看 `main` 里的训练参数段：理解策略/奖励模型和 PPO 关键参数。
 2) 再看 `main`：掌握训练入口、回退机制和模型归档流程。
 3) 最后看 `export_actor_critic_visualization`：学会看 loss/reward/value 三类指标。
 
@@ -30,29 +30,6 @@ import sys
 from pathlib import Path
 
 import torch
-
-
-ACTOR_CRITIC_CONFIG = {
-    "model_id": "Qwen/Qwen3-0.6B",  # 策略模型。
-    "reward_model": "Qwen/Qwen3-0.6B",  # 奖励模型。
-    "reward_model_type": "full",  # 奖励模型类型。
-    "template": "qwen",  # 模板。
-    "dataset": "alpaca_en_demo",  # 数据集。
-    "output_dir": "output",  # 输出目录。
-    "max_samples": 8,  # 最大样本数。
-    "num_train_epochs": 0.01,  # 训练轮数。
-    "learning_rate": 1e-6,  # 学习率。
-    "batch_size": 1,  # 单卡 batch。
-    "grad_accum": 1,  # 梯度累积。
-    "logging_steps": 5,  # 日志间隔。
-    "save_steps": 50,  # 保存间隔。
-    "ppo_buffer_size": 1,  # PPO buffer 大小。
-    "ppo_epochs": 4,  # PPO 更新次数。
-    "ppo_target": 6.0,  # KL 目标。
-    "ppo_score_norm": False,  # 奖励归一化开关。
-    "ppo_whiten_rewards": False,  # whiten 奖励开关。
-    "ema_alpha": 0.2,  # 曲线平滑系数。
-}
 
 
 def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
@@ -185,9 +162,9 @@ def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -
     if y:
         axes[0, 0].plot(
             x,
-            ema(y, ACTOR_CRITIC_CONFIG["ema_alpha"]),
+            ema(y, 0.2),
             linewidth=2,
-            label=f"actor_loss(ema={ACTOR_CRITIC_CONFIG['ema_alpha']})",
+            label="actor_loss(ema=0.2)",
         )
     axes[0, 0].set_title("Actor Loss")
     axes[0, 0].set_xlabel("step")
@@ -199,9 +176,9 @@ def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -
     if y:
         axes[0, 1].plot(
             x,
-            ema(y, ACTOR_CRITIC_CONFIG["ema_alpha"]),
+            ema(y, 0.2),
             linewidth=2,
-            label=f"critic_loss(ema={ACTOR_CRITIC_CONFIG['ema_alpha']})",
+            label="critic_loss(ema=0.2)",
         )
     axes[0, 1].set_title("Critic Loss")
     axes[0, 1].set_xlabel("step")
@@ -213,9 +190,9 @@ def export_actor_critic_visualization(checkpoints_dir: Path, output_dir: Path) -
     if y:
         axes[1, 0].plot(
             x,
-            ema(y, ACTOR_CRITIC_CONFIG["ema_alpha"]),
+            ema(y, 0.2),
             linewidth=2,
-            label=f"reward(ema={ACTOR_CRITIC_CONFIG['ema_alpha']})",
+            label="reward(ema=0.2)",
         )
     axes[1, 0].set_title("Reward")
     axes[1, 0].set_xlabel("step")
@@ -259,7 +236,7 @@ def main() -> None:
 
     code_dir = Path(__file__).resolve().parent
     module_dir = code_dir.parent
-    output_dir = (module_dir / ACTOR_CRITIC_CONFIG["output_dir"]).resolve()
+    output_dir = (module_dir / "output").resolve()
     checkpoints_dir = module_dir / "checkpoints"
     models_dir = module_dir / "models"
     for p in [module_dir / "code", module_dir / "data", models_dir, output_dir, checkpoints_dir]:
@@ -290,31 +267,31 @@ def main() -> None:
     train_config = {
         "stage": "ppo",  # 底层使用 PPO 实现 Actor-Critic 更新。
         "do_train": True,  # 启用训练。
-        "model_name_or_path": ACTOR_CRITIC_CONFIG["model_id"],  # 策略模型。
-        "reward_model": ACTOR_CRITIC_CONFIG["reward_model"],  # 奖励模型。
-        "reward_model_type": ACTOR_CRITIC_CONFIG["reward_model_type"],  # 奖励模型类型。
-        "dataset": ACTOR_CRITIC_CONFIG["dataset"],  # 数据集。
-        "template": ACTOR_CRITIC_CONFIG["template"],  # 模板。
+        "model_name_or_path": "Qwen/Qwen3-0.6B",  # 策略模型。
+        "reward_model": "Qwen/Qwen3-0.6B",  # 奖励模型。
+        "reward_model_type": "full",  # 奖励模型类型。
+        "dataset": "alpaca_en_demo",  # 数据集。
+        "template": "qwen",  # 模板。
         "finetuning_type": "lora",  # LoRA 微调。
         "lora_target": "all",  # LoRA 目标层。
         "output_dir": str(checkpoints_dir),  # checkpoint 目录。
         "overwrite_output_dir": True,  # 覆盖旧目录。
         "save_only_model": True,  # 仅保存模型。
-        "per_device_train_batch_size": ACTOR_CRITIC_CONFIG["batch_size"],  # 单卡 batch。
-        "gradient_accumulation_steps": ACTOR_CRITIC_CONFIG["grad_accum"],  # 梯度累积。
+        "per_device_train_batch_size": 1,  # 单卡 batch。
+        "gradient_accumulation_steps": 1,  # 梯度累积。
         "lr_scheduler_type": "cosine",  # 学习率调度器。
-        "logging_steps": ACTOR_CRITIC_CONFIG["logging_steps"],  # 日志间隔。
-        "save_steps": ACTOR_CRITIC_CONFIG["save_steps"],  # 保存间隔。
-        "learning_rate": ACTOR_CRITIC_CONFIG["learning_rate"],  # 学习率。
-        "num_train_epochs": ACTOR_CRITIC_CONFIG["num_train_epochs"],  # 训练轮数。
-        "max_samples": ACTOR_CRITIC_CONFIG["max_samples"],  # 最大样本数。
+        "logging_steps": 5,  # 日志间隔。
+        "save_steps": 50,  # 保存间隔。
+        "learning_rate": 1e-6,  # 学习率。
+        "num_train_epochs": 0.01,  # 训练轮数。
+        "max_samples": 8,  # 最大样本数。
         "max_grad_norm": 1.0,  # 梯度裁剪。
         "report_to": "none",  # 关闭外部上报。
-        "ppo_buffer_size": ACTOR_CRITIC_CONFIG["ppo_buffer_size"],  # PPO buffer。
-        "ppo_epochs": ACTOR_CRITIC_CONFIG["ppo_epochs"],  # PPO 更新次数。
-        "ppo_target": ACTOR_CRITIC_CONFIG["ppo_target"],  # KL 目标。
-        "ppo_score_norm": ACTOR_CRITIC_CONFIG["ppo_score_norm"],  # 奖励归一化开关。
-        "ppo_whiten_rewards": ACTOR_CRITIC_CONFIG["ppo_whiten_rewards"],  # whiten 奖励开关。
+        "ppo_buffer_size": 1,  # PPO buffer。
+        "ppo_epochs": 4,  # PPO 更新次数。
+        "ppo_target": 6.0,  # KL 目标。
+        "ppo_score_norm": False,  # 奖励归一化开关。
+        "ppo_whiten_rewards": False,  # whiten 奖励开关。
         "bf16": runtime["bf16"],  # bf16 开关。
         "fp16": runtime["fp16"],  # fp16 开关。
     }
