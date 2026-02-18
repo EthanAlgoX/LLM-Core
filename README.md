@@ -1,6 +1,6 @@
 # LLM-Core: 核心知识审计与复现仓库
 
-本项目是一个系统的 LLM 核心技术栈审计仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的“最小闭环”复现，记录并巩固大模型底层原理与工程实践方案。
+本项目是一个系统的 LLM 核心技术栈审计仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的"最小闭环"复现，记录并巩固大模型底层原理与工程实践方案。
 
 ---
 
@@ -19,52 +19,52 @@ python run.py --module ppo --toy
 
 ## 🌐 LLM 核心知识图谱 (Core Knowledge Map)
 
-### 1. 强化学习演进 (RL Foundation)
+### 1. 强化学习基础 (RL Foundation)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/README.md) | MDP 五元组建模与 Bellman 备份 |
-| 价值审计 | [TD Learning](./modules/01_foundation_rl/td_learning/README.md) | Q-Learning 与 SARSA 的收敛特性差异 |
-| 优势优化 | [GAE 核心实现](./modules/01_foundation_rl/gae/README.md) | 广义优势估计在偏差与方差间的数学权衡 |
+| 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/README.md) | MDP 五元组 (S,A,R,P,γ) 建模与 Bellman 备份方程 |
+| 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/README.md) | Q-Learning (off-policy) 与 SARSA (on-policy) 的收敛特性差异 |
+| 策略梯度 | [Policy Gradient](./modules/03_alignment/policy_gradient/README.md) | REINFORCE 算法及高方差问题的基线 (Baseline) 控制 |
+| 价值协同 | [Actor-Critic](./modules/03_alignment/actor_critic/README.md) | Critic 网络对 Actor 策略更新的基准平滑作用 |
+| 优势估计 | [GAE 核心实现](./modules/01_foundation_rl/gae/README.md) | 广义优势估计 (λ 调节) 在偏差与方差间的数学权衡 |
 
 ### 2. 模型架构与多模态 (Architecture & VLM)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 基础架构 | [Transformer Core](./modules/02_architecture/llm/README.md) | Attention 计算与架构实现规范 |
-| 跨模态 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 视觉特征空间向语言特征空间的对齐投影 |
+| 核心架构 | [Transformer Core](./modules/02_architecture/llm/README.md) | Multi-Head Attention 计算、位置编码与 Pre-LN 稳定性 |
+| 生成推理 | [Generation & Decoding](./modules/02_architecture/generation/README.md) | Flash Attention IO 优化、KV Cache 管理与解码策略对比 |
+| 跨模态 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | Q-Former / MLP Projector 实现视觉-语言特征空间对齐 |
 
-### 3. 模型微调与对齐 (SFT & Alignment)
-
-| 领域 | 核心审计模块 | 原理审计要点 |
-| --- | --- | --- |
-| 指令微调 | [监督微调 (SFT)](./modules/03_alignment/sft/README.md) | 遵循数据的 Loss Mask 策略与预测质量 |
-| 强化对齐 | [PPO 深度审计](./modules/03_alignment/ppo/README.md) | 重要性采样约束 (Ratio Clip) 与 KL 惩罚 |
-| 离线对齐 | [DPO 算法映射](./modules/03_alignment/dpo/README.md) | 隐式奖励函数在对比学习逻辑下的有效性 |
-| 推理对齐 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 组内相对标准化对逻辑链（CoT）生成的提升 |
-
-### 4. 推理与生成优化 (Inference & Generation)
+### 3. 后训练与偏好对齐 (Post-Training & Alignment)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 优化算子 | [Flash Attention](./modules/02_architecture/generation/README.md) | IO 感知的注意力计算优化原理 |
-| 解码搜索 | [Decoding 策略](./modules/02_architecture/generation/README.md) | Greedy/Sampling/Beam Search 的审计与权衡 |
-| 缓存机制 | [KV Cache 优化](./modules/02_architecture/generation/README.md) | 推理时显存占用的线性增长控制 |
+| 指令微调 | [监督微调 (SFT)](./modules/03_alignment/sft/README.md) | 指令遵循数据的 Loss Mask 策略与 next-token 预测质量 |
+| 在线对齐 | [PPO 深度审计](./modules/03_alignment/ppo/README.md) | 重要性采样约束 (Ratio Clip)、KL 惩罚与 Critic 稳定性 |
+| 离线对齐 | [DPO 算法映射](./modules/03_alignment/dpo/README.md) | 隐式奖励函数推导：从 RLHF 到对比学习的等价变换 |
+| 推理对齐 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 组内相对标准化 (Group Relative) 对 CoT 逻辑链生成的提升 |
+| 保守策略 | [离线 RL (CQL)](./modules/04_advanced_topics/offline_rl/README.md) | Conservative Q-Learning 对 OOD 动作价值的抑制机制 |
 
-### 5. 工程与系统性能 (Engineering & Scaling)
-
-| 领域 | 核心审计模块 | 原理审计要点 |
-| --- | --- | --- |
-| 分布式 | [并行策略 (Megatron)](./modules/05_engineering/megatron/README.md) | TP/PP/DP 模式下的通信开销与算力利用率 |
-| 显存管理 | [ZeRO/DeepSpeed](./modules/05_engineering/deepspeed/README.md) | 状态切分与显存冗余消除技术 |
-| 算子加速 | [CUDA/Triton 基础](./modules/05_engineering/cuda/README.md) | 高效算子开发的基本原理与内存优化 |
-
-### 6. 智能体深度审计 (Intelligent Agents)
+### 4. 工程与系统性能 (Engineering & Scaling)
 
 | 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 自动化决策 | [智能体 (Agent)](./modules/06_agent/README.md) | ReAct 架构中 Thought-Action-Observation 的状态机流转 |
-| 架构参考 | [NanoBot 深度分析](./modules/06_agent/README.md) | 动态上下文组装、XML 技能索引与双层记忆持久化 |
+| 分布式训练 | [并行策略 (Megatron)](./modules/05_engineering/megatron/README.md) | TP/PP/DP 并行模式下的通信开销与 Bubble Time 分析 |
+| 显存优化 | [ZeRO/DeepSpeed](./modules/05_engineering/deepspeed/README.md) | ZeRO-1/2/3 状态切分与显存冗余消除技术 |
+| 混合精度 | [Mixed Precision](./modules/05_engineering/mixed_precision/README.md) | FP16/BF16 训练的数值稳定性与 Loss Scaling 策略 |
+| 推理加速 | [Inference 优化](./modules/05_engineering/inference/README.md) | 量化 (INT8/INT4)、投机采样与连续批处理 |
+| 算子开发 | [CUDA/Triton 基础](./modules/05_engineering/cuda/README.md) | GPU 内存层次、Warp 调度与高效算子编写规范 |
+
+### 5. 智能体系统 (Intelligent Agents)
+
+| 领域 | 核心审计模块 | 原理审计要点 |
+| --- | --- | --- |
+| 推理循环 | [ReAct Agent](./modules/06_agent/README.md) | Thought-Action-Observation 状态机与 Reflection 注入 |
+| 记忆系统 | [Memory & Context](./modules/06_agent/README.md) | 双层记忆 (MEMORY.md + HISTORY.md) 与 grep 主动回溯 |
+| 工具集成 | [Tool Use & MCP](./modules/06_agent/README.md) | Function Calling 规范、安全沙箱与 MCP 协议集成 |
+| 多智能体 | [Subagent 委托](./modules/06_agent/README.md) | 主从 Agent 任务委托、权限约束与总线回传机制 |
 
 ---
 
@@ -102,12 +102,12 @@ python run.py --module ppo --toy
 
 ## 📂 项目结构 (Project Structure)
 
-- `modules/`: 核心学习组件
+- `modules/`: 核心知识组件
   - `01_foundation_rl/`: 强化学习基础 (MDP, TD, GAE)
   - `02_architecture/`: 模型架构 (LLM, VLM, Generation)
-  - `03_alignment/`: 对齐技术栈 (SFT, DPO, PPO, GRPO)
-  - `04_advanced_topics/`: 进阶话题 (Offline RL)
-  - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA)
+  - `03_alignment/`: 对齐技术栈 (SFT, PG, Actor-Critic, PPO, DPO, GRPO)
+  - `04_advanced_topics/`: 进阶话题 (Offline RL / CQL)
+  - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA, Inference)
   - `06_agent/`: 智能体推理专门模块 (Planning, Tools, Memory)
 - `tools/`: 技术摘要生成、自动化回归测试工具
 - `data/`: 模拟训练数据
