@@ -26,7 +26,7 @@ python run.py --module ppo --toy
 | 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组建模与 Bellman 备份方程 |
 | 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (Off-policy) 与 SARSA (On-policy) 差异 |
 | 优势估计 | [GAE](./modules/01_foundation_rl/gae/gae.md) & [Advantage](./modules/01_foundation_rl/advantage/advantage.md) | **GAE**、**多步回报** 与训练稳定性方差权衡 |
-| 偏好对齐 | [DPO](./modules/03_alignment/dpo/dpo.md) / [PPO](./modules/03_alignment/ppo/ppo.md) | KL 散度约束、**知识蒸馏**与模型能力迁移控制 |
+| 偏好对齐 | [DPO](./modules/03_alignment/dpo/dpo.md) / [PPO](./modules/03_alignment/ppo/ppo.md) | **Bradley-Terry 模型**、**KL 散度约束** 与 **对数比例优化** |
 | 性能调优 | [Performance Tuning](./modules/05_engineering/inference/inference.md) | **CPU/GPU 性能调优**、算子融合与 IO 瓶颈分析 |
 
 ### 2. 架构核心：变压器、多模态与 MoE (Architecture & Scaling)
@@ -46,7 +46,7 @@ python run.py --module ppo --toy
 | --- | --- | --- |
 | 监督学习 | [SFT 解析](./modules/03_alignment/sft/sft.md) | **Supervised Fine-Tuning**、数据质量初筛与指令遵循 |
 | 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
-| 偏好对齐 | [PPO](./modules/03_alignment/ppo/ppo.md) / [DPO](./modules/03_alignment/dpo/dpo.md) | KL 散度约束、**知识蒸馏**与模型能力迁移控制 |
+| 偏好对齐 | [PPO](./modules/03_alignment/ppo/ppo.md) / [DPO](./modules/03_alignment/dpo/dpo.md) | **在线/离线对齐算法**、**奖励模型 (RM)** 与 **隐含偏好优化 (DPO)** |
 | 基础算法 | [PG](./modules/03_alignment/policy_gradient/policy_gradient.md) / [AC](./modules/03_alignment/actor_critic/actor_critic.md) | Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础 |
 | 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 |
 | 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
