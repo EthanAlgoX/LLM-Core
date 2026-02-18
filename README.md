@@ -6,9 +6,9 @@
 
 从这里开始：
 
-- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/README.md`
-- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/ROADMAP_14_DAYS.md`
-- `/Users/yunxuanhan/Documents/workspace/ai/Finetune/learning/LEVEL_CHECKPOINTS.md`
+- [learning/README.md](./learning/README.md)
+- [learning/ROADMAP_14_DAYS.md](./learning/ROADMAP_14_DAYS.md)
+- [learning/LEVEL_CHECKPOINTS.md](./learning/LEVEL_CHECKPOINTS.md)
 
 每次跑完模块后生成口述稿：
 
@@ -70,28 +70,28 @@ python scripts/smoke_test.py --modules sft,grpo,mdp
 
 | 类别 (Category) | 模块 (Module) | 核心原理说明 (Quick Link) |
 | :--- | :--- | :--- |
-| **对齐训练 (Alignment)** | PPO | [PPO README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/ppo/README.md) |
-| | GRPO | [GRPO README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/grpo/README.md) |
-| | SFT | [SFT README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/sft/README.md) |
-| | DPO | [DPO README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/dpo/README.md) |
-| | RLHF | [RLHF README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/rlhf/README.md) |
-| | Actor-Critic | [Actor-Critic README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/actor_critic/README.md) |
-| | Policy Gradient | [Policy Gradient README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/policy_gradient/README.md) |
-| **强化学习基础 (RL Basics)** | MDP | [MDP README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/mdp/README.md) |
-| | TD Learning | [TD Learning README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/td_learning/README.md) |
-| | GAE | [GAE README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/gae/README.md) |
-| | Advantage | [Advantage README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/advantage/README.md) |
-| **离线强化学习 (Offline RL)** | BCQ | [BCQ README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/offline_rl/bcq/README.md) |
-| | CQL | [CQL README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/offline_rl/cql/README.md) |
-| **多模态模型 (Multimodal)** | LLaVA | [LLaVA README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/llava/README.md) |
-| | BLIP-2 | [BLIP-2 README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/blip2/README.md) |
-| | Flamingo | [Flamingo README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/flamingo/README.md) |
-| **生成模型 (Generative)** | Diffusion | [Diffusion README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/generation/diffusion/README.md) |
-| | DiT | [DiT README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/generation/dit/README.md) |
-| **系统与工程 (Systems)** | Megatron-LM | [Megatron-LM README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/llm/megatron/README.md) |
-| | DeepSpeed | [DeepSpeed README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/deepspeed/README.md) |
-| | CUDA | [CUDA README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/cuda/README.md) |
-| | Mixed Precision | [Mixed Precision README](file:///Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/mixed_precision/README.md) |
+| **对齐训练 (Alignment)** | PPO | [PPO README](./post_train/alignment/ppo/README.md) |
+| | GRPO | [GRPO README](./post_train/alignment/grpo/README.md) |
+| | SFT | [SFT README](./post_train/alignment/sft/README.md) |
+| | DPO | [DPO README](./post_train/alignment/dpo/README.md) |
+| | RLHF | [RLHF README](./post_train/alignment/rlhf/README.md) |
+| | Actor-Critic | [Actor-Critic README](./post_train/alignment/actor_critic/README.md) |
+| | Policy Gradient | [Policy Gradient README](./post_train/alignment/policy_gradient/README.md) |
+| **强化学习基础 (RL Basics)** | MDP | [MDP README](./post_train/rl_basics/mdp/README.md) |
+| | TD Learning | [TD Learning README](./post_train/rl_basics/td_learning/README.md) |
+| | GAE | [GAE README](./post_train/rl_basics/gae/README.md) |
+| | Advantage | [Advantage README](./post_train/rl_basics/advantage/README.md) |
+| **离线强化学习 (Offline RL)** | BCQ | [BCQ README](./post_train/offline_rl/bcq/README.md) |
+| | CQL | [CQL README](./post_train/offline_rl/cql/README.md) |
+| **多模态模型 (Multimodal)** | LLaVA | [LLaVA README](./pre_train/vlm/llava/README.md) |
+| | BLIP-2 | [BLIP-2 README](./pre_train/vlm/blip2/README.md) |
+| | Flamingo | [Flamingo README](./pre_train/vlm/flamingo/README.md) |
+| **生成模型 (Generative)** | Diffusion | [Diffusion README](./pre_train/generation/diffusion/README.md) |
+| | DiT | [DiT README](./pre_train/generation/dit/README.md) |
+| **系统与工程 (Systems)** | Megatron-LM | [Megatron-LM README](./pre_train/llm/megatron/README.md) |
+| | DeepSpeed | [DeepSpeed README](./post_train/systems/deepspeed/README.md) |
+| | CUDA | [CUDA README](./post_train/systems/cuda/README.md) |
+| | Mixed Precision | [Mixed Precision README](./post_train/systems/mixed_precision/README.md) |
 
 - `assets/`: 示例数据与历史实验产物归档
 
