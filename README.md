@@ -34,6 +34,7 @@ python run.py --module ppo --toy
 | --- | --- | --- |
 | 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
 | 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
+| 模态融合 | [VLM Mapping / Hub](./modules/02_architecture/vlm/vlm.md) | **MLP Projector**、**Cross-Attention** 与多模态对齐策略 |
 | 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** |
 
 ### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
@@ -41,7 +42,7 @@ python run.py --module ppo --toy
 | 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
 | 参数高效微调 | [PEFT 审计](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
-| 偏好对齐 | [RLHF / DPO / PPO](./modules/03_alignment/ppo/ppo.md) | 在线/离线对齐算法深度实践与 **Continual Pre-training** |
+| 偏好对齐 | [RLHF / DPO / PPO](./modules/03_alignment/ppo/ppo.md) | 在线/离线对齐算法深度实践与 **知识蒸馏** 分布迁移 |
 | 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
 | 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
 
@@ -56,6 +57,7 @@ python run.py --module ppo --toy
 
 | 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
+| 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
 | 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Self-Ask** 模式 |
 | 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **Async Orchestration**、**复杂状态机** 与 **Conditional Routing** |
 | 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/06_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
@@ -93,6 +95,20 @@ python run.py --module ppo --toy
   - `06_agent/`: 智能体 (RAG, Mesh, Multi-Agent, State Machine)
 - `tools/`: 自动化回归测试工具
 - `output/`: 训练产物、日志与测试报告
+
+---
+
+## 🏗️ 核心模型索引 (Key Model Index)
+
+| 模型分类 | 代表模型 | 核心审计文档 |
+| :--- | :--- | :--- |
+| **基础语言模型 (LLM)** | LLaMA-3 / Transformer | [Transformer Core](./modules/02_architecture/llm/llm.md) |
+| **轻量化 LLM** | nanoGPT | [nanoGPT README](./modules/02_architecture/llm/nanoGPT/README.md) |
+| **多模态 VLM** | **LLaVA** | [LLaVA 详述](./modules/02_architecture/vlm/llava/llava.md) |
+| **多模态 VLM** | **Flamingo** | [Flamingo 详述](./modules/02_architecture/vlm/flamingo/flamingo.md) |
+| **多模态 VLM** | **BLIP-2** | [BLIP-2 详述](./modules/02_architecture/vlm/blip2/blip2.md) |
+| **推理增强模型** | DeepSeek (GRPO) | [GRPO 对齐范式](./modules/03_alignment/grpo/grpo.md) |
+| **分布式框架** | Megatron-LM | [Megatron 并行策略](./modules/05_engineering/megatron/megatron.md) |
 
 ---
 

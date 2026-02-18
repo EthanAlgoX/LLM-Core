@@ -10,7 +10,7 @@ VLM 的核心问题是**模态对齐**：如何将视觉编码器的特征空间
 
 所有主流 VLM 都由以下三部分组成：
 
-```
+```text
 [图像] → [视觉编码器] → [模态对齐模块] → [语言模型 (LLM)] → [文本输出]
 ```
 
@@ -40,15 +40,15 @@ VLM 的核心问题是**模态对齐**：如何将视觉编码器的特征空间
 - **优点**：视觉信息在每一层都能影响语言生成，融合更深。
 - **缺点**：需要修改 LLM 架构，参数量增加显著。
 
-### 3. 主流模型对比
+### 3. 重要模型库 (Model Gallery)
 
-| 模型 | 视觉编码器 | 对齐方式 | 核心特点 |
+| 模型 | 核心对齐方式 | 详细文档 | 核心里程碑 |
 | --- | --- | --- | --- |
-| **BLIP-2** | ViT-G (EVA) | Q-Former | 冻结视觉编码器和 LLM，只训练 Q-Former |
-| **LLaVA-1.5** | CLIP ViT-L | MLP Projector | 极简架构，指令微调效果强 |
-| **Flamingo** | NFNet | Cross-Attention | 少样本学习能力强 |
-| **InternVL** | InternViT-6B | MLP Projector | 超大视觉编码器，中文支持好 |
-| **Qwen-VL** | ViT | Cross-Attention | 高分辨率支持，多图理解 |
+| **BLIP-2** | Q-Former | [BLIP-2 详述](./blip2/blip2.md) | 引入 Q-Former 解决变长视觉 Token 压缩问题 |
+| **LLaVA-1.5** | MLP Projector | [LLaVA 详述](./llava/llava.md) | 视觉指令微调 (Visual Instruction Tuning) 开创者 |
+| **Flamingo** | Cross-Attention | [Flamingo 详述](./flamingo/flamingo.md) | 原生交错式图文输入与极强少样本学习 |
+| **InternVL** | MLP Projector | - | 超大视觉编码器与高性能中文支持 |
+| **Qwen-VL** | Cross-Attention | - | 动态高分辨率与多图长序列理解 |
 
 ---
 
