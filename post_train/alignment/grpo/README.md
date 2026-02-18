@@ -1,41 +1,65 @@
-# GRPO（Group Relative Policy Optimization）
+# GRPO (Group Relative Policy Optimization) 组内相对策略优化
 
 ## 定位与分类
-- 阶段：后训练（策略优化）
-- 类型：强化学习风格偏好优化
-- 作用：在同一 prompt 的多候选回答中进行相对比较，提升高奖励行为概率
 
-## 核心原理
-1. 每个 prompt 采样多条回答（`num_generations`）。
-2. 多奖励函数打分（正确性、格式、简洁性等）。
-3. 组内标准化奖励（`scale_rewards=group`）降低方差。
-4. 用相对优势更新策略，而非仅依赖单条样本分数。
+- **阶段**：后训练（Post-training）之对齐/推理增强阶段。
+- **类型**：强化学习（数学逻辑推理增强）。
+- **作用**：由 DeepSeek 提出，通过取消 Critic 模型并采用组内相对分数（Group Relative），显著降低显存开销，并提升模型在逻辑推理任务中的爆发力。
 
-## 与相近方法区别
-1. 相比 `PPO`：GRPO 更强调组内相对比较，弱化绝对值尺度问题。
-2. 相比 `DPO`：GRPO 不局限于成对偏好，可直接利用多候选采样。
-3. 相比 `SFT`：GRPO 使用奖励驱动优化，不是纯监督拟合。
+## 核心架构：化繁为简
 
-## 运行
-```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/grpo
-source /opt/anaconda3/etc/profile.d/conda.sh
-conda activate finetune
-python code/grpo_demo.py
-```
+相比 PPO 的“四角平衡”，GRPO 采用了更轻量化的“三角结构”：
 
-## 输出结果
-默认输出到 `output/grpo_metrics`，包含：
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `log_history.json`
-- `train_summary.json`
+| 角色 | 是否存在 | 职责描述 | 状态 |
+| :--- | :--- | :--- | :--- |
+| **Actor** | 是 | 核心优化对象。负责根据指令生成回复。 | **动态更新** |
+| **Reference** | 是 | 冻结的原型。计算 KL 散度，防止策略崩溃。 | **完全冻结** |
+| **Reward** | 是 | 裁判。可以是神经网络模型，也可以是硬性规则（如编译器）。 | **完全冻结** |
+| **Critic** | **否** | **取消。** 不再预测期望得分，由组内平均分替代其功能。 | **N/A** |
 
+> **优势**：取消 Critic 模型可节省约 50% 的模型权重显存，支持更大规模的并行采样。
 
-## 目录文件说明（重点）
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。
+## 核心逻辑：组内对比 (Group Relative)
+
+这是 GRPO 名字的由来。它不再看“历史平均分（Critic）”，而是看“同侪表现”：
+
+1. **组内采样**：对于同一个问题，Actor 一次性生成一组回答（采样数由 `num_generations` 控制，如一组 8 个）。
+2. **计算优势 (Advantage)**：
+   - 算出这组回答的平均分（Mean）和标准差（Std）。
+   - **Advantage 公式**：$A_i = \frac{Reward_i - \text{Mean}(Rewards)}{\text{Std}(Rewards)}$
+3. **原理**：只要你的回答比同组的其他“兄弟”好，你就获得正向激励。这种横向对比天然抹平了题目难度的干扰。
+
+### 场景分析：组内对比如何奏效？
+
+- **题目极难时**：
+    假设由于题目太难，全组 8 个回答的绝对得分都很低（平均分仅 10 分）。
+  - **A 回答**：得了 12 分。虽然绝对分低，但在组内是“优等生”，$Advantage > 0$，模型会学习奖励这种行为。
+- **题目极简单时**：
+    假设由于题目太易，全组平均分高达 95 分。
+  - **B 回答**：得了 90 分。虽然绝对分很高，但在组内是“差生”，$Advantage < 0$，模型反而会反思这种行为。
+
+> **结论**：GRPO 让模型不再纠结于分数的“绝对值”，而是专注于**“如何做得比同类更好”**。
+
+## GRPO vs. PPO 深度对比
+
+| 特性 | PPO (经典) | GRPO (新型) |
+| :--- | :--- | :--- |
+| **基准来源** | **纵向对比**：靠 Critic 神经网络预测。 | **横向对比**：靠统计学组内平均值。 |
+| **显存压力** | 高（需要维护巨大的 Critic 网络）。 | 低（取消 Critic，省显存）。 |
+| **稳定性** | 依赖 Critic 的拟合质量。 | 依赖组内采样数量 (num_generations)。 |
+| **最佳场景** | 对话对齐、通用偏好学习。 | **逻辑推理、数学难题、深度思索 (CoT)**。 |
+
+## 关键训练配置
+
+| 参数 | 脚本键值 | 原理解读 |
+| :--- | :--- | :--- |
+| `num_generations` | `2` (Demo) / `8~16` (生产) | 每组采样个数。越大，组内统计出的平均值越准，训练越稳。 |
+| `scale_rewards` | `"group"` | 开启组内标准化模式。这是 GRPO 的核心开关。 |
+| `learning_rate` | `5e-7` | 极低的学习率，防止策略梯度在采样不足时产生抖动。 |
+
+## 运行与输出
+
+1. **启动**：`python code/grpo_demo.py`
+2. **可视化**：默认输出至 `output/grpo_metrics`。
+   - 关注 `reward`（总分）与各分项（如 `correctness_reward`）的增长。
+   - `reward_std` 反映了组内回答的多样性与差距。
