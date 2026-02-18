@@ -28,17 +28,38 @@ $$\Delta W = A \times B$$
 
 ## 进阶：QLoRA (Quantized LoRA)
 
-### 核心亮点
+### QLoRA 技术亮点
 
 1. **4-bit NormalFloat (NF4)**：专门为正态分布权重设计的量化格式，比 4-bit Float 精度更高。
 2. **Double Quantization**：对量化常数本身再进行一次量化，节省额外的几百 MB 显存。
 3. **Paged Optimizers**：将优化器状态在显存和内存之间自动切换，防止 OOM。
 
+## 其他轻量化技术
+
+### 1. Prefix Tuning
+
+- **核心逻辑**：在输入 Token 前拼接一组可训练的 **Virtual Tokens (Prefix)**。
+- **与 LoRA 区别**：
+  - **Prefix Tuning**：改变的是输入 Hidden State，增加了一定的推理计算量。
+  - **LoRA**：改变的是权重 $W$，可直接合并，推理零额外开销。
+
+### 2. P-Tuning / Prompt Tuning
+
+- 仅在 Embedding 层增加可训练向量，适用于任务指令极其明确的场景。
+
+## 知识蒸馏 (Knowledge Distillation)
+
+### 蒸馏技术亮点
+
+- **Teacher-Student 架构**：大模型 (Teacher) 引导小模型 (Student) 学习。
+- **Logits 蒸馏**：Student 拟合 Teacher 输出的概率分布。
+- **能力提取**：常用于将 175B 模型的复杂逻辑蒸馏到 7B 模型中，提升端侧执行速度。
+
 ## 面试高频问题
 
-1. **LoRA 的 $r$ （秩）选多少合适？**
+1. LoRA 的 $r$ （秩）选多少合适？
    - 通常 8 或 16 已经足够。过大的 $r$ 会增加显存但并不一定会提升精度。
-2. **为什么 LoRA 能够合并到模型中？**
-   - 矩阵乘法满足分配律： $W_{new}x = (W + AB)x = Wx + ABx$。推理时预计算 $W + AB$ 即可。
-3. **LoRA 应该应用在哪些层？**
-   - 实验表明，同时在 $Q, K, V, O$ 和 $MLP$ 层应用 LoRA 效果比仅在 $Q, V$ 层好。
+2. LoRA 与全参微调的收敛速度？
+   - LoRA 收敛通常更快，因为它优化的是低秩残差，更容易在局部搜索到最优解。
+3. PEFT 在多模态模型中的应用？
+   - 常用于固定 ViT 编码器，仅对 Projector 或 LLM 部分进行 LoRA 微调，实现跨模态对齐。

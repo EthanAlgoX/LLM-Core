@@ -19,59 +19,45 @@ python run.py --module ppo --toy
 
 ## 🌐 LLM 核心知识图谱 (Core Knowledge Map)
 
-### 1. 理论根基：序贯决策与强化学习 (Theory & RL)
+### 1. 理论根基：算法与优化 (Theory & Optimization)
 
-| 领域 | 核心审计模块 | 原理审计要点 |
+| 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组 (S,A,R,P,γ) 建模与 Bellman 备份方程 |
-| 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (off-policy) 与 SARSA (on-policy) 的收敛特性差异 |
-| 策略梯度 | [Policy Gradient](./modules/03_alignment/policy_gradient/policy_gradient.md) | REINFORCE 算法及高方差问题的基线 (Baseline) 控制 |
-| 价值协同 | [Actor-Critic](./modules/03_alignment/actor_critic/actor_critic.md) | Critic 网络对 Actor 策略更新的基准平滑作用 |
-| 优势估计 | [GAE 核心实现](./modules/01_foundation_rl/gae/gae.md) | 广义优势估计 (λ 调节) 在偏差与方差间的数学权衡 |
+| 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组建模与 Bellman 备份方程 |
+| 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (Off-policy) 与 SARSA (On-policy) 差异 |
+| 偏好对齐 | [DPO / PPO](./modules/03_alignment/ppo/ppo.md) | KL 散度约束、**知识蒸馏**与模型能力迁移控制 |
+| 性能调优 | [Performance Tuning](./modules/05_engineering/inference/inference.md) | **CPU/GPU 性能调优**、算子融合与 IO 瓶颈分析 |
 
-### 2. 架构核心：变压器与生成机制 (Architecture & Generation)
+### 2. 架构核心：变压器与多模态 (Architecture & VLM)
 
-| 领域 | 核心审计模块 | 原理审计要点 |
+| 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | Multi-Head Attention 计算、位置编码与 Pre-LN 稳定性 |
-| 生成推理 | [Generation & Decoding](./modules/02_architecture/generation/generation.md) | Flash Attention IO 优化、KV Cache 管理与解码策略对比 |
+| 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA 计算、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
+| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** 推理 |
+| 模态融合 | [VLM Mapping](./modules/02_architecture/vlm/vlm.md) | 线性投影与交叉注意力层对齐视觉-语言空间 |
 
-### 3. 架构扩展：多模态对齐与映射 (Multi-modal VLM)
+### 3. 能力塑形：微调与数据 (Post-Training & Data)
 
-| 领域 | 核心审计模块 | 原理审计要点 |
+| 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 视觉编码 | [ViT/CLIP 基础](./modules/02_architecture/vlm/vlm.md) | 图像分块 (Patchify) 与全局语义特征提取 |
-| 模态对齐 | [Q-Former / MLP](./modules/02_architecture/vlm/vlm.md) | 线性投影与交叉注意力层对齐视觉-语言空间 |
-| 深度融合 | [LLaVA / Flamingo](./modules/02_architecture/vlm/vlm.md) | 特征对齐预训练 (Stage 1) 与视觉指令微调 (Stage 2) |
+| 参数高效微调 | [PEFT 审计](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与 AdaLoRA 的低秩分解对比 |
+| 数据治理 | [Data Engineering](./modules/03_alignment/data_engineering.md) | **数据处理 (Deduplication/Cleaning)** 与多样性采样策略 |
+| 评估体系 | [Model Evaluation](./modules/03_alignment/data_engineering.md) | **模型评估 (Benchmark/Human-eval)** 与对齐稳定性监控 |
 
-### 4. 能力塑造：指令遵循与偏好对齐 (Post-Training & Alignment)
+### 4. 系统性能：并行与推理框架 (Engineering & Scaling)
 
-| 领域 | 核心审计模块 | 原理审计要点 |
+| 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 指令微调 | [监督微调 (SFT)](./modules/03_alignment/sft/sft.md) | 指令遵循数据的 Loss Mask 策略与 next-token 预测质量 |
-| 在线对齐 | [PPO 深度审计](./modules/03_alignment/ppo/ppo.md) | 重要性采样约束 (Ratio Clip)、KL 惩罚与 Critic 稳定性 |
-| 离线对齐 | [DPO 算法映射](./modules/03_alignment/dpo/dpo.md) | 隐式奖励函数推导：从 RLHF 到对比学习的等价变换 |
-| 推理对齐 | [GRPO 推理优化](./modules/03_alignment/grpo/grpo.md) | 组内相对标准化 (Group Relative) 对 CoT 逻辑链生成的提升 |
-| 保守策略 | [离线 RL (CQL)](./modules/04_advanced_topics/offline_rl/offline_rl.md) | Conservative Q-Learning 对 OOD 动作价值的抑制机制 |
+| 推理加速 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **vLLM (PagedAttention)**、**sglang (Runtime)** 与 TensorRT |
+| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | TP/PP/DP 通信开销与 ZeRO-3 显存消除 |
 
-### 5. 系统性能：大规模并行与推理加速 (Engineering & Scaling)
+### 5. 应用闭环：自主智能体系统 (Intelligent Agents)
 
-| 领域 | 核心审计模块 | 原理审计要点 |
+| 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 分布式训练 | [并行策略 (Megatron)](./modules/05_engineering/megatron/megatron.md) | TP/PP/DP 并行模式下的通信开销与 Bubble Time 分析 |
-| 显存优化 | [ZeRO/DeepSpeed](./modules/05_engineering/deepspeed/deepspeed.md) | ZeRO-1/2/3 状态切分与显存冗余消除技术 |
-| 混合精度 | [Mixed Precision](./modules/05_engineering/mixed_precision/mixed_precision.md) | FP16/BF16 训练的数值稳定性与 Loss Scaling 策略 |
-| 推理加速 | [Inference 优化](./modules/05_engineering/inference/inference.md) | 量化 (INT8/INT4)、投机采样与连续批处理 |
-| 算子开发 | [CUDA/Triton 基础](./modules/05_engineering/cuda/cuda.md) | GPU 内存层次、Warp 调度与高效算子编写规范 |
-
-### 6. 应用闭环：自主智能体系统 (Intelligent Agents)
-
-| 领域 | 核心审计模块 | 原理审计要点 |
-| --- | --- | --- |
-| 推理循环 | [ReAct Agent](./modules/06_agent/06_agent.md) | Thought-Action-Observation 状态机与 Reflection 注入 |
-| 记忆系统 | [Memory & Context](./modules/06_agent/06_agent.md) | 双层记忆 (MEMORY.md + HISTORY.md) 与 grep 主动回溯 |
-| 工具集成 | [Tool Use & MCP](./modules/06_agent/06_agent.md) | Function Calling 规范、安全沙箱与 MCP 协议集成 |
-| 多智能体 | [Subagent 委托](./modules/06_agent/06_agent.md) | 主从 Agent 任务委托、权限约束与总线回传机制 |
+| 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
+| 推理范式 | [Agent Reasoning](./modules/06_agent/06_agent.md) | **ReAct**、**Plan and Execute** 与 Reflection 自反思 |
+| 生态集成 | [Frameworks & Tools](./modules/06_agent/06_agent.md) | **Tool-use (Function Calling)**、**LangChain** 与 **LangGraph** |
 
 ---
 
@@ -79,31 +65,14 @@ python run.py --module ppo --toy
 
 ### 1. 显存计算与容量估算 (Memory & Compute)
 
-- **静态权重**：`fp16` 占 2 Bytes/Param。例如 7B 模型加载需 ~14GB。
+- **静态权重**：`fp16` 占 2 Bytes/Param。
 - **KV Cache**：显存占用 = `2 × layers × heads × head_dim × precision_bytes`。
-- **PEFT (LoRA)**： $\Delta W = A \times B$ （或 $\Delta W = A \cdot B$ ），通过低秩分解显著降低训练时的显存梯度存储需求。
+- **量化增益**：通过 **定点量化** (INT4/INT8)，显存占用可降低 50%-75%。
 
-### 2. 核心训练算法对比
+### 2. Agent 架构演进
 
-| 特性 | SFT | PPO | DPO | GRPO |
-| :--- | :--- | :--- | :--- | :--- |
-| **显存压力** | 低 | **极高** (涉及4个独立模型) | 中 | 中 (省去 Critic 网络) |
-| **收敛特性** | 极稳 | 较敏感 (取决于优势估计精度) | 稳定 | 稳定 (适合数学推理) |
-| **优化目标** | 字对字模仿 | 奖励信号最大化 | 偏好映射最大化 | 组内相对反馈优化 |
-
-### 3. Agent 与系统架构
-
-- **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use
-- **ReAct 范式**：协同推理（Reason）与行动（Act），使模型具备动态调整计划的能力。
-- **Flash Attention**：基于 SRAM 的分块计算，消除显存读写的 IO 瓶颈。
-
----
-
-## 🎯 深度解析与工程建议 (Core Principles Deep Dive)
-
-- **KL 散度控制**：在对齐训练中，KL 散度过快增长通常预示着模型正在过度拟合奖励函数。
-- **分布式瓶颈**：在大规模训练中，PP (Pipeline Parallelism) 虽然节省显存，但会引入 Bubble Time；TP (Tensor Parallelism) 虽效率高但对节点间带宽要求极严。
-- **智能体幻觉**：Agent 在复杂任务中易陷入无限循环或调用不存在的工具，建议增加自我反思（Self-Reflection）或强约束 Schema 解析。
+- **ReAct 范式**：协同推理（Reason）与行动（Act），动态调整计划。
+- **Plan and Execute**：先生成完整计划再执行，适合复杂逻辑解耦。
 
 ---
 
@@ -111,13 +80,11 @@ python run.py --module ppo --toy
 
 - `modules/`: 核心知识组件
   - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
-  - `02_architecture/`: 架构核心与扩展 (LLM, VLM, Generation)
-  - `03_alignment/`: 能力塑造与对齐技术 (SFT, PPO, DPO, GRPO)
-  - `04_advanced_topics/`: 算法扩展 (Offline RL / CQL)
-  - `05_engineering/`: 系统性能与工程 (DeepSpeed, Megatron, CUDA, Inference)
-  - `06_agent/`: 应用闭环与智能体 (Planning, Tools, Memory)
-- `tools/`: 技术摘要生成、自动化回归测试工具
-- `data/`: 模拟训练数据
+  - `02_architecture/`: 架构核心 (LLM, VLM, Embedding, Quantization)
+  - `03_alignment/`: 对齐技术 (SFT, PEFT/LoRA, Distillation, Data Process)
+  - `05_engineering/`: 工程与性能 (DeepSpeed, vLLM, sglang, CPU/GPU Tuning)
+  - `06_agent/`: 智能体 (RAG, Rerank, Plan&Execute, Frameworks)
+- `tools/`: 自动化回归测试工具
 - `output/`: 训练产物、日志与测试报告
 
 ---

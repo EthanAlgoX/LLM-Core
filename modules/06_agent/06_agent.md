@@ -10,20 +10,34 @@ Agent 是大语言模型从“对话框”向“生产力工具”演进的核�
 
 ### 1. 规划 (Planning)
 
-规划层决定了 Agent 如何拆分复杂任务。常用的模式包括：
+规划层决定了 Agent 如何拆分复杂任务。常用模式包括：
 
-- **CoT (Chain of Thought)**：思维链。让模型逐步思考，提高逻辑稳定性。
-- **ReAct (Reason + Act)**：协同推理与行动。模型先生成一步“思考”（Thought），然后执行一个“动作”（Action），并根据“观察”（Observation）调整下一步。
-- **ToT (Tree of Thoughts)**：针对复杂决策，探索多条可能路径并进行剪枝优化。
+- **ReAct (Reason + Act)**：协同推理与行动。模型根据 Observation 动态调整 Thought。适用于交互频繁、不确定性高的任务。
+- **Plan and Execute**：先通过 Planner 生成完整 Task List，再由 Executor 逐一执行。适用于逻辑清晰、长链条的复杂工程任务。
+- **CoT (Chain of Thought)**：思维链引导。
+- **ToT (Tree of Thoughts)**：针对复杂决策，探索多条可能路径并进行回溯。
 
-### 2. 记忆 (Memory)
+### 2. 记忆与检索 (Memory & RAG)
 
-- **短期记忆 (Short-term)**：即上下文（Context）。利用 LLM 的 Context Window 存储对话历史和中间思考过程。
-- **长期记忆 (Long-term)**：通过 **RAG (Retrieval Augmented Generation)** 模式，将海量知识库存储在向量数据库（如 Chroma, Pinecone）中，按需检索相关信息。
+- **短期记忆 (Short-term)**：利用 Context Window 存储对话历史和中间思考过程。
+- **长期记忆 (Long-term) - RAG 架构**：
+    1. **Query 理解**：意图识别、实体提取或查询扩展（Query Expansion）。
+    2. **向量检索 (Vector Search)**：计算 **Embedding** 相似度（如余弦相似度），从向量库召回候选集。
+    3. **Rerank 模型**：对召回结果进行精排，解决语义稀释问题。
 
-### 3. 工具使用 (Tool Use / Function Calling)
+### 3. 工具集成 (Tool Use / Function Calling)
 
-Agent 能力的延伸。LLM 通过生成 JSON 格式的函数调用指令，驱动外部 API（搜索、计算、执行代码）获取外部实时信息或改变环境状态---
+Agent 能力的延伸。通过标准化的 Function Calling 规范驱动外部 API。
+
+---
+
+## 🛠️ 主流框架对比 (Frameworks)
+
+| 框架 | 核心设计哲学 | 适用场景 |
+| :--- | :--- | :--- |
+| **LangChain** | 基于组件（LCEL）的线性链式调用。 | 快速原型开发，标准 RAG 流程。 |
+| **LangGraph** | 基于状态机（Graph）的循环逻辑。 | 复杂多智能体协作、需要状态回退的场景。 |
+| **OpenClaw** | 基于文件系统与总线（Bus）的深度嵌入。 | 极低功耗、本地化执行的智能体系统。 |
 
 ## 🏛️ 架构案例：NanoBot 设计模式
 
