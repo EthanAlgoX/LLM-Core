@@ -26,7 +26,7 @@
 1. **组内采样**：对于同一个问题，Actor 一次性生成一组回答（采样数由 `num_generations` 控制，如一组 8 个）。
 2. **计算优势 (Advantage)**：
    - 算出这组回答的平均分（Mean）和标准差（Std）。
-   - **Advantage 公式**：$A_i = \frac{Reward_i - \text{Mean}(Rewards)}{\text{Std}(Rewards)}$
+   - **Advantage 公式**：$A_i = \frac{Reward_i - \mathrm{Mean}(Rewards)}{\mathrm{Std}(Rewards)}$
 3. **原理**：只要你的回答比同组的其他“兄弟”好，你就获得正向激励。这种横向对比天然抹平了题目难度的干扰。
 
 ## 核心原理与数学公式
@@ -35,10 +35,10 @@
 
 这是 GRPO 的核心数学创新。对于针对同一个 Prompt 生成的一组回答 $\{o_1, o_2, \dots, o_G\}$，每个回答的优势 $A_i$ 计算如下：
 
-$$A_i = \frac{r_i - \text{mean}(r_1, r_2, \dots, r_G)}{\text{std}(r_1, r_2, \dots, r_G)}$$
+$$A_i = \frac{r_i - \mathrm{mean}(r_1, r_2, \dots, r_G)}{\mathrm{std}(r_1, r_2, \dots, r_G)}$$
 
 - **$r_i$**：第 $i$ 个回答获得的显式奖励分数。
-- **$\text{mean}$ 与 $\text{std}$**：这组回答奖励分的平均值和标准差。
+- **$\mathrm{mean}$ 与 $\mathrm{std}$**：这组回答奖励分的平均值和标准差。
 - **直觉理解**：这是一种**归一化**操作。它将绝对分数转化为了“在该组中的表现排名”。
 
 ### 2. 目标优化函数 (Objective Function)

@@ -22,7 +22,7 @@ GQA 在保持 MHA 精度（多组特征表达）的同时，显著降低了 KV C
 
 ### 核心痛点
 
-传统的 Attention 计算复杂度是 $O(N^2)$，且在显存和 SRAM 之间频繁读写中间矩阵 $S = QK^T$ 和 $P = \text{softmax}(S)$，导致 **IO 受限 (Memory Bound)** 而非计算受限。
+传统的 Attention 计算复杂度是 $O(N^2)$，且在显存和 SRAM 之间频繁读写中间矩阵 $S = QK^T$ 和 $P = \mathrm{softmax}(S)$，导致 **IO 受限 (Memory Bound)** 而非计算受限。
 
 ### 优化策略
 
@@ -37,4 +37,4 @@ GQA 在保持 MHA 精度（多组特征表达）的同时，显著降低了 KV C
 2. **RoPE (旋转位置编码) 的优势？**
    - 具备外推性（Relative Position），通过复数乘法实现，对长文本友好。
 3. **KV Cache 显存如何计算？**
-   - $2 \times \text{layers} \times \text{heads} \times \text{dim} \times \text{precision}$ (针对每个 Token)。
+   - $2 \times \mathrm{layers} \times \mathrm{heads} \times \mathrm{dim} \times \mathrm{precision}$ (针对每个 Token)。

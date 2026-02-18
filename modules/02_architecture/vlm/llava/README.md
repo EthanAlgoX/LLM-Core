@@ -26,7 +26,7 @@ LLaVA (Large Language-and-Vision Assistant) 可以被看作是给 LLM（如 Llam
 
 ### 1. 输入序列构造
 
-$$X_{input} = [ \text{MLP}(f_{vision}(I)), \text{Embedding}(X_{text}) ]$$
+$$X_{input} = [ \mathrm{MLP}(f_{vision}(I)), \mathrm{Embedding}(X_{text}) ]$$
 
 - 将图像 Token 与文本 Token 在向量空间进行物理拼接。
 

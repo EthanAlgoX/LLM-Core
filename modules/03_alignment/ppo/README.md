@@ -11,20 +11,20 @@
 
 PPO 的核心在于如何在提升性能的同时，限制策略更新的幅度，确保训练稳健。其核心目标函数为：
 
-$$L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t \right) \right]$$
+$$L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta)\hat{A}_t, \mathrm{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t \right) \right]$$
 
 **公式拆解与理解：**
 
 - **$r_t(\theta)$ (概率比例)**：当前新策略与旧策略在特定动作上的概率比值。
 - **$\hat{A}_t$ (Advantage/优势)**：由 Critic 辅助计算。告诉模型当前的动作比平均水平好多少。
-- **$\text{clip}(\dots, 1-\epsilon, 1+\epsilon)$**：剪切机制。如果新旧策略差异超过 $\epsilon$（通常为 0.1 或 0.2），则强制将比例截断。
+- **$\mathrm{clip}(\dots, 1-\epsilon, 1+\epsilon)$**：剪切机制。如果新旧策略差异超过 $\epsilon$（通常为 0.1 或 0.2），则强制将比例截断。
 - **$\min$ 函数**：取两者的最小值。这是一个保守策略：即使 Advantage 非常大，我们也不希望一次性更新太猛；如果更新方向错了，$\min$ 会让模型快速回调。
 
 ### 2. LLM 中的特殊约束：KL 惩罚
 
 在 LLM 的 PPO 流程中，为了防止模型为了刷分而变成“复读机”或失去逻辑，会在奖励函数中加入 KL 散度项：
 
-$$\text{Reward}_{total} = \text{Reward}_{RM} - \beta \cdot D_{KL}(\pi_\theta || \pi_{ref})$$
+$$\mathrm{Reward}_{total} = \mathrm{Reward}_{RM} - \beta \cdot D_{KL}(\pi_\theta || \pi_{ref})$$
 
 - **意义**：在追求高分（Reward）的同时，惩罚那些偏离原始 SFT 模型（Reference）太远的行为。它就像一条“风筝线”，拉住模型不让其产生严重的策略崩坏。
 

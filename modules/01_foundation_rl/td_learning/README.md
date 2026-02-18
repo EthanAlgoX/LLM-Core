@@ -32,7 +32,7 @@ $$\delta_t = R_{t+1} + \gamma V(s_{t+1}) - V(s_t)$$
 
 ### 2. Q-Learning 更新公式
 
-$$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a') - Q(s, a)]}_{\text{TD Error}}$$
+$$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a') - Q(s, a)]}_{\mathrm{TD Error}}$$
 
 - **$\alpha$ (Learning Rate)**：学习率，决定了新知识覆盖旧知识的速度。
 - **$\gamma$ (Discount Factor)**：折扣因子，决定了我们多在乎长远利益。

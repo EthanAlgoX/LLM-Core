@@ -26,7 +26,7 @@ BCQ（Batch-Constrained deep Q-learning）是解决离线强化学习中“外�
 
 BCQ 的核心在于如何计算下一步的标靶值（Target）：
 
-$$Q(s, a) \leftarrow r + \gamma \max_{a' \text{ s.t. } \frac{\pi_b(a'|s')}{\max_{\hat{a}} \pi_b(\hat{a}|s')} > \tau} Q_{target}(s', a')$$
+$$Q(s, a) \leftarrow r + \gamma \max_{a' \mathrm{ s.t. } \frac{\pi_b(a'|s')}{\max_{\hat{a}} \pi_b(\hat{a}|s')} > \tau} Q_{target}(s', a')$$
 
 - **$\pi_b(a'|s')$**：行为模型预测的动作概率。
 - **$\tau$ (Threshold)**：约束强度。$\tau=0$ 退化为普通 Q-learning，$\tau=1$ 则完全变成行为克隆（BC）。

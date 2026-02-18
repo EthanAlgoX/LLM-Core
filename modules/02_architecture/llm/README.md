@@ -2,7 +2,7 @@
 
 LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件的设计动机是审计所有后续技术的基础。
 
-> **核心公式**：$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
+> **核心公式**：$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
 
 ---
 
@@ -34,20 +34,20 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ### 4. FFN 层 (Feed-Forward Network)
 
-- **标准 FFN**：$\text{FFN}(x) = \text{ReLU}(xW_1 + b_1)W_2 + b_2$，隐层维度通常为 $4 \times d_{\text{model}}$。
-- **SwiGLU**（LLaMA 系列）：$\text{SwiGLU}(x) = (\text{Swish}(xW_1) \odot xW_2)W_3$，门控机制提升表达能力。
+- **标准 FFN**：$\mathrm{FFN}(x) = \mathrm{ReLU}(xW_1 + b_1)W_2 + b_2$，隐层维度通常为 $4 \times d_{\mathrm{model}}$。
+- **SwiGLU**（LLaMA 系列）：$\mathrm{SwiGLU}(x) = (\mathrm{Swish}(xW_1) \odot xW_2)W_3$，门控机制提升表达能力。
 
 ### 5. KV Cache（推理关键）
 
 - **问题**：自回归生成时，每步都需要重新计算所有历史 Token 的 K/V，计算冗余。
 - **方案**：将已计算的 K/V 缓存起来，每步只计算新 Token 的 K/V 并追加。
-- **代价**：显存占用随序列长度线性增长：$2 \times L \times H \times d \times \text{precision}$。
+- **代价**：显存占用随序列长度线性增长：$2 \times L \times H \times d \times \mathrm{precision}$。
 
 ---
 
 ## 工程审计要点
 
-- **参数量估算**：$\approx 12 \times d_{\text{model}}^2 \times n_{\text{layers}}$（忽略 embedding）
+- **参数量估算**：$\approx 12 \times d_{\mathrm{model}}^2 \times n_{\mathrm{layers}}$（忽略 embedding）
 - **计算量估算**：$\approx 6 \times N \times T$ FLOPs（N=参数量，T=序列长度）
 - **显存分解**：权重 + 梯度 + 优化器状态 + 激活值，训练时约为推理的 12-16 倍
 

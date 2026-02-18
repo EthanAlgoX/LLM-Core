@@ -17,7 +17,7 @@
 将前向计算中的 Key 和 Value 缓存下来，后续 Token 仅需与缓存进行计算。
 
 - **显存占用公式**：
-  $$\text{Mem}_{KV} = 2 \times \text{layers} \times \text{heads} \times \text{hidden\_dim} \times \text{seq\_len} \times \text{precision\_bytes}$$
+  $$\mathrm{Mem}_{KV} = 2 \times \mathrm{layers} \times \mathrm{heads} \times \mathrm{hidden\_dim} \times \mathrm{seq\_len} \times \mathrm{precision\_bytes}$$
 - **面试点**：Llama 7B (fp16) 处理 1024 长度约占用 0.5GB 显存。
 
 ## 量化技术 (Quantization)

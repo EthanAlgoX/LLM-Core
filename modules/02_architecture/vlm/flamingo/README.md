@@ -24,7 +24,7 @@ Flamingo 就像是一个能够看懂图画书并理解上下文的“超级读�
 
 ### 1. 门控跨注意力机制 (tanh Gating)
 
-$$y = x + \tanh(\alpha) \cdot \text{CrossAttention}(x, z)$$
+$$y = x + \tanh(\alpha) \cdot \mathrm{CrossAttention}(x, z)$$
 
 - $x$：语言模型的隐层状态。
 - $z$：来自 Perceiver Resampler 的视觉 Tokens。

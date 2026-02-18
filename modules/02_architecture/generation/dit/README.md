@@ -26,19 +26,19 @@ DiT（Diffusion Transformer）是扩散模型的一种新式变体。
 
 ### 1. 输入 Token 化
 
-$$z_{tokens} = \text{Patchify}(x_t) + \text{PositionalEmbedding}$$
+$$z_{tokens} = \mathrm{Patchify}(x_t) + \mathrm{PositionalEmbedding}$$
 
 ### 2. 条件注入 (Adaptive Layer Norm)
 
 DiT 常用如下方式将时间信息 $c$ 注入：
-$$\text{adaLN}(h, c) = w_c \cdot \text{LayerNorm}(h) + b_c$$
+$$\mathrm{adaLN}(h, c) = w_c \cdot \mathrm{LayerNorm}(h) + b_c$$
 
 - 其中 $w_c$ 和 $b_c$ 是基于时间步计算出的缩放和平移系数。
 
 ### 3. 统一目标函数
 
 与标准 Diffusion 一致：
-$$\min_\theta \mathbb{E}_{x_0, \epsilon, t} [ \| \epsilon - \text{DiT}_\theta(x_t, t) \|^2 ]$$
+$$\min_\theta \mathbb{E}_{x_0, \epsilon, t} [ \| \epsilon - \mathrm{DiT}_\theta(x_t, t) \|^2 ]$$
 
 ## 与相近方法区别
 
