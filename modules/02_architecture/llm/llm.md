@@ -43,6 +43,20 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 - **方案**：将已计算的 K/V 缓存起来，每步只计算新 Token 的 K/V 并追加。
 - **代价**：显存占用随序列长度线性增长： $2 \times L \times H \times d \times \mathrm{precision}$ 。
 
+### 6. 扩展架构：MoE (Mixture of Experts)
+
+当 Dense 模型规模达到瓶颈时，MoE 通过稀疏化提升参数容量。
+
+- **核心组件**：
+  1. **Gate (Router)**：决定输入 Token 分配给哪几个专家。
+  2. **Experts**：一系列独立的 FFN 层。
+- **并行策略：Expert Parallelism (EP)**：
+  - 将不同的专家分布在不同的 GPU 上。
+  - **通信压力**：引入 **All-to-All** 通信，在路由 Token 时产生巨大开销。
+- **关键挑战**：
+  1. **Load Balancing**：专家利用率不均导致计算长尾。常用 **辅助损失 (Auxiliary Loss)** 强制均衡。
+  2. **稀疏计算优化**：需要定制的并行内核（如 **Fused MoE Kernels**）减少碎片化计算。
+
 ---
 
 ## 工程审计要点

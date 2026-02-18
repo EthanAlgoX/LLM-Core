@@ -28,36 +28,37 @@ python run.py --module ppo --toy
 | 偏好对齐 | [DPO / PPO](./modules/03_alignment/ppo/ppo.md) | KL 散度约束、**知识蒸馏**与模型能力迁移控制 |
 | 性能调优 | [Performance Tuning](./modules/05_engineering/inference/inference.md) | **CPU/GPU 性能调优**、算子融合与 IO 瓶颈分析 |
 
-### 2. 架构核心：变压器与多模态 (Architecture & VLM)
+### 2. 架构核心：变压器、多模态与 MoE (Architecture & Scaling)
 
 | 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA 计算、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
-| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** 推理 |
-| 模态融合 | [VLM Mapping](./modules/02_architecture/vlm/vlm.md) | 线性投影与交叉注意力层对齐视觉-语言空间 |
+| 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
+| 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
+| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** |
 
-### 3. 能力塑形：微调与数据 (Post-Training & Data)
-
-| 领域 | 核心内容 | 原理审计要点 |
-| --- | --- | --- |
-| 参数高效微调 | [PEFT 审计](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与 AdaLoRA 的低秩分解对比 |
-| 数据治理 | [Data Engineering](./modules/03_alignment/data_engineering.md) | **数据处理 (Deduplication/Cleaning)** 与多样性采样策略 |
-| 评估体系 | [Model Evaluation](./modules/03_alignment/data_engineering.md) | **模型评估 (Benchmark/Human-eval)** 与对齐稳定性监控 |
-
-### 4. 系统性能：并行与推理框架 (Engineering & Scaling)
+### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
 
 | 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 推理加速 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **vLLM (PagedAttention)**、**sglang (Runtime)** 与 TensorRT |
-| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | TP/PP/DP 通信开销与 ZeRO-3 显存消除 |
+| 参数高效微调 | [PEFT 审计](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
+| 偏好对齐 | [RLHF / DPO / PPO](./modules/03_alignment/ppo/ppo.md) | 在线/离线对齐算法深度实践与 **Continual Pre-training** |
+| 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
+| 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
 
-### 5. 应用闭环：自主智能体系统 (Intelligent Agents)
+### 4. 系统性能：并发、并行与 PD 分离 (Engineering & Scaling)
 
 | 领域 | 核心内容 | 原理审计要点 |
 | --- | --- | --- |
-| 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
-| 推理范式 | [Agent Reasoning](./modules/06_agent/06_agent.md) | **ReAct**、**Plan and Execute** 与 Reflection 自反思 |
-| 生态集成 | [Frameworks & Tools](./modules/06_agent/06_agent.md) | **Tool-use (Function Calling)**、**LangChain** 与 **LangGraph** |
+| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | TP/PP/EP (专家并行) 通信开销与 **PD 分离架构** |
+| 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **vLLM (PagedAttention)**、**sglang** 与算子融合调优 |
+
+### 5. 应用闭环：自主智能体与多机协作 (Agents & Mesh)
+
+| 领域 | 核心内容 | 原理审计要点 |
+| --- | --- | --- |
+| 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Self-Ask** 模式 |
+| 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **Async Orchestration**、**复杂状态机** 与 **Conditional Routing** |
+| 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/06_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
 
 ---
 
@@ -69,10 +70,16 @@ python run.py --module ppo --toy
 - **KV Cache**：显存占用 = `2 × layers × heads × head_dim × precision_bytes`。
 - **量化增益**：通过 **定点量化** (INT4/INT8)，显存占用可降低 50%-75%。
 
-### 2. Agent 架构演进
+### 2. 系统演进：从 Dense 到 MoE
+
+- **MoE 优势**：通过稀疏激活，在不显著增加计算量的前提下极大扩展模型参数量。
+- **并行瓶颈**：专家并行 (EP) 会引入额外的 All-to-All 通信开销，需配合负载均衡。
+
+### 3. Agent 架构演进
 
 - **ReAct 范式**：协同推理（Reason）与行动（Act），动态调整计划。
-- **Plan and Execute**：先生成完整计划再执行，适合复杂逻辑解耦。
+- **Plan and Execute**：先计划再执行，适合长链条任务。
+- **Multi-Agent Mesh**：去中心化编排，支持分布式决策与角色分担。
 
 ---
 
@@ -80,10 +87,10 @@ python run.py --module ppo --toy
 
 - `modules/`: 核心知识组件
   - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
-  - `02_architecture/`: 架构核心 (LLM, VLM, Embedding, Quantization)
-  - `03_alignment/`: 对齐技术 (SFT, PEFT/LoRA, Distillation, Data Process)
-  - `05_engineering/`: 工程与性能 (DeepSpeed, vLLM, sglang, CPU/GPU Tuning)
-  - `06_agent/`: 智能体 (RAG, Rerank, Plan&Execute, Frameworks)
+  - `02_architecture/`: 架构核心 (LLM, VLM, MoE, Quantization)
+  - `03_alignment/`: 对齐技术 (SFT, PEFT, Agentic-RL, Data Engineering)
+  - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, EP)
+  - `06_agent/`: 智能体 (RAG, Mesh, Multi-Agent, State Machine)
 - `tools/`: 自动化回归测试工具
 - `output/`: 训练产物、日志与测试报告
 

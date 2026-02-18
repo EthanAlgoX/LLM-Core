@@ -18,17 +18,19 @@ Megatron 是分布式并行训练的“集大成者”。
 2. **流水线并行 (Pipeline Parallelism, PP)**：
    - 将模型的层分为不同的“段”（Stages），每张 GPU 或每组 GPU 负责一段。数据像流水线一样在段间传递。
 3. **数据并行 (Data Parallelism, DP)**：
-   - 在 TP 和 PP 的基础上，进一步增加总卡数，复制整个模型并行处理不同的数据集。
-4. **分布式初始化 (Initialization)**：
-   - 配置 `world_size` 以及 TP/PP/DP 的分组，建立进程间的通信（如 NCCL）。
+   - 在 TP 和 PP 的基础上，复制整个模型并行处理不同的数据集。
+4. **专家并行 (Expert Parallelism, EP)**：
+   - 专门用于 **MoE 模型**。将不同的专家分布在不同的设备上，配合 **All-to-All** 通信机制，显著降低单卡显存压力。
+5. **分布式初始化 (Initialization)**：
+   - 配置 `world_size` 以及 TP/PP/DP/EP 的分组，建立进程间的通信。
 
 ## 核心数学公式
 
 ### 1. 通信组大小计算
 
-$$WorldSize = TP_{size} \times PP_{size} \times DP_{size}$$
+$$WorldSize = TP_{size} \times PP_{size} \times DP_{size} \times EP_{size}$$
 
-- 这一公式定义了完成一个完整前向+反向过程所需的总 GPU 数量。
+- 这一公式定义了完成一个完整前向+反向过程所需的总 GPU 数量。在 MoE 模型中，EP 分组大小通常等于专家数量（或其倍数）。
 
 ### 2. 梯度累加步数 (Gradient Accumulation)
 
