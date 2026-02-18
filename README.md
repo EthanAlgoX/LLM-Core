@@ -45,8 +45,7 @@ python run.py --module ppo --toy
 | 保守策略 | [离线 RL (CQL)](./modules/04_advanced_topics/offline_rl/README.md) | 保守项对 OOD (Out-of-Distribution) 动作价值的抑制 |
 | 跨模态 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 视觉特征空间向语言特征空间的对齐投影逻辑 |
 | 大规模训练 | [并行策略 (Megatron)](./modules/05_engineering/megatron/README.md) | TP/PP/DP 并行模式下的通信开销与算力利用率分析 |
-| 自动化决策 | [智能体 (Agent)](./modules/04_advanced_topics/agents/README.md) | ReAct 架构中 Thought-Action-Observation 的状态机流转 |
-| 复习自测 | [知识复盘](./modules/06_quizzes_and_cards/) | 模块化原理考核与核心关键点（Flashcards）速记 |
+| 决策审计 | [智能体 (Agent)](./modules/06_agent/README.md) | ReAct 架构中 Thought-Action-Observation 的状态机流转 |
 
 ---
 
@@ -88,9 +87,9 @@ python run.py --module ppo --toy
   - `01_foundation_rl/`: 强化学习基础 (MDP, TD, GAE)
   - `02_architecture/`: 模型架构 (LLM, VLM, Generation)
   - `03_alignment/`: 对齐技术栈 (SFT, DPO, PPO, GRPO)
-  - `04_advanced_topics/`: 进阶话题 (Offline RL, Agents)
+  - `04_advanced_topics/`: 进阶话题 (Offline RL)
   - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA)
-  - `06_quizzes_and_cards/`: 原理自测题库与核心知识卡片
+  - `06_agent/`: 智能体推理专门模块 (Planning, Tools, Memory)
 - `tools/`: 技术摘要生成、自动化回归测试工具
 - `data/`: 模拟训练数据
 - `output/`: 训练产物、日志与测试报告
