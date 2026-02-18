@@ -1,0 +1,167 @@
+# OpenClaw 架构深度解析
+
+> OpenClaw 是一个开源的本地优先（Local-First）AI Agent 框架，GitHub 150K+ Stars。其核心不是 LLM 本身，而是一个让 AI 能执行真实操作（Shell、文件、浏览器）的受控执行运行时。
+
+---
+
+## 核心架构
+
+### 运行时 + 网关模式
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Gateway (网关)                          │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │
+│  │Messages │  │Heartbeat│  │  Cron   │  │ Webhooks│       │
+│  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘       │
+│       │            │            │            │              │
+│       └────────────┴────────────┴────────────┘              │
+│                         │                                    │
+│                    Lane Queue                                │
+│                  (串行防竞态)                                 │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Agent Runtime                               │
+│  inputs → queue → agent turn → actions → state → repeat    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 输入模型 (5+1 模式)
+
+| 输入类型 | 说明 | 示例 |
+|---------|------|------|
+| **Messages** | 人类消息 | WhatsApp/Telegram/Slack 消息 |
+| **Heartbeats** | 定时触发 | 每30分钟检查"有什么需要汇报的吗" |
+| **Crons** | 计划任务 | 每天9点自动处理邮件 |
+| **Hooks** | 内部事件 | 启动、任务开始/结束 |
+| **Webhooks** | 外部系统 | GitHub、Jira、邮件 |
+| **Agent-to-Agent** | 多Agent通信 | 隔离工作空间的消息传递 |
+
+---
+
+## 上下文管理机制
+
+### 上下文构建
+
+```
+当前上下文 = System Prompt + 最新压缩摘要 + 近期会话消息
+```
+
+- **JSONL 文件**：完整历史（所有原始对话、元数据）
+- **当前上下文**：实时从 JSONL 构建，不存储单独副本
+
+### 压缩机制 (Compaction)
+
+当 token 超过阈值时触发：
+
+1. 模型读取旧对话历史
+2. 生成摘要（保留关键信息）
+3. 保存为 `compaction` 条目
+4. 用摘要 + 最近消息替换旧内容
+
+### 修剪机制 (Pruning)
+
+- 每次 LLM 调用前**临时**裁剪旧的 tool results
+- 不修改磁盘，仅减少发送给模型的上下文
+- 比 compaction 轻量，无需模型参与
+
+| 特性 | Pruning | Compaction |
+|-----|---------|------------|
+| 持久化 | 否 | 是 |
+| 模型参与 | 否 | 是 |
+| 目标 | Tool Results | 整个对话 |
+
+### 自动记忆刷新 (Memory Flush)
+
+**关键创新**：在上下文压缩前，触发静默 agent turn 提醒模型保存重要记忆。
+
+```
+触发条件：currentTokens >= contextWindow - reserveTokensFloor - softThresholdTokens
+```
+
+---
+
+## 记忆系统设计
+
+### 双层记忆架构
+
+| 记忆类型 | 位置 | 用途 |
+|---------|------|------|
+| **临时记忆** | `memory/YYYY-MM-DD.md` | 当日活动日志，会话开始时加载当天+昨天 |
+| **持久记忆** | `MEMORY.md` | 长期偏好、决策、约定（仅在私人会话加载） |
+| **会话记忆** | `sessions/YYYY-MM-DD-<slug>.md` | 历史会话可检索归档 |
+
+### 混合搜索 (Hybrid Search)
+
+```
+最终得分 = 0.7 × 向量得分 + 0.3 × BM25得分
+```
+
+- **向量搜索**：语义匹配（"gateway host" ≈ "machine running gateway"）
+- **BM25 搜索**：精确匹配（函数名、错误码、ID）
+- **sqlite-vec**：内置向量相似度计算
+
+### 分块算法
+
+- **块大小**：~400 tokens
+- **重叠**：80 tokens（保持上下文连贯）
+- **行号保留**：支持精确溯源
+- **SHA-256 去重**：相同内容只嵌入一次
+
+### Embedding Provider 自动选择
+
+```
+Local (node-llama-cpp) → OpenAI → Gemini
+```
+
+- 本地优先：隐私零成本
+- 云端 fallback：保证可用性
+
+---
+
+## 核心设计哲学
+
+| 设计点 | 实现方式 |
+|--------|----------|
+| **文件即真理** | Markdown 文件是唯一真相来源，可版本控制 |
+| **混合检索** | 向量 + BM25 平衡语义与精确匹配 |
+| **本地优先** | Embedding 本地处理，隐私零成本 |
+| **增量同步** | Delta-based 索引，避免全量重处理 |
+| **自动保存** | 压缩前自动触发记忆刷写 |
+| **会话隔离** | 按渠道/Agent 独立存储 |
+
+---
+
+## 与 LangChain/LangGraph 对比
+
+| 特性 | LangChain | LangGraph | OpenClaw |
+|-----|-----------|-----------|----------|
+| **设计哲学** | LCEL 线性链 | 状态机图 | 文件系统 + 总线 |
+| **部署模式** | 云端为主 | 云端为主 | 本地优先 |
+| **记忆系统** | 外部向量库 | 外部向量库 | Markdown 文件 |
+| **输入模式** | API 轮询 | API 轮询 | 事件驱动 (Heartbeat/Cron) |
+| **适用场景** | 快速原型 | 复杂流程 | 低功耗、本地化 |
+
+---
+
+## 安全考量
+
+- **Prompt 注入**：防范邮件/文档/网页中的恶意指令
+- **凭据泄露**：限制技能插件权限
+- **危险命令**：沙箱执行、审计日志
+
+**缓解措施**：
+- 隔离机器/账户运行
+- 最小权限工具
+- 容器化部署
+
+---
+
+## 参考资源
+
+- [OpenClaw GitHub](https://github.com/openclaw/openclaw)
+- [OpenClaw 文档](https://docs.openclaw.ai)
+- [Memory System Deep Dive](https://snowan.gitbook.io/study-notes/ai-blogs/openclaw-memory-system-deep-dive)
+- [Architecture of a Local Agent](https://slavakurilyak.com/posts/openclaw)

@@ -71,6 +71,7 @@ python run.py --module ppo --toy
 | 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 |
 | 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** |
 | 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/06_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
+| 本地Agent框架 | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) | **Gateway + Runtime**、**文件记忆系统**、**Heartbeat 事件驱动** 与 **混合检索** |
 
 ### 6. 进阶课题：离线强化学习 (Advanced Topics: Offline RL)
 
