@@ -291,8 +291,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "agents": ModuleSpec(
-        "agents",
-        "agents/code/react_demo.py",
+        "04_advanced_topics",
+        "modules/04_advanced_topics/agents/code/react_demo.py",
         "智能体推理 (Planning/Tool Use)",
         (
             "--output-dir",
