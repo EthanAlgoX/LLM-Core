@@ -41,7 +41,7 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 - **问题**：自回归生成时，每步都需要重新计算所有历史 Token 的 K/V，计算冗余。
 - **方案**：将已计算的 K/V 缓存起来，每步只计算新 Token 的 K/V 并追加。
-- **代价**：显存占用随序列长度线性增长：$2 \times L \times H \times d \times \mathrm{precision}$。
+- **代价**：显存占用随序列长度线性增长： $2 \times L \times H \times d \times \mathrm{precision}$ 。
 
 ---
 

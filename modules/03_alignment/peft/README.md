@@ -23,7 +23,7 @@ $$\Delta W = A \times B$$
 
 ### 为什么 LoRA 显存占用低？
 
-因为它不存储庞大的梯度矩阵 $\Delta W$，仅存储细小的 $A$ 和 $B$。
+因为它不存储庞大的梯度矩阵 $\Delta W$ ，仅存储细小的 $A$ 和 $B$ 。
 
 ## 进阶：QLoRA (Quantized LoRA)
 

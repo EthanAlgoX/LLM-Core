@@ -74,7 +74,7 @@ python run.py --module ppo --toy
 
 - **静态权重**：`fp16` 占 2 Bytes/Param。例如 7B 模型加载需 ~14GB。
 - **KV Cache**：显存占用 = `2 × layers × heads × head_dim × precision_bytes`。
-- **PEFT (LoRA)**：$\Delta W = A \times B$，通过低秩分解显著降低训练时的显存梯度存储需求。
+- **PEFT (LoRA)**： $\Delta W = A \times B$（或 $\Delta W = A \cdot B$），通过低秩分解显著降低训练时的显存梯度存储需求。
 
 ### 2. 核心训练算法对比
 
