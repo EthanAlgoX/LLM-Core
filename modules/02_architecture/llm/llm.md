@@ -69,4 +69,4 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ## 📂 模块实战
 
-- `code/`：nanoGPT 最小可读实现，包含完整的 Transformer 训练闭环。
+- `code/`：包含核心 Transformer 架构的最小可读实现与实验脚本。

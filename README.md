@@ -25,6 +25,7 @@ python run.py --module ppo --toy
 | --- | --- | --- |
 | 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组建模与 Bellman 备份方程 |
 | 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (Off-policy) 与 SARSA (On-policy) 差异 |
+| 优势估计 | [GAE & Advantage](./modules/01_foundation_rl/gae/gae.md) | **GAE**、**多步回报** 与训练稳定性方差权衡 |
 | 偏好对齐 | [DPO / PPO](./modules/03_alignment/ppo/ppo.md) | KL 散度约束、**知识蒸馏**与模型能力迁移控制 |
 | 性能调优 | [Performance Tuning](./modules/05_engineering/inference/inference.md) | **CPU/GPU 性能调优**、算子融合与 IO 瓶颈分析 |
 
@@ -32,17 +33,21 @@ python run.py --module ppo --toy
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
-| 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
+| 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
+| 注意力内核 | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) | **MHA / GQA / MQA** 变体与 **Flash Attention** 工程实现 |
 | 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
 | 模态融合 | [VLM Mapping / Hub](./modules/02_architecture/vlm/vlm.md) | **MLP Projector**、**Cross-Attention** 与多模态对齐策略 |
+| 多媒体生成 | [Diffusion / DiT](./modules/02_architecture/generation/diffusion/diffusion.md) | **Diffusion Transformer (DiT)**、**Stable Diffusion** 与生成控制 |
 | 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | Flash Attention、KV Cache 与 **定点量化 (INT8/FP8)** |
 
 ### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
 
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
+| 监督学习 | [SFT 解析](./modules/03_alignment/sft/sft.md) | **Supervised Fine-Tuning**、数据质量初筛与指令遵循 |
 | 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
 | 偏好对齐 | [RLHF / DPO / PPO](./modules/03_alignment/ppo/ppo.md) | 在线/离线对齐算法深度实践与 **知识蒸馏** 分布迁移 |
+| 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 |
 | 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
 | 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
 
@@ -103,7 +108,6 @@ python run.py --module ppo --toy
 | 模型分类 | 代表模型 | 核心解析文档 |
 | :--- | :--- | :--- |
 | **基础语言模型 (LLM)** | LLaMA-3 / Transformer | [Transformer Core](./modules/02_architecture/llm/llm.md) |
-| **轻量化 LLM** | nanoGPT | [nanoGPT README](./modules/02_architecture/llm/nanoGPT/README.md) |
 | **多模态 VLM** | **LLaVA** | [LLaVA 详述](./modules/02_architecture/vlm/llava/llava.md) |
 | **多模态 VLM** | **Flamingo** | [Flamingo 详述](./modules/02_architecture/vlm/flamingo/flamingo.md) |
 | **多模态 VLM** | **BLIP-2** | [BLIP-2 详述](./modules/02_architecture/vlm/blip2/blip2.md) |
