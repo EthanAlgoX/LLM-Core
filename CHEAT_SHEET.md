@@ -23,7 +23,7 @@
 
 ## ⚖️ 核心算法对比矩阵 (Comparison Matrix)
 
-| 特性 | SFT | PPO | DPO | GRPO |
+| 特性 | [SFT](./post_train/alignment/sft/README.md) | [PPO](./post_train/alignment/ppo/README.md) | [DPO](./post_train/alignment/dpo/README.md) | [GRPO](./post_train/alignment/grpo/README.md) |
 | :--- | :--- | :--- | :--- | :--- |
 | **基础要求** | 监督数据 (Q/A) | 偏好数据 + 奖励模型 | 偏好对 (C/R) | 规则/奖励函数 |
 | **显存压力** | 低 | **极高** (4个模型) | 中 | 中 (省去 Critic) |
@@ -36,9 +36,9 @@
 
 | 模型 | 特点 | 融合方式 |
 | :--- | :--- | :--- |
-| **BLIP-2** | 引入 Q-Former | 瓶颈式抽取 (Fixed number of visual tokens) |
-| **LLaVA** | 简单 MLP Projector | 直接线性映射全量视觉特征 |
-| **Flamingo** | Perceiver Resampler | 跨注意力层 (Cross-Attention) 注入 |
+| **[BLIP-2](./pre_train/vlm/blip2/)** | 引入 Q-Former | 瓶颈式抽取 (Fixed number of visual tokens) |
+| **[LLaVA](./pre_train/vlm/llava/)** | 简单 MLP Projector | 直接线性映射全量视觉特征 |
+| **[Flamingo](./pre_train/vlm/flamingo/)** | Perceiver Resampler | 跨注意力层 (Cross-Attention) 注入 |
 
 ---
 
@@ -47,3 +47,5 @@
 - **ZeRO-1**：划分优化器状态 (Optimizer States)。
 - **ZeRO-2**：划分优化器状态 + 梯度 (Gradients)。
 - **ZeRO-3**：划分所有状态（权重 + 梯度 + 优化器状态）。
+
+> 详细配置与实现参考：[DeepSpeed 优化指南](./post_train/systems/deepspeed/README.md)
