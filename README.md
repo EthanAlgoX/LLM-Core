@@ -45,7 +45,7 @@ python run.py --module ppo --toy
 | 10 | [离线 RL](./modules/04_advanced_topics/offline_rl/README.md) | 掌握 CQL 如何通过 Conservative 项抑制 OOD 动作 |
 | 11 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 理解 Q-Former 或 MLP Projector 如何实现模态对齐 |
 | 12 | [并行策略](./modules/05_engineering/megatron/README.md) | 深度理解 TP/PP/DP 在分布式训练中的通信开销 |
-| 13 | [智能体 (Agent)](./modules/04_advanced_topics/agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
+| 13 | [智能体 (Agent)](./agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
 | 14 | **总结与自测** | [复习自测](./modules/06_quizzes_and_cards/)，原理摘要：`tools/technical_brief.py` |
 
 ---
@@ -88,9 +88,10 @@ python run.py --module ppo --toy
   - `01_foundation_rl/`: 强化学习基础 (MDP, TD, GAE)
   - `02_architecture/`: 模型架构 (LLM, VLM, Generation)
   - `03_alignment/`: 对齐技术栈 (SFT, DPO, PPO, GRPO)
-  - `04_advanced_topics/`: 进阶话题 (Offline RL, Agents)
+  - `04_advanced_topics/`: 进阶话题 (Offline RL)
   - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA)
   - `06_quizzes_and_cards/`: 原理自测题库与核心知识卡片
+- `agents/`: 智能体推理专门模块 (Planning, Tools, Memory)
 - `tools/`: 技术摘要生成、自动化回归测试工具
 - `data/`: 模拟训练数据
 - `output/`: 训练产物、日志与测试报告
