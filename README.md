@@ -1,6 +1,6 @@
-# LLM-Core: 核心知识审计与复现仓库
+# LLM-Core: 核心知识解析与复现仓库
 
-本项目是一个系统的 LLM 核心技术栈审计仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的"最小闭环"复现，记录并巩固大模型底层原理与工程实践方案。
+本项目是一个系统的 LLM 核心技术栈解析仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的"最小闭环"复现，记录并巩固大模型底层原理与工程实践方案。
 
 ---
 
@@ -10,7 +10,7 @@
 # 激活工程环境
 conda activate finetune
 
-# 运行模块审计 (建议配合 --toy 参数观察闭环逻辑)
+# 运行模块解析 (建议配合 --toy 参数观察闭环逻辑)
 python run.py --module sft --toy
 python run.py --module ppo --toy
 ```
@@ -21,7 +21,7 @@ python run.py --module ppo --toy
 
 ### 1. 理论根基：算法与优化 (Theory & Optimization)
 
-| 领域 | 核心内容 | 原理审计要点 |
+| 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
 | 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/mdp.md) | MDP 五元组建模与 Bellman 备份方程 |
 | 价值学习 | [TD Learning](./modules/01_foundation_rl/td_learning/td_learning.md) | Q-Learning (Off-policy) 与 SARSA (On-policy) 差异 |
@@ -30,7 +30,7 @@ python run.py --module ppo --toy
 
 ### 2. 架构核心：变压器、多模态与 MoE (Architecture & Scaling)
 
-| 领域 | 核心内容 | 原理审计要点 |
+| 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
 | 核心架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | MHA、Pre-LN 稳定性与 **文本/多模态 Embedding** 对齐 |
 | 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
@@ -39,23 +39,23 @@ python run.py --module ppo --toy
 
 ### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
 
-| 领域 | 核心内容 | 原理审计要点 |
+| 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
-| 参数高效微调 | [PEFT 审计](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
+| 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
 | 偏好对齐 | [RLHF / DPO / PPO](./modules/03_alignment/ppo/ppo.md) | 在线/离线对齐算法深度实践与 **知识蒸馏** 分布迁移 |
 | 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL** 训练范式、**MARL (MAPPO)** 与 **User Simulator** |
 | 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
 
 ### 4. 系统性能：并发、并行与 PD 分离 (Engineering & Scaling)
 
-| 领域 | 核心内容 | 原理审计要点 |
+| 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
 | 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | TP/PP/EP (专家并行) 通信开销与 **PD 分离架构** |
 | 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **vLLM (PagedAttention)**、**sglang** 与算子融合调优 |
 
 ### 5. 应用闭环：自主智能体与多机协作 (Agents & Mesh)
 
-| 领域 | 核心内容 | 原理审计要点 |
+| 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
 | 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
 | 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Self-Ask** 模式 |
@@ -100,7 +100,7 @@ python run.py --module ppo --toy
 
 ## 🏗️ 核心模型索引 (Key Model Index)
 
-| 模型分类 | 代表模型 | 核心审计文档 |
+| 模型分类 | 代表模型 | 核心解析文档 |
 | :--- | :--- | :--- |
 | **基础语言模型 (LLM)** | LLaMA-3 / Transformer | [Transformer Core](./modules/02_architecture/llm/llm.md) |
 | **轻量化 LLM** | nanoGPT | [nanoGPT README](./modules/02_architecture/llm/nanoGPT/README.md) |
