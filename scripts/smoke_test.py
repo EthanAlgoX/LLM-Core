@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-自动化烟雾测试（面试模式）。
+自动化全模块冒烟测试（学习进阶模式）。
 
 默认行为：
 1) 所有模块做 `--help` 检查
@@ -25,7 +25,7 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import run as interview_run  # noqa: E402
+import run as run_py  # noqa: E402
 
 
 HEAVY_STARTUP_MODULES = {
@@ -60,7 +60,7 @@ class CaseResult:
 
 
 def build_default_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run smoke tests for interview learning flows.")
+    parser = argparse.ArgumentParser(description="Run smoke tests for core learning flows.")
     parser.add_argument(
         "--modules",
         default="",
@@ -74,18 +74,18 @@ def build_default_args() -> argparse.Namespace:
 
 
 def iter_modules(selected: str) -> list[str]:
-    all_modules = sorted(interview_run.MODULES.keys())
+    all_modules = sorted(run_py.MODULES.keys())
     if not selected.strip():
         return all_modules
     picked = [x.strip() for x in selected.split(",") if x.strip()]
-    unknown = [x for x in picked if x not in interview_run.MODULES]
+    unknown = [x for x in picked if x not in run_py.MODULES]
     if unknown:
         raise ValueError(f"Unknown modules: {unknown}")
     return picked
 
 
 def module_output_dir(module: str) -> Path | None:
-    spec = interview_run.MODULES[module]
+    spec = run_py.MODULES[module]
     toy_args = list(spec.toy_args)
     if "--output-dir" not in toy_args:
         return None
@@ -145,7 +145,7 @@ def tail(text: str, n: int = 14) -> str:
 def run_help_phase(modules: Iterable[str], timeout: int) -> list[CaseResult]:
     results: list[CaseResult] = []
     for module in modules:
-        spec = interview_run.MODULES[module]
+        spec = run_py.MODULES[module]
         script = ROOT / spec.script
         cmd = [sys.executable, str(script), "--help"]
         status, elapsed, stdout, stderr = run_cmd(cmd, timeout=timeout)
@@ -165,10 +165,10 @@ def run_help_phase(modules: Iterable[str], timeout: int) -> list[CaseResult]:
 
 def run_toy_phase(modules: Iterable[str], toy_timeout: int, startup_timeout: int) -> list[CaseResult]:
     results: list[CaseResult] = []
-    run_py = ROOT / "run.py"
+    run_main = ROOT / "run.py"
 
     for module in modules:
-        cmd = [sys.executable, str(run_py), "--module", module, "--toy"]
+        cmd = [sys.executable, str(run_main), "--module", module, "--toy"]
         timeout = startup_timeout if module in HEAVY_STARTUP_MODULES else toy_timeout
         status, elapsed, stdout, stderr = run_cmd(cmd, timeout=timeout)
 

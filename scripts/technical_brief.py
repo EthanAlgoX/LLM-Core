@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-根据模块运行结果自动生成面试口述稿。
+根据模块运行结果自动生成核心原理技术摘要。
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import run as interview_run  # noqa: E402
+import run as run_py  # noqa: E402
 
 
 NOTES: dict[str, dict[str, str]] = {
@@ -132,15 +132,15 @@ NOTES: dict[str, dict[str, str]] = {
 
 
 def build_default_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate interview-ready oral brief from run artifacts.")
-    parser.add_argument("--module", required=True, choices=sorted(interview_run.MODULES.keys()))
+    parser = argparse.ArgumentParser(description="Generate technical summary from run artifacts.")
+    parser.add_argument("--module", required=True, choices=sorted(run_py.MODULES.keys()))
     parser.add_argument("--summary", default="", help="可选：指定 summary/result JSON 路径。")
     parser.add_argument("--save", default="", help="可选：把生成内容保存到文件。")
     return parser.parse_known_args()[0]
 
 
 def module_output_dir(module: str) -> Path | None:
-    spec = interview_run.MODULES[module]
+    spec = run_py.MODULES[module]
     toy_args = list(spec.toy_args)
     if "--output-dir" not in toy_args:
         return None
@@ -221,13 +221,13 @@ def build_metric_interpretation(data: dict[str, Any]) -> str:
 
 
 def build_brief(module: str, summary_path: Path | None, data: dict[str, Any]) -> str:
-    spec = interview_run.MODULES[module]
+    spec = run_py.MODULES[module]
     note = NOTES.get(
         module,
         {
             "principle": "该模块用于演示该方法的最小可运行流程。",
-            "compare": "请重点和相邻方法对比：目标函数、数据依赖、在线/离线训练方式。",
-            "engineering": "请结合本次输出曲线解释训练是否稳定，以及下一步调参方向。",
+            "compare": "请掌握核心逻辑：目标函数、数据依赖、算法原理。",
+            "engineering": "请结合本次输出曲线解释收敛性，以及下一步调优方向。",
         },
     )
 
@@ -236,29 +236,29 @@ def build_brief(module: str, summary_path: Path | None, data: dict[str, Any]) ->
 
     return "\n".join(
         [
-            f"# {module} 面试口述稿",
+            f"# {module} 技术摘要",
             "",
-            "## 30秒定义",
+            "## 核心定位",
             f"{module} 在本项目中的定位是：{spec.summary}。",
             "",
-            "## 60秒原理",
+            "## 核心原理",
             note["principle"],
             "",
-            "## 60秒结果解释",
-            f"本次读取结果文件：{source_line}",
+            "## 运行结果分析",
+            f"结果文件：{source_line}",
             f"关键指标：{metric_line}",
-            "解释方式：先说趋势（是否收敛/是否稳定），再说原因（目标函数与奖励设计），最后说改进方向。",
+            "分析方式：观察收敛稳定性、奖励变换趋势，并结合核心原理评估模型状态。",
             "",
-            "## 30秒工程经验",
+            "## 工程实践建议",
             note["engineering"],
             "",
-            "## 对比回答（加分项）",
+            "## 原理深度对比",
             note["compare"],
             "",
-            "## 面试追问自测",
-            "1. 这个方法最怕的数据问题是什么？",
-            "2. 如果指标变好但样例变差，你先查哪三个点？",
-            "3. 和上一个方法相比，你为什么要切换到它？",
+            "## 原理深钻自测",
+            "1. 该方法的核心假设是什么？在什么场景下会失效？",
+            "2. 如果实验结果不理想，从原理出发应优先检查哪三个环节？",
+            "3. 相比于其他主流方法，该方案在效率与效果上做了哪些折中？",
         ]
     )
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-统一学习入口（面试模式）。
+统一学习入口（核心原理复现）。
 
 用法示例：
   python run.py --list
@@ -49,7 +49,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_sft",
+            "output/toy_sft",
         ),
     ),
     "dpo": ModuleSpec(
@@ -70,7 +70,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_dpo",
+            "output/toy_dpo",
         ),
     ),
     "grpo": ModuleSpec(
@@ -93,7 +93,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "100",
             "--output-dir",
-            "output/interview_toy_grpo",
+            "output/toy_grpo",
         ),
     ),
     "ppo": ModuleSpec(
@@ -116,7 +116,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_ppo",
+            "output/toy_ppo",
         ),
     ),
     "policy_gradient": ModuleSpec(
@@ -139,7 +139,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_policy_gradient",
+            "output/toy_policy_gradient",
         ),
     ),
     "actor_critic": ModuleSpec(
@@ -162,7 +162,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_actor_critic",
+            "output/toy_actor_critic",
         ),
     ),
     "rlhf": ModuleSpec(
@@ -185,7 +185,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-steps",
             "1000",
             "--output-dir",
-            "output/interview_toy_rlhf",
+            "output/toy_rlhf",
         ),
     ),
     "mdp": ModuleSpec(
@@ -198,7 +198,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every-iters",
             "10",
             "--output-dir",
-            "output/interview_toy_mdp",
+            "output/toy_mdp",
         ),
     ),
     "td_learning": ModuleSpec(
@@ -215,7 +215,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every-episodes",
             "10",
             "--output-dir",
-            "output/interview_toy_td_learning",
+            "output/toy_td_learning",
         ),
     ),
     "gae": ModuleSpec(
@@ -232,7 +232,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "2",
             "--output-dir",
-            "output/interview_toy_gae",
+            "output/toy_gae",
         ),
     ),
     "advantage": ModuleSpec(
@@ -249,7 +249,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "2",
             "--output-dir",
-            "output/interview_toy_advantage",
+            "output/toy_advantage",
         ),
     ),
     "cql": ModuleSpec(
@@ -268,7 +268,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "12",
             "--output-dir",
-            "output/interview_toy_cql",
+            "output/toy_cql",
         ),
     ),
     "bcq": ModuleSpec(
@@ -287,7 +287,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "12",
             "--output-dir",
-            "output/interview_toy_bcq",
+            "output/toy_bcq",
         ),
     ),
     "deepspeed": ModuleSpec(
@@ -302,7 +302,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "6",
             "--output-dir",
-            "output/interview_toy_deepspeed",
+            "output/toy_deepspeed",
         ),
     ),
     "cuda": ModuleSpec(
@@ -319,7 +319,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--log-every",
             "3",
             "--output-dir",
-            "output/interview_toy_cuda",
+            "output/toy_cuda",
         ),
     ),
     "mixed_precision": ModuleSpec(
@@ -334,7 +334,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "10",
             "--output-dir",
-            "output/interview_toy_mixed_precision",
+            "output/toy_mixed_precision",
         ),
     ),
     # pre_train
@@ -354,7 +354,7 @@ MODULES: dict[str, ModuleSpec] = {
             "--num-vis-samples",
             "4",
             "--output-dir",
-            "output/interview_toy_diffusion",
+            "output/toy_diffusion",
         ),
     ),
     "dit": ModuleSpec(
@@ -373,26 +373,26 @@ MODULES: dict[str, ModuleSpec] = {
             "--num-vis-samples",
             "4",
             "--output-dir",
-            "output/interview_toy_dit",
+            "output/toy_dit",
         ),
     ),
     "blip2": ModuleSpec(
         "pre_train/vlm",
         "pre_train/vlm/blip2/code/blip2.py",
         "BLIP2 推理示例",
-        ("--dry-run", "--output-dir", "output/interview_toy_blip2"),
+        ("--dry-run", "--output-dir", "output/toy_blip2"),
     ),
     "llava": ModuleSpec(
         "pre_train/vlm",
         "pre_train/vlm/llava/code/llava.py",
         "LLaVA 推理示例",
-        ("--dry-run", "--output-dir", "output/interview_toy_llava"),
+        ("--dry-run", "--output-dir", "output/toy_llava"),
     ),
     "flamingo": ModuleSpec(
         "pre_train/vlm",
         "pre_train/vlm/flamingo/code/flamingo.py",
         "Flamingo 推理示例",
-        ("--dry-run", "--output-dir", "output/interview_toy_flamingo"),
+        ("--dry-run", "--output-dir", "output/toy_flamingo"),
     ),
     "megatron": ModuleSpec(
         "pre_train/llm",
@@ -406,17 +406,17 @@ MODULES: dict[str, ModuleSpec] = {
             "--save-every",
             "10",
             "--output-dir",
-            "output/interview_toy_megatron",
+            "output/toy_megatron",
         ),
     ),
 }
 
 
 def build_default_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Unified learning entrypoint for interview-friendly demos.")
+    parser = argparse.ArgumentParser(description="Unified learning entrypoint for core principle demos.")
     parser.add_argument("--list", action="store_true", help="列出所有可用模块。")
     parser.add_argument("--module", choices=sorted(MODULES.keys()), help="要运行的模块。")
-    parser.add_argument("--toy", action="store_true", help="启用面试模式最小参数。")
+    parser.add_argument("--toy", action="store_true", help="启用最小量化参数（快速打通流程）。")
     parser.add_argument("--dry-run-cmd", action="store_true", help="仅打印命令，不执行。")
     parser.add_argument(
         "--extra",
