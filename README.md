@@ -18,7 +18,29 @@ python scripts/interview_brief.py --module mdp
 
 # 批量导出所有模块口述稿
 python scripts/export_interview_briefs.py
+
+# 模拟面试环节 (针对选定模块提问)
+python scripts/interview_qa.py --module ppo
 ```
+
+## 🧠 面试备考速记表 (Interview Cheat Sheet)
+
+### 1. 显存计算公式 (Memory Calculation)
+
+- **模型权重**：$Params \times Bytes$ (fp16 为 2B 每一参数)。
+- **KV Cache** (针对每个 Token)：$2 \times \text{layers} \times \text{heads} \times \text{dim} \times \text{precision}$。
+- **训练梯度与优化器**：
+  - **Adam (fp32)**：模型权重的 ~12~16 倍 (4B 梯度 + 8B 优化器状态 + 4B 权重副本)。
+  - **LoRA**：仅占模型权重的 ~1~5%。
+
+### 2. 核心算法对比矩阵
+
+| 特性 | SFT | PPO | DPO | GRPO |
+| :--- | :--- | :--- | :--- | :--- |
+| **基础要求** | 监督数据 (Q/A) | 偏好数据 + 奖励模型 | 偏好对 (Chosen/Rejected) | 偏好数据 + 分数奖励 |
+| **显存压力** | 低 | **极高** (4个模型同时在显存) | 中 | 中 (省去 Critic) |
+| **收敛难度** | 容易 (梯度下降) | 难 (强化学习抖动) | 较容易 | 较容易 |
+| **核心场景** | 初始化、习得格式 | 逻辑推理、安全边界 | 离线偏好学习 | **大规模在线强化学习** |
 
 ## 一键入口（面试模式）
 
@@ -75,6 +97,7 @@ python scripts/smoke_test.py --modules sft,grpo,mdp
 | | SFT | [SFT README](./post_train/alignment/sft/README.md) |
 | | DPO | [DPO README](./post_train/alignment/dpo/README.md) |
 | | RLHF | [RLHF README](./post_train/alignment/rlhf/README.md) |
+| | PEFT | [PEFT README](./post_train/alignment/peft/README.md) |
 | | Actor-Critic | [Actor-Critic README](./post_train/alignment/actor_critic/README.md) |
 | | Policy Gradient | [Policy Gradient README](./post_train/alignment/policy_gradient/README.md) |
 | **强化学习基础 (RL Basics)** | MDP | [MDP README](./post_train/rl_basics/mdp/README.md) |
@@ -89,9 +112,11 @@ python scripts/smoke_test.py --modules sft,grpo,mdp
 | **生成模型 (Generative)** | Diffusion | [Diffusion README](./pre_train/generation/diffusion/README.md) |
 | | DiT | [DiT README](./pre_train/generation/dit/README.md) |
 | **系统与工程 (Systems)** | Megatron-LM | [Megatron-LM README](./pre_train/llm/megatron/README.md) |
+| | Attention | [Attention README](./pre_train/llm/attention.md) |
 | | DeepSpeed | [DeepSpeed README](./post_train/systems/deepspeed/README.md) |
 | | CUDA | [CUDA README](./post_train/systems/cuda/README.md) |
 | | Mixed Precision | [Mixed Precision README](./post_train/systems/mixed_precision/README.md) |
+| | Inference | [Inference README](./post_train/systems/inference/README.md) |
 
 - `assets/`: 示例数据与历史实验产物归档
 
