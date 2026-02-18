@@ -1,6 +1,6 @@
 # 面试备考速记表 (Interview Cheat Sheet)
 
-## 🧠 显存计算专栏 (Memory Calculation)
+## 🧠 显存与计算 (Memory & Compute)
 
 ### 1. 静态权重 (Weights)
 
@@ -9,15 +9,17 @@
   - `fp8`: 1 Byte
   - `int4`: 0.5 Byte
 
-### 2. 训练状态 (Training States - Adam 优化器)
+### 2. 注意力机制变体 (Attention Variations)
 
-- **Adam (fp32)**：约为参数量的 **12-16 倍**。
-  - 4B 梯度 + 8B 优化器 (Momentum, Variance) + 4B 权重副本。
+| 模式 | 全称 | KV 共享状况 | 优势 |
+| :--- | :--- | :--- | :--- |
+| **MHA** | Multi-Head | 无共享 | 表达能力最强 (最重) |
+| **MQA** | Multi-Query | **所有** Query 共享 1 组 K/V | 推理极快，显存极省 |
+| **GQA** | Grouped-Query | **分组**共享 (如 8 组) | **Llama 3 主流**，平衡精度与速度 |
 
-### 3. 推理 KV Cache (每个 Token)
+### 3. 工程优化：Flash Attention
 
-- **计算公式**：$2 \times \text{layers} \times \text{heads} \times \text{dim} \times \text{precision}$
-  - `fp16` 下，7B 模型约 0.5MB/token。
+- **核心逻辑**：IO 感知优化。通过 **Tiling (分块)** 减少显存读写，利用 **Recomputation (重计算)** 在 SRAM 计算 Softmax，速度提升 2-4x。
 
 ---
 
@@ -32,20 +34,26 @@
 
 ---
 
-## ⚡️ VLM 架构演进
+## 🚀 高效微调 (PEFT - LoRA)
 
-| 模型 | 特点 | 融合方式 |
-| :--- | :--- | :--- |
-| **[BLIP-2](./pre_train/vlm/blip2/)** | 引入 Q-Former | 瓶颈式抽取 (Fixed number of visual tokens) |
-| **[LLaVA](./pre_train/vlm/llava/)** | 简单 MLP Projector | 直接线性映射全量视觉特征 |
-| **[Flamingo](./pre_train/vlm/flamingo/)** | Perceiver Resampler | 跨注意力层 (Cross-Attention) 注入 |
+- **核心公式**：$\Delta W = A \times B$ (秩 $r \ll d, k$)
+- **优点**：显存省、不增加推理延迟 (可在推理前合并权重)。
+- **QLoRA**：NF4 量化 + 双量化 + 分页优化器，单卡 24G 即可微调 70B 模型。
 
 ---
 
-## 🛠️ 分布式训练 (ZeRO)
+## ⚡️ 推理与系统优化
 
-- **ZeRO-1**：划分优化器状态 (Optimizer States)。
-- **ZeRO-2**：划分优化器状态 + 梯度 (Gradients)。
-- **ZeRO-3**：划分所有状态（权重 + 梯度 + 优化器状态）。
+- **KV Cache**：$2 \times \text{layers} \times \text{heads} \times \text{dim} \times \text{precision}$ (针对每个 Token)。
+- **Paged Attention**：解决显存碎片化，提高 Batch Size 极限。
+- **ZeRO 优化 (DeepSpeed)**：
+  - **ZeRO-1**：划分优化器状态。
+  - **ZeRO-2**：划分状态 + 梯度。
+  - **ZeRO-3**：划分所有 (权重+梯度+优化器状态)。
 
-> 详细配置与实现参考：[DeepSpeed 优化指南](./post_train/systems/deepspeed/README.md)
+---
+
+## 📊 训练指标解读 (RLHF 关键)
+
+- **KL Divergence**：反映新旧策略偏差。如果过高说明奖励攻击 (Reward Hacking) 严重，需要调大 $\beta$。
+- **Reward Mean**：奖励均值。应稳步上升，如出现剧烈跳变通常意味着样本质量或学习率过大。
