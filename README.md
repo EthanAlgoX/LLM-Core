@@ -1,52 +1,52 @@
-# LLM-Core 核心知识复现与学习
+# LLM-Core: 核心知识审计与复现仓库
 
-本项目致力于通过“最小闭环”复现，帮助开发者在 14 天内深度掌握 LLM、VLM 与后训练（Alignment）的核心原理与工程实现。
+本项目是一个系统的 LLM 核心技术栈审计仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的“最小闭环”复现，记录并巩固大模型底层原理与工程实践方案。
 
 ---
 
-## 🛠️ 环境与一键运行
+## 🛠️ 环境预设与运行
 
 ```bash
-# 激活环境
+# 激活工程环境
 conda activate finetune
 
-# 运行模块 (推荐配合 --toy 参数快速体验)
+# 运行模块审计 (建议配合 --toy 参数观察闭环逻辑)
 python run.py --module sft --toy
 python run.py --module ppo --toy
 ```
 
 ---
 
-## 📅 14 天深度学习路线图 (Roadmap)
+## 🌐 LLM 核心知识图谱 (Core Knowledge Map)
 
-### 第一阶段：强化学习基础 (Foundation)
+### 1. 强化学习演进 (RL Foundation)
 
-| Day | 重点模块 | 核心原理掌握要求 |
+| 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 1 | [项目认知与 MDP](./modules/01_foundation_rl/mdp/README.md) | 理解 MDP 五元组 (S, A, R, P, γ) 的物理建模含义 |
-| 2 | [TD Learning](./modules/01_foundation_rl/td_learning/README.md) | 掌握 Q-Learning 与 SARSA 的更新差异 |
-| 3 | [优势估计](./modules/01_foundation_rl/gae/README.md) | 深入 GAE (Generalized Advantage Estimation) 的偏差-方差权衡 |
+| 决策建模 | [MDP 模型复现](./modules/01_foundation_rl/mdp/README.md) | MDP 五元组 (S, A, R, P, γ) 的物理建模与 Bellman 备份 |
+| 价值审计 | [TD Learning](./modules/01_foundation_rl/td_learning/README.md) | Q-Learning 与 SARSA 的更新步距与收敛特性差异 |
+| 优势优化 | [GAE 核心实现](./modules/01_foundation_rl/gae/README.md) | 广义优势估计在偏差与方差间的数学权衡 (λ 调节) |
 
-### 第二阶段：大模型微调与对齐 (Alignment)
+### 2. 模型微调与偏好对齐 (Alignment)
 
-| Day | 重点模块 | 核心原理掌握要求 |
+| 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 4 | [监督微调 (SFT)](./modules/03_alignment/sft/README.md) | 掌握指令遵循数据的构建与 Loss Mask 技巧 |
-| 5 | [策略梯度 (PG)](./modules/03_alignment/policy_gradient/README.md) | 理解 REINFORCE 算法及其在高方差下的局限性 |
-| 6 | [Actor-Critic](./modules/03_alignment/actor_critic/README.md) | 掌握价值网络 (Critic) 如何辅助策略网络 (Actor) 稳定收敛 |
-| 7 | [PPO 深度解析](./modules/03_alignment/ppo/README.md) | 理解重要性采样 (Importance Sampling) 与 Clip 约束 |
-| 8 | [DPO 离线对齐](./modules/03_alignment/dpo/README.md) | 掌握对比学习思想在偏好优化中的应用 |
-| 9 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 理解组相对策略优化（DeepSeek 系列核心技术） |
+| 基础微调 | [监督微调 (SFT)](./modules/03_alignment/sft/README.md) | 指令遵循数据的 Loss Mask 策略与 next-token 预测质量 |
+| 策略梯度 | [Policy Gradient](./modules/03_alignment/policy_gradient/README.md) | REINFORCE 及其变体在高维动作空间下的方差控制 |
+| 价值协同 | [Actor-Critic](./modules/03_alignment/actor_critic/README.md) | 价值网络 (Critic) 对策略更新的基准平滑作用 |
+| 强化对齐 | [PPO 深度审计](./modules/03_alignment/ppo/README.md) | 重要性采样约束 (Ratio Clip) 与 KL 惩罚的工程一致性 |
+| 离线对齐 | [DPO 算法映射](./modules/03_alignment/dpo/README.md) | 隐式奖励函数在对比学习逻辑下的有效性审计 |
+| 推理对齐 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 组内相对标准化 (Group Relative) 对逻辑链生成的提升 |
 
-### 第三阶段：多模态与进阶领域 (Advanced)
+### 3. 多模态与系统进阶 (Advanced & Engineering)
 
-| Day | 重点模块 | 核心原理掌握要求 |
+| 领域 | 核心审计模块 | 原理审计要点 |
 | --- | --- | --- |
-| 10 | [离线 RL](./modules/04_advanced_topics/offline_rl/README.md) | 掌握 CQL 如何通过 Conservative 项抑制 OOD 动作 |
-| 11 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 理解 Q-Former 或 MLP Projector 如何实现模态对齐 |
-| 12 | [并行策略](./modules/05_engineering/megatron/README.md) | 深度理解 TP/PP/DP 在分布式训练中的通信开销 |
-| 13 | [智能体 (Agent)](./modules/04_advanced_topics/agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
-| 14 | **总结与自测** | [复习自测](./modules/06_quizzes_and_cards/)，原理摘要：`tools/technical_brief.py` |
+| 保守策略 | [离线 RL (CQL)](./modules/04_advanced_topics/offline_rl/README.md) | 保守项对 OOD (Out-of-Distribution) 动作价值的抑制 |
+| 跨模态 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 视觉特征空间向语言特征空间的对齐投影逻辑 |
+| 大规模训练 | [并行策略 (Megatron)](./modules/05_engineering/megatron/README.md) | TP/PP/DP 并行模式下的通信开销与算力利用率分析 |
+| 自动化决策 | [智能体 (Agent)](./modules/04_advanced_topics/agents/README.md) | ReAct 架构中 Thought-Action-Observation 的状态机流转 |
+| 复习自测 | [知识复盘](./modules/06_quizzes_and_cards/) | 模块化原理考核与核心关键点（Flashcards）速记 |
 
 ---
 
