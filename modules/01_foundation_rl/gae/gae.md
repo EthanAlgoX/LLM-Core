@@ -20,7 +20,7 @@ GAE（Generalized Advantage Estimation）是一种通过“折衷”来提升训
 - **TD 残差** = (你拿到的 10 分 + 老师估计的 85 分) - 你最开始预期的 90 分 = **+5 分**。
 - **意义**：如果残差是正的，说明现实比你预期的要好，你的策略就需要向这个方向靠拢。
 
-### 2. 什么是 GAE？——“老练的面试官”
+### 2. 什么是 GAE？——“老练的评估专家”
 
 **比喻**：评价一个球员的表现，你是只看他这一次传球（TD，1步），还是看他一整场比赛的表现（MC，无限步）？
 
@@ -54,8 +54,8 @@ $$\hat{A}_t^{GAE(\gamma, \lambda)} = \sum_{l=0}^\infty (\gamma \lambda)^l \delta
 
 $$\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots$$
 
-- ** $\gamma$ (Gamma)**：折扣因子，决定了对未来奖励的重视程度。
-- ** $\lambda$ (Lambda)**：GAE 特有因子。 $\lambda=0$ 时退化为 1-step TD； $\lambda=1$ 时退化为 Monte Carlo。
+- **$\gamma$ (Gamma)**：折扣因子，决定了对未来奖励的重视程度。
+- **$\lambda$ (Lambda)**：GAE 特有因子。 $\lambda=0$ 时退化为 1-step TD； $\lambda=1$ 时退化为 Monte Carlo。
 
 ## 与相近方法区别
 

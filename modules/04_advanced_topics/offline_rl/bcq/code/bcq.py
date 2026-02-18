@@ -653,7 +653,7 @@ def main() -> None:
         checkpoints_dir=layout["checkpoints"],
     )
 
-    # 步骤 6：导出学习结果（曲线/指标/策略），用于复盘与面试讲解。
+    # 步骤 6：导出学习结果（曲线/指标/策略），用于复盘与核心要点讲解。
     metrics_dir = export_artifacts(
         logs=logs,
         dataset_stats=dataset_stats,

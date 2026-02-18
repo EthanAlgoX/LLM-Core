@@ -198,7 +198,7 @@ def main() -> None:
     module_dir = code_dir.parent
     layout = ensure_layout_dirs(module_dir=module_dir, output_arg=args.output_dir)
 
-    # 步骤 2：保存本次运行配置（面试复盘时可直接引用）。
+    # 步骤 2：保存本次运行配置（技术复盘时可直接引用）。
     config_path = layout["output"] / "blip2_run_config.json"
     config_path.write_text(json.dumps(vars(args), ensure_ascii=False, indent=2), encoding="utf-8")
 

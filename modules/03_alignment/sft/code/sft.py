@@ -166,7 +166,7 @@ def export_sft_visualization(checkpoints_dir: Path, output_dir: Path) -> Path:
     fig.savefig(metrics_dir / "training_curves.png", dpi=160)
     plt.close(fig)
 
-    # summary 给出“最关键结论”，便于面试时快速口述训练结果。
+    # summary 给出“最关键结论”，便于技术复盘时快速口述训练结果。
     summary = {
         "total_steps": len(rows),
         "final_step": rows[-1]["step"] if rows else None,

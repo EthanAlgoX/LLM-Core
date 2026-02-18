@@ -4,7 +4,7 @@
 
 - **阶段**：推理与部署 (Deployment)。
 - **类型**：吞吐与延迟优化。
-- **作用**：随着 LLM 参数量和用户并发的增加，如何通过工程手段降低首字延迟 (TTFT) 和提升生成吞吐是面试核心。
+- **作用**：随着 LLM 参数量 and 用户并发的增加，如何通过工程手段降低首字延迟 (TTFT) and 提升生成吞吐是技术解析核心。
 
 ## 核心概念：KV Cache
 
@@ -19,7 +19,7 @@
 - **显存占用公式**：
   $$\mathrm{Mem}_{KV} = 2 \times \mathrm{layers} \times \mathrm{heads} \times \mathrm{hidden\_dim} \times \mathrm{seq\_len} \times \mathrm{precision\_bytes}$$
 
-- **面试点**：Llama 7B (fp16) 处理 1024 长度约占用 0.5GB 显存。
+- **技术解析点**：Llama 7B (fp16) 处理 1024 长度约占用 0.5GB 显存。
 
 ## 推理框架 (Inference Frameworks)
 
@@ -48,7 +48,7 @@
 - **量化感知训练 (QAT)**：在训练中模拟量化误差，通常精度损失最小。
 - **精度对标**：**定点量化 (INT8/INT4)** 与 **浮点量化 (FP8)** 的数值稳定性权衡。
 
-## 面试高频问题
+## 技术核心解析
 
 1. **如何降低首字延迟 (TTFT)？**
    - 使用 Flash Attention。

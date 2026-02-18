@@ -4,7 +4,7 @@
 
 - **阶段**：模型架构设计 / 推理优化。
 - **类型**：特征提取内核。
-- **作用**：Attention 是 Transformer 的心脏，负责建模序列内部的依赖关系。面试中常考各种变体（MHA/GQA/MQA）以及工程优化（Flash Attention）。
+- **作用**：Attention 是 Transformer 的心脏，负责建模序列内部的依赖关系。技术评估中常考各种变体（MHA/GQA/MQA）以及工程优化（Flash Attention）。
 
 ## 核心变体对比
 
@@ -30,7 +30,7 @@ GQA 在保持 MHA 精度（多组特征表达）的同时，显著降低了 KV C
 2. **Recomputation (重计算)**：反向传播时不存储 $N \times N$ 的 Attention Matrix，而是重新计算，用计算量换显存空间。
 3. **IO 感知**：通过减少显存读写次数，实现 $2\times \sim 4\times$ 的端到端加速。
 
-## 面试高频问题
+## 技术核心解析
 
 1. **Softmax 为什么需要减去 Max？**
    - 为了数值稳定性，防止指数爆炸溢出。
