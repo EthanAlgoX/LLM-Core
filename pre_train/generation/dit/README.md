@@ -1,21 +1,53 @@
 # DiT（Diffusion Transformer）
 
 ## 定位与分类
-- 阶段：预训练/生成建模
-- 类型：Transformer 架构扩散模型
-- 作用：学习如何用 Transformer 替代 U-Net 做扩散去噪
 
-## 核心原理
-1. 将图像切为 patch token。
-2. 注入时间步嵌入并做 Transformer 编码。
-3. 预测噪声并按扩散反演过程采样。
+- **阶段**：生成式预训练（架构演进）。
+- **类型**：基于 Transformer 的扩散模型（Scalable Diffusion）。
+- **作用**：它是 Sora（视频生成）等最新大模型的技术支柱。它证明了扩散模型不需要复杂的 U-Net，只要简单的 Transformer 配合 Patch 机制就能实现更强的生成效果和更好的扩展性（Scaling）。
+
+## 什么是 DiT？
+
+DiT（Diffusion Transformer）是扩散模型的一种新式变体。
+传统的扩散模型大多使用卷积神经网络（U-Net）作为骨干。DiT 借鉴了 ViT（Vision Transformer）的思想，将图像看作一串“视觉单词”（Patches），并使用 Transformer 块来处理这些单词，从而预测去噪需要的轨迹。
+
+## 关键结构步骤
+
+1. **Patchify (切片化)**：
+   - 将输入的带噪图像（或潜在空间变量 Latent）切分成固定大小的 $p \times p$ 小块，并展平为序列。
+2. **Time/Condition Embedding (条件注入)**：
+   - 将当前的时间步 $t$（以及可能的分类标签或文本描述）通过多层感知机转为向量，注入到 Transformer 的每一层中。
+3. **Transformer Processing (注意力处理)**：
+   - 使用多层 Self-Attention 块处理 Patch 序列，捕捉像素间的全局关联，这在生成大尺寸或复杂结构图像时比卷积更有优势。
+4. **Unpatchify (反向还原)**：
+   - 将 Transformer 输出的向量序列还原为预测的噪声图。
+
+## 核心数学公式
+
+### 1. 输入 Token 化
+
+$$z_{tokens} = \text{Patchify}(x_t) + \text{PositionalEmbedding}$$
+
+### 2. 条件注入 (Adaptive Layer Norm)
+
+DiT 常用如下方式将时间信息 $c$ 注入：
+$$\text{adaLN}(h, c) = w_c \cdot \text{LayerNorm}(h) + b_c$$
+
+- 其中 $w_c$ 和 $b_c$ 是基于时间步计算出的缩放和平移系数。
+
+### 3. 统一目标函数
+
+与标准 Diffusion 一致：
+$$\min_\theta \mathbb{E}_{x_0, \epsilon, t} [ \| \epsilon - \text{DiT}_\theta(x_t, t) \|^2 ]$$
 
 ## 与相近方法区别
+
 1. 相比 `Diffusion` 基础实现：DiT 更强调 token 化与全局注意力。
 2. 相比 CNN-U-Net：DiT 通常更易扩展到大模型规模。
 3. 相比 LLM：DiT 处理图像/latent token，不是自然语言 token。
 
 ## 运行
+
 ```bash
 cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/generation/dit
 source /opt/anaconda3/etc/profile.d/conda.sh
@@ -24,15 +56,17 @@ python code/dit.py
 ```
 
 ## 输出结果
+
 默认输出到 `output/dit_metrics`，包含：
+
 - `training_metrics.csv`
 - `training_curves.png`
 - `generated_samples.pt`
 - `target_samples.pt`
 - `summary.json`
 
-
 ## 目录文件说明（重点）
+
 - `code/`：主流程代码，通常是可直接运行的单文件脚本。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
