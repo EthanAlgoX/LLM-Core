@@ -45,8 +45,8 @@ python run.py --module ppo --toy
 | 10 | [离线 RL](./post_train/offline_rl/README.md) | 掌握 CQL 如何通过 Conservative 项抑制 OOD 动作 |
 | 11 | [VLM 入门](./pre_train/vlm/README.md) | 理解 Q-Former 或 MLP Projector 如何实现模态对齐 |
 | 12 | [并行策略](./pre_train/llm/megatron/README.md) | 深度理解 TP/PP/DP 在分布式训练中的通信开销 |
-| 13 | [复习自测](./learning/quizzes/) | 总结 KV Cache、Flash Attention 等工程优化细节 |
-| 14 | **技术总结与导出** | 导出个人技术摘要：`python scripts/technical_brief.py` |
+| 13 | [智能体 (Agent)](./post_train/agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
+| 14 | **总结与自测** | [复习自测](./learning/quizzes/)，技术摘要：`scripts/technical_brief.py` |
 
 ---
 
@@ -66,11 +66,12 @@ python run.py --module ppo --toy
 | **收敛特性** | 极稳 | 较敏感 (取决于优势估计精度) | 稳定 | 稳定 (适合数学推理) |
 | **优化目标** | 字对字模仿 | 奖励信号最大化 | 偏好映射最大化 | 组内相对反馈优化 |
 
-### 3. 注意力机制与工程优化
+### 3. Agent 是大语言模型从“对话框”向“生产力工具”演进的核心形态
 
-- **架构演进**：MHA $\to$ MQA $\to$ **GQA** (Grouped-Query)。GQA 在 Llama 3 中被广泛采用，实现了精度与推理吞吐量的最佳平衡。
-- **Flash Attention**：基于 SRAM 的分块计算与 Tiling 策略，消除了显存读写的 IO 瓶颈。
-- **ZeRO 技术**：通过 DeepSpeed 划分模型状态，突破单卡显存对参数规模的限制。
+> **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use
+
+- **ReAct 范式**：协同推理（Reason）与行动（Act），使模型具备动态调整计划的能力。
+- **Flash Attention**：基于 SRAM 的分块计算，消除显存读写的 IO 瓶颈。
 
 ---
 
@@ -78,6 +79,7 @@ python run.py --module ppo --toy
 
 - **KL 散度控制**：在对齐训练中，KL 散度过快增长通常预示着模型正在过度拟合奖励函数（Reward Hacking）。建议检查 $\beta$ 系数或样本正则化。
 - **分布式瓶颈**：在大规模训练中，PP (Pipeline Parallelism) 虽然节省显存，但会引入 Bubble Time；TP (Tensor Parallelism) 虽效率高但对节点间带宽要求极严。
+- **智能体幻觉**：Agent 在复杂任务中易陷入无限循环或调用不存在的工具，建议增加自我反思（Self-Reflection）或强约束 Schema 解析。
 
 ---
 

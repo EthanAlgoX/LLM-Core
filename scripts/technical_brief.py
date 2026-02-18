@@ -128,6 +128,11 @@ NOTES: dict[str, dict[str, str]] = {
         "compare": "相比 LLaVA，Flamingo 的视觉信息融合更深层、持续性更强。",
         "engineering": "跨注意力计算开销高，部署时要注意吞吐与显存折中。",
     },
+    "agents": {
+        "principle": "Agent = LLM + Planning + Memory + Tools。核心是通过 ReAct 等闭环机制实现自主决策。",
+        "compare": "相比单纯的 Prompting，Agent 具备状态感知与环境交互（工具调用）能力。",
+        "engineering": "重点解决幻觉（Hallucination）导致的逻辑链中断，以及 RAG 检索质量问题。",
+    },
 }
 
 

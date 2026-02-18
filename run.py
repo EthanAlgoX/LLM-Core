@@ -290,6 +290,15 @@ MODULES: dict[str, ModuleSpec] = {
             "output/toy_bcq",
         ),
     ),
+    "agents": ModuleSpec(
+        "post_train/agents",
+        "post_train/agents/code/react_demo.py",
+        "智能体推理 (Planning/Tool Use)",
+        (
+            "--output-dir",
+            "output/toy_agents",
+        ),
+    ),
     "deepspeed": ModuleSpec(
         "post_train/systems",
         "post_train/systems/deepspeed/code/deepspeed.py",
