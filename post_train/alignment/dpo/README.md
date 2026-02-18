@@ -2,9 +2,24 @@
 
 ## 定位与分类
 
-- 阶段：后训练（偏好对齐）
-- 类型：偏好学习（无需显式奖励模型）
-- 作用：让模型偏向 `chosen` 回答，抑制 `rejected` 回答
+- **阶段**：后训练（Post-training）之偏好对齐。
+- **类型**：直接偏好学习（Direct Preference Learning）。
+- **作用**：取代复杂的“奖励模型 + PPO”流程，直接通过对比“好回答”与“坏回答”，将人类的偏好注入模型中。
+
+## 什么是 DPO？
+
+DPO（Direct Preference Optimization）是由斯坦福大学提出的一种简化版对齐算法。它的核心思想是：**不再训练一个裁判（奖励模型），而是直接让模型在“好坏对”中学习。**
+它在数学上证明了，通过对数比例（Log-Ratio）的优化，可以达到与传统 RLHF 相同的对齐效果，但工程实现难度降低了 90%。
+
+## DPO 训练的关键步骤
+
+1. **构建偏好对 (Preference Pairs)**：准备数据，格式为 `(Prompt, Chosen_Answer, Rejected_Answer)`。
+2. **加载双模型**：
+   - **Policy Model (待训模型)**：我们要优化的 Actor。
+   - **Reference Model (参考模型)**：通常是 SFT 后的冻结模型，作为动态基准。
+3. **计算 Log-Prob**：待训模型和参考模型分别对 Chosen 和 Rejected 答案计算预测概率的对数（Log-Probability）。
+4. **计算对数比例差距 (Log-Ratio Gap)**：计算待训模型相对于参考模型，在 Chosen 上的进步是否比在 Rejected 上的进步更大。
+5. **偏好更新 (Optimization)**：通过 Sigmoid 激活函数和梯度下降，拉大好坏答案之间的差距。
 
 ## 核心原理与关键公式
 
