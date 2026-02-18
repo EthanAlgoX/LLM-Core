@@ -32,8 +32,8 @@ class ModuleSpec:
 MODULES: dict[str, ModuleSpec] = {
     # post_train: alignment / rl / systems
     "sft": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/sft/code/sft.py",
+        "03_alignment",
+        "modules/03_alignment/sft/code/sft.py",
         "监督微调，后训练起点",
         (
             "--max-samples",
@@ -53,8 +53,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "dpo": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/dpo/code/dpo.py",
+        "03_alignment",
+        "modules/03_alignment/dpo/code/dpo.py",
         "直接偏好优化",
         (
             "--max-samples",
@@ -74,8 +74,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "grpo": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/grpo/code/grpo_demo.py",
+        "03_alignment",
+        "modules/03_alignment/grpo/code/grpo_demo.py",
         "组相对策略优化",
         (
             "--train-size",
@@ -97,8 +97,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "ppo": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/ppo/code/ppo.py",
+        "03_alignment",
+        "modules/03_alignment/ppo/code/ppo.py",
         "PPO 对齐训练",
         (
             "--reward-model",
@@ -120,8 +120,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "policy_gradient": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/policy_gradient/code/policy_gradient.py",
+        "03_alignment",
+        "modules/03_alignment/policy_gradient/code/policy_gradient.py",
         "策略梯度对齐训练",
         (
             "--reward-model",
@@ -143,8 +143,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "actor_critic": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/actor_critic/code/actor_critic.py",
+        "03_alignment",
+        "modules/03_alignment/actor_critic/code/actor_critic.py",
         "Actor-Critic 对齐训练",
         (
             "--reward-model",
@@ -166,8 +166,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "rlhf": ModuleSpec(
-        "post_train/alignment",
-        "post_train/alignment/rlhf/code/rlhf.py",
+        "03_alignment",
+        "modules/03_alignment/rlhf/code/rlhf.py",
         "RLHF 闭环训练",
         (
             "--reward-model",
@@ -189,8 +189,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "mdp": ModuleSpec(
-        "post_train/rl_basics",
-        "post_train/rl_basics/mdp/code/mdp.py",
+        "01_foundation_rl",
+        "modules/01_foundation_rl/mdp/code/mdp.py",
         "MDP 值迭代",
         (
             "--max-iters",
@@ -202,8 +202,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "td_learning": ModuleSpec(
-        "post_train/rl_basics",
-        "post_train/rl_basics/td_learning/code/td_learning.py",
+        "01_foundation_rl",
+        "modules/01_foundation_rl/td_learning/code/td_learning.py",
         "TD/Q-learning 基础",
         (
             "--episodes",
@@ -219,8 +219,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "gae": ModuleSpec(
-        "post_train/rl_basics",
-        "post_train/rl_basics/gae/code/gae.py",
+        "01_foundation_rl",
+        "modules/01_foundation_rl/gae/code/gae.py",
         "GAE 优势估计",
         (
             "--iterations",
@@ -236,8 +236,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "advantage": ModuleSpec(
-        "post_train/rl_basics",
-        "post_train/rl_basics/advantage/code/advantage.py",
+        "01_foundation_rl",
+        "modules/01_foundation_rl/advantage/code/advantage.py",
         "优势函数估计对比",
         (
             "--iterations",
@@ -253,8 +253,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "cql": ModuleSpec(
-        "post_train/offline_rl",
-        "post_train/offline_rl/cql/code/cql.py",
+        "04_advanced_topics",
+        "modules/04_advanced_topics/offline_rl/cql/code/cql.py",
         "离线 RL：CQL",
         (
             "--dataset-episodes",
@@ -272,8 +272,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "bcq": ModuleSpec(
-        "post_train/offline_rl",
-        "post_train/offline_rl/bcq/code/bcq.py",
+        "04_advanced_topics",
+        "modules/04_advanced_topics/offline_rl/bcq/code/bcq.py",
         "离线 RL：BCQ",
         (
             "--dataset-episodes",
@@ -291,8 +291,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "agents": ModuleSpec(
-        "post_train/agents",
-        "post_train/agents/code/react_demo.py",
+        "04_advanced_topics",
+        "modules/04_advanced_topics/agents/code/react_demo.py",
         "智能体推理 (Planning/Tool Use)",
         (
             "--output-dir",
@@ -300,8 +300,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "deepspeed": ModuleSpec(
-        "post_train/systems",
-        "post_train/systems/deepspeed/code/deepspeed.py",
+        "05_engineering",
+        "modules/05_engineering/systems/deepspeed/code/deepspeed.py",
         "训练系统优化：DeepSpeed",
         (
             "--steps",
@@ -315,8 +315,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "cuda": ModuleSpec(
-        "post_train/systems",
-        "post_train/systems/cuda/code/cuda.py",
+        "05_engineering",
+        "modules/05_engineering/systems/cuda/code/cuda.py",
         "CUDA 与吞吐观察",
         (
             "--benchmark-iters",
@@ -332,8 +332,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "mixed_precision": ModuleSpec(
-        "post_train/systems",
-        "post_train/systems/mixed_precision/code/mixed_precision.py",
+        "05_engineering",
+        "modules/05_engineering/systems/mixed_precision/code/mixed_precision.py",
         "混合精度训练",
         (
             "--steps",
@@ -348,8 +348,8 @@ MODULES: dict[str, ModuleSpec] = {
     ),
     # pre_train
     "diffusion": ModuleSpec(
-        "pre_train/generation",
-        "pre_train/generation/diffusion/code/diffusion.py",
+        "02_architecture",
+        "modules/02_architecture/generation/diffusion/code/diffusion.py",
         "扩散模型基础",
         (
             "--epochs",
@@ -367,8 +367,8 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "dit": ModuleSpec(
-        "pre_train/generation",
-        "pre_train/generation/dit/code/dit.py",
+        "02_architecture",
+        "modules/02_architecture/generation/dit/code/dit.py",
         "DiT 训练示例",
         (
             "--epochs",
@@ -386,26 +386,26 @@ MODULES: dict[str, ModuleSpec] = {
         ),
     ),
     "blip2": ModuleSpec(
-        "pre_train/vlm",
-        "pre_train/vlm/blip2/code/blip2.py",
+        "02_architecture",
+        "modules/02_architecture/vlm/blip2/code/blip2.py",
         "BLIP2 推理示例",
         ("--dry-run", "--output-dir", "output/toy_blip2"),
     ),
     "llava": ModuleSpec(
-        "pre_train/vlm",
-        "pre_train/vlm/llava/code/llava.py",
+        "02_architecture",
+        "modules/02_architecture/vlm/llava/code/llava.py",
         "LLaVA 推理示例",
         ("--dry-run", "--output-dir", "output/toy_llava"),
     ),
     "flamingo": ModuleSpec(
-        "pre_train/vlm",
-        "pre_train/vlm/flamingo/code/flamingo.py",
+        "02_architecture",
+        "modules/02_architecture/vlm/flamingo/code/flamingo.py",
         "Flamingo 推理示例",
         ("--dry-run", "--output-dir", "output/toy_flamingo"),
     ),
     "megatron": ModuleSpec(
-        "pre_train/llm",
-        "pre_train/llm/megatron/code/megatron.py",
+        "05_engineering",
+        "modules/05_engineering/megatron/code/megatron.py",
         "Megatron 并行训练示例",
         (
             "--steps",

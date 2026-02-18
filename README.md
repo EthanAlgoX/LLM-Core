@@ -23,30 +23,30 @@ python run.py --module ppo --toy
 
 | Day | 重点模块 | 核心原理掌握要求 |
 | --- | --- | --- |
-| 1 | [项目认知](./post_train/rl_basics/mdp/README.md) | 理解 MDP 五元组 (S, A, R, P, γ) 的物理建模含义 |
-| 2 | [RL 基础](./post_train/rl_basics/td_learning/README.md) | 掌握 TD 误差如何引导价值函数在动态环境中收敛 |
-| 3 | [优势估计](./post_train/rl_basics/advantage/README.md) | 理解 $A(s,a) = Q(s,a) - V(s)$ 对训练方差的缩减作用 |
-| 4 | [GAE 算法](./post_train/rl_basics/gae/README.md) | 深度理解 GAE λ 权衡偏差与方差的数学逻辑 |
+| 1 | [项目认知与 MDP](./modules/01_foundation_rl/mdp/README.md) | 理解 MDP 五元组 (S, A, R, P, γ) 的物理建模含义 |
+| 2 | [TD Learning](./modules/01_foundation_rl/td_learning/README.md) | 掌握 Q-Learning 与 SARSA 的更新差异 |
+| 3 | [优势估计](./modules/01_foundation_rl/gae/README.md) | 深入 GAE (Generalized Advantage Estimation) 的偏差-方差权衡 |
 
-### 第二阶段：语言模型对齐 (Alignment)
-
-| Day | 重点模块 | 核心原理掌握要求 |
-| --- | --- | --- |
-| 5 | [SFT 入门](./post_train/alignment/sft/README.md) | 掌握交叉熵损失在文本生成任务中的收敛特性 |
-| 6 | [DPO 对齐](./post_train/alignment/dpo/README.md) | 理解如何通过隐式奖励函数避开显式奖励模型的训练 |
-| 7 | [PPO 算法](./post_train/alignment/ppo/README.md) | 掌握策略裁剪 (Clipping) 如何保障 RL 对齐的稳定性 |
-| 8 | [GRPO 创新](./post_train/alignment/grpo/README.md) | 理解组内相对奖励标准化对推理任务性能的提升 |
-| 9 | [RLHF 闭环](./post_train/alignment/rlhf/README.md) | 掌握从 SFT 到 PPO 的全流程数据流与系统架构 |
-
-### 第三阶段：多模态与大规模系统 (Systems)
+### 第二阶段：大模型微调与对齐 (Alignment)
 
 | Day | 重点模块 | 核心原理掌握要求 |
 | --- | --- | --- |
-| 10 | [离线 RL](./post_train/offline_rl/README.md) | 掌握 CQL 如何通过 Conservative 项抑制 OOD 动作 |
-| 11 | [VLM 入门](./pre_train/vlm/README.md) | 理解 Q-Former 或 MLP Projector 如何实现模态对齐 |
-| 12 | [并行策略](./pre_train/llm/megatron/README.md) | 深度理解 TP/PP/DP 在分布式训练中的通信开销 |
-| 13 | [智能体 (Agent)](./post_train/agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
-| 14 | **总结与自测** | [复习自测](./learning/quizzes/)，技术摘要：`scripts/technical_brief.py` |
+| 4 | [监督微调 (SFT)](./modules/03_alignment/sft/README.md) | 掌握指令遵循数据的构建与 Loss Mask 技巧 |
+| 5 | [策略梯度 (PG)](./modules/03_alignment/policy_gradient/README.md) | 理解 REINFORCE 算法及其在高方差下的局限性 |
+| 6 | [Actor-Critic](./modules/03_alignment/actor_critic/README.md) | 掌握价值网络 (Critic) 如何辅助策略网络 (Actor) 稳定收敛 |
+| 7 | [PPO 深度解析](./modules/03_alignment/ppo/README.md) | 理解重要性采样 (Importance Sampling) 与 Clip 约束 |
+| 8 | [DPO 离线对齐](./modules/03_alignment/dpo/README.md) | 掌握对比学习思想在偏好优化中的应用 |
+| 9 | [GRPO 推理优化](./modules/03_alignment/grpo/README.md) | 理解组相对策略优化（DeepSeek 系列核心技术） |
+
+### 第三阶段：多模态与进阶领域 (Advanced)
+
+| Day | 重点模块 | 核心原理掌握要求 |
+| --- | --- | --- |
+| 10 | [离线 RL](./modules/04_advanced_topics/offline_rl/README.md) | 掌握 CQL 如何通过 Conservative 项抑制 OOD 动作 |
+| 11 | [多模态 VLM](./modules/02_architecture/vlm/README.md) | 理解 Q-Former 或 MLP Projector 如何实现模态对齐 |
+| 12 | [并行策略](./modules/05_engineering/megatron/README.md) | 深度理解 TP/PP/DP 在分布式训练中的通信开销 |
+| 13 | [智能体 (Agent)](./modules/04_advanced_topics/agents/README.md) | 掌握 ReAct 循环中 Thought/Action/Observation 的状态流转 |
+| 14 | **总结与自测** | [复习自测](./modules/06_quizzes_and_cards/)，原理摘要：`tools/technical_brief.py` |
 
 ---
 
@@ -66,10 +66,9 @@ python run.py --module ppo --toy
 | **收敛特性** | 极稳 | 较敏感 (取决于优势估计精度) | 稳定 | 稳定 (适合数学推理) |
 | **优化目标** | 字对字模仿 | 奖励信号最大化 | 偏好映射最大化 | 组内相对反馈优化 |
 
-### 3. Agent 是大语言模型从“对话框”向“生产力工具”演进的核心形态
+### 3. Agent 与系统架构
 
-> **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use
-
+- **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use
 - **ReAct 范式**：协同推理（Reason）与行动（Act），使模型具备动态调整计划的能力。
 - **Flash Attention**：基于 SRAM 的分块计算，消除显存读写的 IO 瓶颈。
 
@@ -77,7 +76,7 @@ python run.py --module ppo --toy
 
 ## 🎯 深度解析与工程建议 (Core Principles Deep Dive)
 
-- **KL 散度控制**：在对齐训练中，KL 散度过快增长通常预示着模型正在过度拟合奖励函数（Reward Hacking）。建议检查 $\beta$ 系数或样本正则化。
+- **KL 散度控制**：在对齐训练中，KL 散度过快增长通常预示着模型正在过度拟合奖励函数。
 - **分布式瓶颈**：在大规模训练中，PP (Pipeline Parallelism) 虽然节省显存，但会引入 Bubble Time；TP (Tensor Parallelism) 虽效率高但对节点间带宽要求极严。
 - **智能体幻觉**：Agent 在复杂任务中易陷入无限循环或调用不存在的工具，建议增加自我反思（Self-Reflection）或强约束 Schema 解析。
 
@@ -85,15 +84,21 @@ python run.py --module ppo --toy
 
 ## 📂 项目结构 (Project Structure)
 
-- `pre_train/`：模型架构与预训练（Megatron-LM / VLM / Transformers）
-- `post_train/`：对齐技术栈（RL Basics / SFT / DPO / PPO / GRPO）
-- `scripts/`：技术摘要生成、自动化回归测试工具。
-- `learning/`：原理自测题库、核心知识卡片。
+- `modules/`: 核心学习组件
+  - `01_foundation_rl/`: 强化学习基础 (MDP, TD, GAE)
+  - `02_architecture/`: 模型架构 (LLM, VLM, Generation)
+  - `03_alignment/`: 对齐技术栈 (SFT, DPO, PPO, GRPO)
+  - `04_advanced_topics/`: 进阶话题 (Offline RL, Agents)
+  - `05_engineering/`: 工程与系统 (DeepSpeed, Megatron, CUDA)
+  - `06_quizzes_and_cards/`: 原理自测题库与核心知识卡片
+- `tools/`: 技术摘要生成、自动化回归测试工具
+- `data/`: 模拟训练数据
+- `output/`: 训练产物、日志与测试报告
 
 ---
 
 ## 🧪 系统健康度验证
 
 ```bash
-python scripts/smoke_test.py  # 验证全模块运行逻辑，结果输出至 output/smoke_reports/
+python tools/smoke_test.py  # 验证全模块运行逻辑，结果输出至 output/smoke_reports/
 ```

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import run  # noqa: E402
-from scripts.technical_brief import build_brief, load_summary  # noqa: E402
+from tools.technical_brief import build_brief, load_summary  # noqa: E402
 
 
 def build_default_args() -> argparse.Namespace:
