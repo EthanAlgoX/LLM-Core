@@ -72,4 +72,14 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ## 📂 模块实战
 
-- `历史脚本（归档）`：包含核心 Transformer 架构的最小可读实现与实验脚本。
+```python
+# 关键步骤代码（纯文档示例）
+x = token_embedding(input_ids)  # [B, T, d_model]
+for block in transformer_blocks:
+    # Attention 子层：RMSNorm -> RoPE -> Self-Attention -> Residual
+    x = x + block.self_attn(block.rmsnorm_1(x), rope_cache)
+    # FFN 子层：RMSNorm -> MLP -> Residual
+    x = x + block.mlp(block.rmsnorm_2(x))
+
+logits = lm_head(final_rmsnorm(x))  # [B, T, vocab_size]
+```

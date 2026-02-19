@@ -83,4 +83,17 @@ VLM 的核心问题是**模态对齐**：如何将视觉编码器的特征空间
 
 ## 📂 模块实战
 
-- `历史脚本（归档）`：包含 BLIP-2 (Q-Former) 和 LLaVA (MLP Projector) 的对比复现实验。
+```python
+# 关键步骤代码（纯文档示例）
+# Path A: BLIP-2（Q-Former 路线）
+vision_tokens = vision_encoder(image)
+query_tokens = q_former(query_embeddings, encoder_hidden_states=vision_tokens)
+prefix_tokens = blip2_projector(query_tokens)
+answer_a = llm.generate(prefix_tokens, prompt_tokens)
+
+# Path B: LLaVA（MLP Projector 路线）
+vision_tokens = clip_encoder(image)
+image_prefix = llava_projector(vision_tokens)
+multimodal_input = concat(image_prefix, prompt_tokens)
+answer_b = llm.generate(multimodal_input)
+```

@@ -71,5 +71,17 @@ NanoBot 是一个极简主义（~4k 行代码）但功能全备的 Agent 架构�
 
 本目录下包含：
 
-- `历史脚本（归档）`：一个不依赖外部 API 的纯逻辑 ReAct 循环演示。
 - `data/`：模拟工具及其元数据定义。
+
+```python
+# 关键步骤代码（纯文档示例）
+state = {"goal": user_query, "scratchpad": []}
+
+while not task_finished(state):
+    thought = llm_reason(state)
+    tool_call = decide_tool(thought)
+    observation = run_tool(tool_call) if tool_call else None
+    state["scratchpad"].append({"thought": thought, "observation": observation})
+
+answer = llm_finalize(state)
+```

@@ -68,4 +68,19 @@ LLM 推理是将训练好的模型转化为实际生产力的关键环节。本�
 
 ## 📂 模块实战
 
-- `历史脚本（归档）`：包含 Flash Attention 原理演示与解码策略对比实验。
+```python
+# 关键步骤代码（纯文档示例）
+tokens = prompt_tokens
+kv_cache = None
+
+for _ in range(max_new_tokens):
+    logits, kv_cache = model.step(
+        tokens[:, -1:],
+        kv_cache=kv_cache,
+        use_flash_attention=True,
+    )
+    next_token = sample(logits[:, -1, :], top_p=0.9, temperature=0.8)
+    tokens = append(tokens, next_token)
+
+decoded_text = tokenizer.decode(tokens[0])
+```
