@@ -25,14 +25,12 @@
 
 ## 关键公式
 
-\[
-V^{\pi}(s)=\mathbb{E}_{a\sim\pi, s'\sim P}[r(s,a)+\gamma V^{\pi}(s')]
-\]
+`V_pi(s) = E_{a~pi, s'~P}[r(s,a) + gamma * V_pi(s')]`
 
 符号说明：
-- \(V^{\pi}(s)\)：策略 \(\pi\) 在状态 \(s\) 下的价值。
-- \(\gamma\)：折扣因子，控制长期回报权重。
-- \(P\)：环境转移概率。
+- `V_pi(s)`：策略 `pi` 在状态 `s` 下的价值。
+- `gamma`：折扣因子，控制长期回报权重。
+- `P`：环境转移概率。
 
 ## 关键步骤代码（纯文档示例）
 
@@ -82,4 +80,3 @@ for _ in range(num_iters):
 
 - [Sutton & Barto《Reinforcement Learning》](http://incompleteideas.net/book/the-book.html)
 - [David Silver RL Course](https://www.davidsilver.uk/teaching/)
-

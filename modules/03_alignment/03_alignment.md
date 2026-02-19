@@ -25,14 +25,12 @@
 
 ## 关键公式
 
-\[
-\max_{\theta}\ \mathbb{E}_{(x,y)\sim \pi_{\theta}}[r(x,y)]-\beta\,\mathrm{KL}(\pi_{\theta}\|\pi_{\mathrm{ref}})
-\]
+`J(theta) = E_{(x,y)~pi_theta}[r(x,y)] - beta * KL(pi_theta || pi_ref)`
 
 符号说明：
-- \(r(x,y)\)：奖励模型或偏好信号给出的评分。
-- \(\pi_{\mathrm{ref}}\)：参考策略（约束模型别偏离太远）。
-- \(\beta\)：KL 约束强度。
+- `r(x, y)`：奖励模型或偏好信号给出的评分。
+- `pi_ref`：参考策略（约束模型别偏离太远）。
+- `beta`：KL 约束强度。
 
 ## 关键步骤代码（纯文档示例）
 
@@ -84,4 +82,3 @@ for batch in train_loader:
 
 - [InstructGPT](https://arxiv.org/abs/2203.02155)
 - [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)
-

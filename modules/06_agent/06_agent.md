@@ -52,9 +52,7 @@ Agent 是大语言模型从“对话框”向“生产力工具”演进的核�
 
 ## 关键公式（逻辑表达）
 
-\[
-\mathrm{Agent} = \mathrm{LLM} + \mathrm{Planning} + \mathrm{Memory} + \mathrm{Tool\ Use}
-\]
+`Agent = LLM + Planning + Memory + ToolUse`
 
 ## 🛠️ 主流框架对比 (Frameworks)
 
@@ -135,4 +133,3 @@ answer = llm_finalize(state)
 
 - [ReAct](https://arxiv.org/abs/2210.03629)
 - [Toolformer](https://arxiv.org/abs/2302.04761)
-

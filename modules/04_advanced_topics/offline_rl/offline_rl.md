@@ -27,14 +27,11 @@
 
 ## 关键公式
 
-\[
-\mathcal{L}_{\mathrm{CQL}}=\underbrace{\mathbb{E}_{(s,a)\sim \mathcal{D}}\left[(Q_{\theta}(s,a)-y)^2\right]}_{\text{Bellman 误差}}
- + \alpha\left(\log\sum_{a}\exp(Q_{\theta}(s,a))-\mathbb{E}_{a\sim\mathcal{D}}[Q_{\theta}(s,a)]\right)
-\]
+`CQLLoss = E_D[(Q(s,a)-y)^2] + alpha * (logsumexp_a Q(s,a) - E_D[Q(s,a)])`
 
 符号说明：
-- \(\mathcal{D}\)：离线数据集。
-- \(\alpha\)：保守正则强度。
+- `D`：离线数据集。
+- `alpha`：保守正则强度。
 - 第二项用于压低分布外动作的 Q 值。
 
 ## 关键步骤代码（纯文档示例）
@@ -83,4 +80,3 @@ for batch in offline_loader:
 
 - [Conservative Q-Learning](https://arxiv.org/abs/2006.04779)
 - [Batch-Constrained deep Q-learning](https://arxiv.org/abs/1812.02900)
-

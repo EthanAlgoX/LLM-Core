@@ -87,13 +87,11 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ## 关键公式
 
-\[
-\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
-\]
+`Attention(Q, K, V) = softmax((QK^T) / sqrt(d_k)) * V`
 
 符号说明：
-- \(Q,K,V\)：查询、键、值矩阵。
-- \(d_k\)：键向量维度，用于缩放稳定梯度。
+- `Q, K, V`：查询、键、值矩阵。
+- `d_k`：键向量维度，用于缩放稳定梯度。
 
 ## 工程实现要点
 
