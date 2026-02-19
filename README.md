@@ -1,19 +1,16 @@
-# LLM-Core: 核心知识解析与复现仓库
+# LLM-Core: 核心知识解析文档仓库
 
-本项目是一个系统的 LLM 核心技术栈解析仓库。通过对 LLM、VLM 与后训练（Alignment）关键环节的"最小闭环"复现，记录并巩固大模型底层原理与工程实践方案。
+本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。
 
 ---
 
-## 🛠️ 环境预设与运行
+## 🛠️ 仓库定位与使用方式
 
-```bash
-# 激活工程环境
-conda activate finetune
-
-# 运行模块解析 (建议配合 --toy 参数观察闭环逻辑)
-python run.py --module sft --toy
-python run.py --module ppo --toy
-```
+> 当前仓库状态：**纯文档仓库**（以知识解析与技术笔记为主）。
+>
+> - `modules/` 下内容为主要学习入口。
+> - 根目录 `run.py` 与 `tools/` 中脚本为历史工程文件，不作为当前维护范围，也不保证可执行。
+> - 如需代码复现，请以对应文档中的外部项目/实现链接为准（若文档已提供）。
 
 ---
 
@@ -99,7 +96,8 @@ python run.py --module ppo --toy
 ### 1. 显存计算与容量估算 (Memory & Compute)
 
 - **静态权重**：`fp16` 占 2 Bytes/Param。
-- **KV Cache**：显存占用 = `2 × layers × heads × head_dim × precision_bytes`。
+- **KV Cache（总量）**：`batch_size × seq_len × 2 × layers × kv_heads × head_dim × precision_bytes`。  
+  （其中 `2` 表示 K/V 两份缓存）
 - **量化增益**：通过 **定点量化** (INT4/INT8)，显存占用可降低 50%-75%。
 
 ### 2. 注意力机制变体
@@ -144,8 +142,10 @@ python run.py --module ppo --toy
   - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)
   - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Multi-Agent, OpenClaw)
   - `07_classic_models/`: 经典解析 (ChatGPT, DeepSeek-R1, Qwen3)
-- `tools/`: 自动化回归测试工具
-- `output/`: 训练产物、日志与测试报告
+- `tools/`: 历史脚本（归档，默认不作为当前文档体系的一部分）
+- `output/`: 历史输出目录（归档）
+- `docs/`: 文档规范与术语表（如 `DOC_STYLE.md`、`TERMINOLOGY.md`）
+- `scripts/`: 文档检查脚本（如链接检查）
 
 ---
 
@@ -166,8 +166,12 @@ python run.py --module ppo --toy
 
 ---
 
-## 🧪 系统健康度验证
+## 🧪 文档质量检查（建议）
 
 ```bash
-python tools/smoke_test.py  # 验证全模块运行逻辑，结果输出至 output/smoke_reports/
+# 1) Markdown 本地链接检查（README + modules + docs）
+python scripts/check_markdown_links.py README.md modules docs
 ```
+
+- 术语一致性：以 `docs/TERMINOLOGY.md` 为唯一规范，新增术语先入表再落文档。
+- 结构一致性：改动 `modules/` 后同步更新 README 导航与索引表。
