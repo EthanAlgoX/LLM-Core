@@ -23,6 +23,22 @@ Agent 是大语言模型从“对话框”向“生产力工具”演进的核�
 3. 根据反馈修正计划（Re-plan）。
 4. 在满足停止条件后汇总输出最终答案（Finalize）。
 
+## 图文速览（参考 llm_interview_note）
+
+![Agent 技术演进参考图](./assets/agent_evolution_reference.png)
+
+图示解读：从 Prompt 工程到 Agent 闭环，关键增量是“工具调用 + 反馈反思 + 记忆系统”。
+
+```mermaid
+flowchart LR
+    A["Goal"] --> B["Plan"]
+    B --> C["Act (Tools)"]
+    C --> D["Observe"]
+    D --> E["Reflect / Re-plan"]
+    E --> B
+    E --> F["Finalize"]
+```
+
 ---
 
 ## 核心组件解析

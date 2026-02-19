@@ -33,6 +33,21 @@ Agent 的记忆系统是实现长期交互能力的关键。分为短期记忆�
    - 解决语义稀释问题
    - 典型方案：Cross-Encoder、BGE-Reranker
 
+## 图文速览（参考 llm_interview_note）
+
+![RAG 架构参考图](./assets/rag_reference.jpeg)
+
+图示解读：RAG 不是“把知识喂给模型”，而是“先检索，再拼接上下文，再生成”，每一步都可独立优化。
+
+```mermaid
+flowchart LR
+    A["User Query"] --> B["Retriever"]
+    B --> C["Candidate Chunks"]
+    C --> D["Reranker"]
+    D --> E["Top-K Context"]
+    E --> F["LLM Generation"]
+```
+
 ---
 
 ## 进阶技术
@@ -114,4 +129,3 @@ metrics = evaluate(state)
 
 - [ReAct](https://arxiv.org/abs/2210.03629)
 - [Toolformer](https://arxiv.org/abs/2302.04761)
-

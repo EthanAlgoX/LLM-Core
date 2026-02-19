@@ -31,6 +31,21 @@ $$\mathrm{Reward}_{total} = \mathrm{Reward}_{RM} - \beta \cdot D_{KL}(\pi_\theta
 
 - **意义**：在追求高分（Reward）的同时，惩罚那些偏离原始 SFT 模型（Reference）太远的行为。它就像一条“风筝线”，拉住模型不让其产生严重的策略崩坏。
 
+## 图文速览（参考 llm_interview_note）
+
+![PPO 训练过程参考图](./assets/ppo_reference.png)
+
+图示解读：PPO 的关键是“采样-评估-裁剪更新”闭环，避免策略一步更新过猛导致训练崩溃。
+
+```mermaid
+flowchart LR
+    A["Policy (Old) Generate"] --> B["Reward/Critic Evaluate"]
+    B --> C["Compute Advantage"]
+    C --> D["Clipped Objective Update"]
+    D --> E["Policy (New)"]
+    E --> A
+```
+
 ## 核心架构：四大角色
 
 PPO 训练背后涉及四个关键模型的协作：
@@ -186,4 +201,3 @@ metrics = evaluate(state)
 
 - [InstructGPT](https://arxiv.org/abs/2203.02155)
 - [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)
-

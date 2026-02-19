@@ -30,6 +30,21 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 3. 通过归一化与训练技巧保证深层网络稳定收敛。
 4. 推理时结合 KV Cache 降低重复计算。
 
+## 图文速览（参考 llm_interview_note）
+
+![Attention 机制参考图](./assets/attention_reference.png)
+
+图示解读：上图展示了 Q/K/V 交互与注意力加权的直观过程，适合先建立“查询-匹配-聚合”的整体心智模型。
+
+```mermaid
+flowchart LR
+    A["Token Embedding"] --> B["Q/K/V Projection"]
+    B --> C["Scaled Dot-Product Attention"]
+    C --> D["Multi-Head Concat + Linear"]
+    D --> E["Residual + Norm + FFN"]
+    E --> F["Next Layer / Logits"]
+```
+
 ---
 
 ## 核心组件解析

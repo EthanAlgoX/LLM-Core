@@ -35,6 +35,20 @@
    - **内容**：利用第二阶段训练好的 RM 给 Actor 打分，通过强化学习算法（PPO 或 GRPO）最大化期望奖励。
    - **关键元素**：Reward（得分）、Critic（预估）、KL Penalty（防模型练废的紧箍咒）。
 
+## 图文速览（参考 llm_interview_note）
+
+![RLHF 三阶段流程参考图](./assets/rlhf_reference.png)
+
+图示解读：图中强调 RLHF 的三段式流水线，核心是把“人类偏好”变成可优化的奖励信号。
+
+```mermaid
+flowchart LR
+    A["SFT Model"] --> B["Sample Candidates"]
+    B --> C["Human Preference Ranking"]
+    C --> D["Reward Model"]
+    D --> E["PPO/GRPO Optimize Policy"]
+```
+
 ## 关键公式
 
 RLHF 的最终优化目标是两者的平衡：
@@ -134,4 +148,3 @@ metrics = evaluate(state)
 
 - [InstructGPT](https://arxiv.org/abs/2203.02155)
 - [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)
-

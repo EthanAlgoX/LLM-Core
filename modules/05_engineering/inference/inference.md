@@ -24,6 +24,21 @@
 
 - **技术解析点**：Llama 7B (fp16) 处理 1024 长度约占用 0.5GB 显存。
 
+## 图文速览（参考 llm_interview_note）
+
+![vLLM 连续批处理参考图](./assets/vllm_continuous_batching_reference.png)
+
+图示解读：连续批处理会在请求完成后立即补入新请求，比静态批处理更能减少 GPU 空转。
+
+```mermaid
+flowchart LR
+    A["Incoming Requests"] --> B["Scheduler"]
+    B --> C["Continuous Batching"]
+    C --> D["Paged KV Cache"]
+    D --> E["Decode Tokens"]
+    E --> F["Return Responses"]
+```
+
 ## 推理框架 (Inference Frameworks)
 
 | 框架 | 核心技术点 | 场景优势 |
@@ -221,4 +236,3 @@ metrics = evaluate(state)
 
 - [Megatron-LM](https://github.com/NVIDIA/Megatron-LM)
 - [DeepSpeed](https://www.deepspeed.ai/)
-

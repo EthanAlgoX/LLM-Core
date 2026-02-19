@@ -29,6 +29,20 @@
 
 因为它不存储庞大的梯度矩阵 $\Delta W$ ，仅存储细小的 $A$ 和 $B$ 。
 
+## 图文速览（参考 llm_interview_note）
+
+![LoRA 低秩分解参考图](./assets/lora_reference.png)
+
+图示解读：核心是把完整参数更新拆成低秩矩阵乘积，只训练小矩阵即可完成任务迁移。
+
+```mermaid
+flowchart LR
+    A["Frozen Weight W"] --> C["Output: Wx"]
+    B["LoRA Branch: A then B"] --> D["Delta: BAx"]
+    C --> E["Final: Wx + BAx"]
+    D --> E
+```
+
 ## 进阶：QLoRA (Quantized LoRA)
 
 ### QLoRA 技术亮点
