@@ -30,56 +30,56 @@ python run.py --module ppo --toy
 
 ### 2. 架构核心：变压器、多模态与 MoE (Architecture & Scaling)
 
-| 领域 | 核心内容 | 原理技术要点 |
-| --- | --- | --- |
-| 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | **MHSA**、**Normalization (RMSNorm)** 与 **RoPE 旋转位置编码** |
-| 注意力内核 | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) | **MHA / GQA / MQA** 变体与 **Flash Attention** 工程实现 |
-| 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 |
-| 模态融合 | [VLM Mapping / Hub](./modules/02_architecture/vlm/vlm.md) | **MLP Projector**、**Cross-Attention** 与多模态对齐策略 |
-| 多媒体生成 | [Diffusion](./modules/02_architecture/generation/diffusion/diffusion.md) / [DiT](./modules/02_architecture/generation/dit/dit.md) | **Diffusion Transformer (DiT)**、**Stable Diffusion** 与生成控制 |
-| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | **KV Cache (PagedAttention)**、**解码策略** 与 **投机采样** |
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | **MHSA**、**Normalization (RMSNorm)** 与 **RoPE 旋转位置编码** | LLM 的"身体"——每个词怎么被感知并编码成向量 |
+| 注意力内核 | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) | **MHA / GQA / MQA** 变体与 **Flash Attention** 工程实现 | 模型"读文章"时同时关注多个角度，Flash Attention 让这更快更省显存 |
+| 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 | 超大模型拆成多个"专家"，每次只激活少数几个，省算力 |
+| 模态融合 | [VLM Mapping / Hub](./modules/02_architecture/vlm/vlm.md) | **MLP Projector**、**Cross-Attention** 与多模态对齐策略 | 把图像"翻译"成语言模型能理解的格式，让 AI 能看图说话 |
+| 多媒体生成 | [Diffusion](./modules/02_architecture/generation/diffusion/diffusion.md) / [DiT](./modules/02_architecture/generation/dit/dit.md) | **Diffusion Transformer (DiT)**、**Stable Diffusion** 与生成控制 | AI 画图原理：从噪声图一步步去噪，变成目标图片 |
+| 生成推理 | [Decoding Strategy](./modules/02_architecture/generation/generation.md) | **KV Cache (PagedAttention)**、**解码策略** 与 **投机采样** | 让 AI 吐字又快又省内存——如何高效地一字一字生成文本 |
 
 ### 3. 能力塑形：微调、对齐与仿真 (Post-Training & Alignment)
 
-| 领域 | 核心内容 | 原理技术要点 |
-| --- | --- | --- |
-| 对齐总览 | [Alignment Overview](./modules/03_alignment/03_alignment.md) | 后训练对齐全链路解析：从 SFT 到 RLHF 的演进路径 |
-| 监督学习 | [SFT 解析](./modules/03_alignment/sft/sft.md) | **Supervised Fine-Tuning**、数据质量初筛与指令遵循 |
-| 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) |
-| 偏好对齐 | [PPO](./modules/03_alignment/ppo/ppo.md) / [DPO](./modules/03_alignment/dpo/dpo.md) | **在线/离线对齐算法**、**奖励模型 (RM)** 与 **隐含偏好优化 (DPO)** |
-| 基础算法 | [PG](./modules/03_alignment/policy_gradient/policy_gradient.md) / [AC](./modules/03_alignment/actor_critic/actor_critic.md) | Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础 |
-| 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 |
-| 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL 训练范式**、**基于模拟器的演练** 与 **多智能体博弈 (MARL)** |
-| 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** |
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| 对齐总览 | [Alignment Overview](./modules/03_alignment/03_alignment.md) | 后训练对齐全链路解析：从 SFT 到 RLHF 的演进路径 | 从"写作业"到"真正听懂人话"，AI 是怎么一步步被调教的 |
+| 监督学习 | [SFT 解析](./modules/03_alignment/sft/sft.md) | **Supervised Fine-Tuning**、数据质量初筛与指令遵循 | 拿人类写的高质量问答对，手把手教模型"怎么说话" |
+| 参数高效微调 | [PEFT 解析](./modules/03_alignment/peft/peft.md) | **LoRA**、**Prefix Tuning** 与模型融合 (**Model Merging**) | 只改模型一小部分权重，就能让它学会新技能，省时省显存 |
+| 偏好对齐 | [PPO](./modules/03_alignment/ppo/ppo.md) / [DPO](./modules/03_alignment/dpo/dpo.md) | **在线/离线对齐算法**、**奖励模型 (RM)** 与 **隐含偏好优化 (DPO)** | 给 AI 两个答案让它选好的，通过"偏好打分"驯化它说人话 |
+| 基础算法 | [PG](./modules/03_alignment/policy_gradient/policy_gradient.md) / [AC](./modules/03_alignment/actor_critic/actor_critic.md) | Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础 | RL 的基础：好结果加分、坏结果扣分，用梯度驱动策略进化 |
+| 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 | DeepSeek 的秘诀：同时生成多个答案，优质的胜出，让模型学会"推理" |
+| 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL 训练范式**、**基于模拟器的演练** 与 **多智能体博弈 (MARL)** | 在沙盒里练习，让 Agent 从实战模拟中学会完成复杂的真实任务 |
+| 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** | 训练数据的质量决定模型上限，用 LLM 来给 LLM 打分做筛选 |
 
 ### 4. 系统性能：并发、并行与 PD 分离 (Engineering & Scaling)
 
-| 领域 | 核心内容 | 原理技术要点 |
-| --- | --- | --- |
-| 工程总览 | [Engineering Overview](./modules/05_engineering/05_engineering.md) | 模型并行、显存管理与大规模训练系统的技术演进入口 |
-| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | **3D Parallelism (TP/PP/DP)**、**专家并行 (EP)** 与通信优化 |
-| 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **Prefill-Decode 分离**、**PagedAttention** 与算子融合 |
-| 算子与加速 | [CUDA](./modules/05_engineering/cuda/cuda.md) / [Precision](./modules/05_engineering/mixed_precision/mixed_precision.md) | **CUDA Kernel 优化**、**混合精度 (FP16/BF16)** 与量化加速原理 |
-| 工程框架 | [DeepSpeed](./modules/05_engineering/deepspeed/deepspeed.md) | **DeepSpeed ZeRO** 系列显存优化与训练流水线 |
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| 工程总览 | [Engineering Overview](./modules/05_engineering/05_engineering.md) | 模型并行、显存管理与大规模训练系统的技术演进入口 | 把一个大到塞不进单张卡的模型，切开分发到成百上千张卡协同训练 |
+| 并行策略 | [Distributed Training](./modules/05_engineering/megatron/megatron.md) | **3D Parallelism (TP/PP/DP)**、**专家并行 (EP)** 与通信优化 | 模型切横刀、纵刀、流水线——三把刀解决超大模型的分布式训练难题 |
+| 推理框架 | [Inference Frameworks](./modules/05_engineering/inference/inference.md) | **Prefill-Decode 分离**、**PagedAttention** 与算子融合 | 让用户提问和 AI 吐字分开跑，显存更省、吞吐更高 |
+| 算子与加速 | [CUDA](./modules/05_engineering/cuda/cuda.md) / [Precision](./modules/05_engineering/mixed_precision/mixed_precision.md) | **CUDA Kernel 优化**、**混合精度 (FP16/BF16)** 与量化加速原理 | 用低精度浮点数代替 FP32，显存省一半，速度翻倍，效果几乎不变 |
+| 工程框架 | [DeepSpeed](./modules/05_engineering/deepspeed/deepspeed.md) | **DeepSpeed ZeRO** 系列显存优化与训练流水线 | ZeRO 把优化器状态等分散到每张卡，人人各拿一份不重复，省掉冗余显存 |
 
 ### 5. 应用闭环：自主智能体与多机协作 (Agents & Mesh)
 
-| 领域 | 核心内容 | 原理技术要点 |
-| --- | --- | --- |
-| 智能体总览 | [Agentic Overview](./modules/06_agent/06_agent.md) | 核心逻辑：**LLM + Planning + Memory + Toolkit** 深度解析 |
-| 记忆与检索 | [Memory & RAG](./modules/06_agent/memory_rag/memory_rag.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
-| 编排范式 | [Agent Orchestration](./modules/06_agent/orchestration/orchestration.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 |
-| 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** |
-| 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/multi_agent/multi_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
-| 本地Agent框架 | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) | **Gateway + Runtime**、**文件记忆系统**、**Heartbeat 事件驱动** 与 **混合检索** |
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| 智能体总览 | [Agentic Overview](./modules/06_agent/06_agent.md) | 核心逻辑：**LLM + Planning + Memory + Toolkit** 深度解析 | 让 AI 从"回答问题"升级为"主动做事"——思考、记忆、用工具、迭代执行 |
+| 记忆与检索 | [Memory & RAG](./modules/06_agent/memory_rag/memory_rag.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** | AI 自带可检索"知识库"，让它能回答私有或超出训练范围的问题 |
+| 编排范式 | [Agent Orchestration](./modules/06_agent/orchestration/orchestration.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 | Agent 的"大脑逻辑"：先思考再行动，遇到新情况随时调整计划 |
+| 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** | 用状态机管理 Agent 行为流，保证复杂任务可靠推进不乱套 |
+| 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/multi_agent/multi_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** | 多个 AI 各自分工合作，像一个智能团队完成单 Agent 搞不定的任务 |
+| 本地Agent框架 | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) | **Gateway + Runtime**、**文件记忆系统**、**Heartbeat 事件驱动** 与 **混合检索** | 可本地运行的完整 Agent 框架，用文件系统做记忆，用消息总线解耦通信 |
 
 ### 6. 进阶课题：离线强化学习 (Advanced Topics: Offline RL)
 
-| 领域 | 核心内容 | 原理技术要点 |
-| --- | --- | --- |
-| 离线对齐总览 | [Offline RL Overview](./modules/04_advanced_topics/offline_rl/offline_rl.md) | 在无环境交互前提下，利用离线轨迹数据进行策略优化的核心范式 |
-| 算法复现 | [Offline RL](./modules/04_advanced_topics/offline_rl/offline_rl.md) | **Offline RL 系统详述** 与数据分布偏移（Distribution Shift）对抗策略 |
-| 代表算法 | [BCQ](./modules/04_advanced_topics/offline_rl/bcq/bcq.md) / [CQL](./modules/04_advanced_topics/offline_rl/cql/cql.md) | **外推误差 (Extrapolation Error) 抑制** 与 **下界 Q 学习 (Lower Bound Q-learning)** |
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| 离线对齐总览 | [Offline RL Overview](./modules/04_advanced_topics/offline_rl/offline_rl.md) | 在无环境交互前提下，利用离线轨迹数据进行策略优化的核心范式 | 不和真实环境交互，只用"历史经验数据"学习，像人类读案例复盘一样 |
+| 算法复现 | [Offline RL](./modules/04_advanced_topics/offline_rl/offline_rl.md) | **Offline RL 系统详述** 与数据分布偏移（Distribution Shift）对抗策略 | 离线数据和真实分布有差距，需专门设计算法防止策略学偏 |
+| 代表算法 | [BCQ](./modules/04_advanced_topics/offline_rl/bcq/bcq.md) / [CQL](./modules/04_advanced_topics/offline_rl/cql/cql.md) | **外推误差 (Extrapolation Error) 抑制** 与 **下界 Q 学习 (Lower Bound Q-learning)** | BCQ 约束动作别乱飞；CQL 让 Q 值保守低估——两者都防止 AI 对没见过的情况过度自信 |
 
 ---
 
@@ -94,7 +94,7 @@ python run.py --module ppo --toy
 ### 2. 注意力机制变体
 
 | 机制 | 特点 | 显存优化 |
-|-----|------|---------|
+| --- | --- | --- |
 | MHA | Multi-Head Attention | 标准 |
 | MQA | Multi-Query Attention | KV 头=1 |
 | GQA | Grouped-Query Attention | 折中方案 |
@@ -102,7 +102,7 @@ python run.py --module ppo --toy
 ### 3. 对齐算法演进
 
 | 阶段 | 算法 | 核心思想 |
-|-----|------|---------|
+| --- | --- | --- |
 | SFT | Supervised Fine-Tuning | 模仿学习 |
 | RLHF | PPO + Reward Model | 人类反馈强化学习 |
 | DPO | Direct Preference Optimization | 离线对比优化 |
