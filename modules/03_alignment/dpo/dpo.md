@@ -150,7 +150,7 @@ trainer.train()
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/dpo
 conda activate finetune
-python code/dpo.py
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 ## 输出结果

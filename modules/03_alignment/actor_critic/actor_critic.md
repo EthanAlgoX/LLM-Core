@@ -142,5 +142,5 @@ model = AutoModelForCausalLMWithValueHead.from_pretrained("Qwen/Qwen2.5-7B")
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/actor_critic
 conda activate finetune
-python code/actor_critic.py
+# 纯文档仓库：历史脚本命令已归档
 ```

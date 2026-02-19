@@ -172,7 +172,7 @@ for batch in dataloader:
 ## 原始脚本运行
 
 ```bash
-python code/ppo.py
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 **可视化**：默认输出至 `output/ppo_metrics`。建议阅读顺序：`summary.json` → `training_curves.png` → `training_metrics.csv`。

@@ -191,7 +191,7 @@ trainer.train()
 ## 原始脚本运行
 
 ```bash
-python code/grpo_demo.py
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 **可视化**：默认输出至 `output/grpo_metrics`。关注 `reward`（总分）与 `reward_std`（组内差异）的变化趋势。

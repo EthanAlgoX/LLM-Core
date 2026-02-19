@@ -238,5 +238,5 @@ tensorboard --logdir saves/qwen2.5-7b/lora/my_sft
 本模块也提供了不依赖框架的纯 PyTorch SFT 实现，供理解底层机制：
 
 ```bash
-python code/sft.py
+# 纯文档仓库：历史脚本命令已归档
 ```

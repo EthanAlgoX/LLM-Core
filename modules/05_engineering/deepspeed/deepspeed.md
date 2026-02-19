@@ -118,11 +118,13 @@ for batch in dataloader:
 ### Step 3: 启动命令
 
 ```bash
+TRAIN_ENTRY="<training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
+
 # 单机多卡
-deepspeed --num_gpus=4 train.py --deepspeed ds_config.json
+deepspeed --num_gpus=4 "$TRAIN_ENTRY" --deepspeed ds_config.json
 
 # 多机多卡（hostfile 方式）
-deepspeed --hostfile=hostfile.txt --num_gpus=8 train.py --deepspeed ds_config.json
+deepspeed --hostfile=hostfile.txt --num_gpus=8 "$TRAIN_ENTRY" --deepspeed ds_config.json
 ```
 
 `hostfile.txt` 格式：
@@ -158,7 +160,7 @@ args = TrainingArguments(
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/deepspeed
 conda activate finetune
-python code/deepspeed.py
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 ## 输出结果

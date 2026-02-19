@@ -139,5 +139,5 @@ benchmark_precision(torch.bfloat16)  # BF16（A100 约 2x 提速）
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/mixed_precision
 conda activate finetune
-python code/mixed_precision.py
+# 纯文档仓库：历史脚本命令已归档
 ```

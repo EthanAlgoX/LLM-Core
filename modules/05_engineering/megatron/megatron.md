@@ -60,11 +60,12 @@ TENSOR_PARALLEL=4          # TP: 同节点内 NVLink 互联的卡数
 PIPELINE_PARALLEL=2        # PP: 跨节点的流水线段数
 DATA_PARALLEL=2            # DP: 自动计算 = WORLD_SIZE / (TP × PP)
 WORLD_SIZE=16              # 总 GPU 数 = 4 × 2 × 2
+TRAIN_ENTRY="<megatron_training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
 
-# 启动 Megatron-LM GPT 预训练
+# 启动 Megatron-LM GPT 预训练（纯文档示例：展示关键参数组合）
 torchrun --nproc_per_node=4 --nnodes=4 --node_rank=$NODE_RANK \
     --master_addr=$MASTER_ADDR --master_port=6000 \
-    pretrain_gpt.py \
+    "$TRAIN_ENTRY" \
     --tensor-model-parallel-size $TENSOR_PARALLEL \
     --pipeline-model-parallel-size $PIPELINE_PARALLEL \
     --num-layers 32 \
@@ -91,7 +92,8 @@ torchrun --nproc_per_node=4 --nnodes=4 --node_rank=$NODE_RANK \
 
 ```bash
 # 结合 Megatron 的模型并行 + DeepSpeed 的 ZeRO 优化
-deepspeed --num_gpus=8 pretrain_gpt.py \
+TRAIN_ENTRY="<megatron_training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
+deepspeed --num_gpus=8 "$TRAIN_ENTRY" \
     --tensor-model-parallel-size 4 \
     --pipeline-model-parallel-size 2 \
     --deepspeed \
@@ -134,5 +136,5 @@ mlp = ColumnParallelLinear(4096, 16384, tp_size=4)
 ```bash
 cd <YOUR_PROJECT_ROOT>/pre_train/llm/megatron
 conda activate finetune
-python code/megatron.py
+# 纯文档仓库：历史脚本命令已归档
 ```

@@ -72,4 +72,4 @@ LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件�
 
 ## 📂 模块实战
 
-- `code/`：包含核心 Transformer 架构的最小可读实现与实验脚本。
+- `历史脚本（归档）`：包含核心 Transformer 架构的最小可读实现与实验脚本。

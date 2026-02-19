@@ -138,5 +138,5 @@ for prompt in prompts:
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/policy_gradient
 conda activate finetune
-python code/policy_gradient.py
+# 纯文档仓库：历史脚本命令已归档
 ```

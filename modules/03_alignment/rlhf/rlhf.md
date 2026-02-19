@@ -167,7 +167,7 @@ for batch in prompt_dataloader:
 ## 原始脚本运行
 
 ```bash
-python code/rlhf.py --reward-model <你的RM路径>
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 **指标解读**：

@@ -137,7 +137,8 @@ with torch.profiler.profile(
 
 ```bash
 # NVIDIA Nsight Systems 命令行性能分析
-nsys profile -o report python train.py
+TRAIN_ENTRY="<training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
+nsys profile -o report python "$TRAIN_ENTRY"
 
 # 查看 GPU 利用率
 nvidia-smi dmon -s u -d 1
@@ -150,5 +151,5 @@ nvidia-smi dmon -s u -d 1
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/cuda
 conda activate finetune
-python code/cuda.py
+# 纯文档仓库：历史脚本命令已归档
 ```

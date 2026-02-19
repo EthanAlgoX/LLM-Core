@@ -52,7 +52,7 @@ $$L_{total} = L_{TD} + \alpha \cdot L_{CQL\_reg}$$
 cd <YOUR_PROJECT_ROOT>/post_train/offline_rl/cql
 
 conda activate finetune
-python code/cql.py
+# 纯文档仓库：历史脚本命令已归档
 ```
 
 ## 输出结果
@@ -67,7 +67,7 @@ python code/cql.py
 
 ## 目录文件说明（重点）
 
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
+- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

@@ -83,4 +83,4 @@ VLM 的核心问题是**模态对齐**：如何将视觉编码器的特征空间
 
 ## 📂 模块实战
 
-- `code/`：包含 BLIP-2 (Q-Former) 和 LLaVA (MLP Projector) 的对比复现实验。
+- `历史脚本（归档）`：包含 BLIP-2 (Q-Former) 和 LLaVA (MLP Projector) 的对比复现实验。
