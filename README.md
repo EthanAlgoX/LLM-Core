@@ -50,6 +50,7 @@ python run.py --module ppo --toy
 | 基础算法 | [PG](./modules/03_alignment/policy_gradient/policy_gradient.md) / [AC](./modules/03_alignment/actor_critic/actor_critic.md) | Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础 | RL 的基础：好结果加分、坏结果扣分，用梯度驱动策略进化 |
 | 推理对齐 | [DeepSeek GRPO](./modules/03_alignment/grpo/grpo.md) | **GRPO 对齐范式**、奖励模型建模与复杂逻辑链验证 | DeepSeek 的秘诀：同时生成多个答案，优质的胜出，让模型学会"推理" |
 | 智能体强化学习 | [Agentic-RL](./modules/03_alignment/rlhf/rlhf.md) | **Agentic-RL 训练范式**、**基于模拟器的演练** 与 **多智能体博弈 (MARL)** | 在沙盒里练习，让 Agent 从实战模拟中学会完成复杂的真实任务 |
+| 数据合成 | [Data Synthesis](./modules/03_alignment/data_synthesis/data_synthesis.md) | **拒绝采样、Evol-Instruct、仿真轨迹合成** 与 **长思维链 (Long CoT) 合成** | 真实数据不够用时，让 LLM 自己"造题目"，并用验证器过滤掉低质量样本 |
 | 数据与评估 | [Data & Evaluation](./modules/03_alignment/data_engineering.md) | **数据处理 (Cleaning)**、**对抗性测试** 与 **LLM-as-a-Judge** | 训练数据的质量决定模型上限，用 LLM 来给 LLM 打分做筛选 |
 
 ### 4. 系统性能：并发、并行与 PD 分离 (Engineering & Scaling)
