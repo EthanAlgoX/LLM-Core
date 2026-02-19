@@ -8,7 +8,7 @@
 - **阶段**：后训练（Post-training）之 RLHF 对齐阶段。
 - **类型**：强化学习（Policy Gradient + KL Constraint）。
 
-## 核心原理与关键公式
+## 关键公式
 
 ### 1. 关键公式：PPO 剪切目标函数 (Clipped Objective)
 
@@ -123,56 +123,32 @@ bf16: true
 output_dir: saves/qwen2.5-7b/lora/ppo
 ```
 
-```bash
-# 先训练 RM
-llamafactory-cli train reward_model.yaml
-# 再跑 PPO
-llamafactory-cli train ppo_train.yaml
-```
-
-### 方式二：TRL 库 PPO
-
 ```python
-from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
-from transformers import AutoTokenizer, pipeline
-
-# 1. 加载策略模型（带 Value Head）
-model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/qwen2.5-7b-sft")
-ref_model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/qwen2.5-7b-sft")
-tokenizer = AutoTokenizer.from_pretrained("saves/qwen2.5-7b-sft")
-
-# 2. 加载奖励模型（作为打分管道）
-reward_pipeline = pipeline("text-classification", model="saves/reward_model")
-
-# 3. PPO 配置
-ppo_config = PPOConfig(
-    batch_size=4,
-    learning_rate=1e-6,
-    ppo_epochs=4,
-    kl_penalty="kl",                 # KL 约束类型
-    target_kl=6.0,
-)
-
-# 4. PPO 训练循环
-ppo_trainer = PPOTrainer(ppo_config, model, ref_model, tokenizer)
-
-for batch in dataloader:
-    # 生成回复
-    response_tensors = ppo_trainer.generate(batch["input_ids"])
-    # 计算奖励
-    rewards = [reward_pipeline(text)[0]["score"] for text in decoded_responses]
-    # PPO 更新
-    stats = ppo_trainer.step(batch["input_ids"], response_tensors, rewards)
-```
-
-> **显存注意**：PPO 需维护 4 个模型（Actor, Ref, Reward, Critic），显存需求约为 SFT 的 **4 倍**。建议使用 ZeRO-2/3。
-
----
-
-## 原始脚本运行
-
-```bash
-# 纯文档仓库：历史脚本命令已归档
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 **可视化**：默认输出至 `output/ppo_metrics`。建议阅读顺序：`summary.json` → `training_curves.png` → `training_metrics.csv`。
+
+---
+## 定义与目标
+
+- **定义**：本节主题用于解释该模块的核心概念与实现思路。
+- **目标**：帮助读者快速建立问题抽象、方法路径与工程落地方式。
+## 关键步骤
+
+1. 明确输入/输出与任务边界。
+2. 按模块主流程执行核心算法或系统步骤。
+3. 记录指标并做对比分析，形成可复用结论。
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
+```

@@ -9,12 +9,12 @@
 - **类型**：保守价值函数学习。
 - **作用**：通过在训练中主动“压低”未见动作的 Q 值，确保模型在离线数据上学到的策略不会因为盲目乐观而崩溃。
 
-## 什么是 CQL？
+## 定义与目标
 
 CQL（Conservative Q-Learning）是解决离线强化学习中“过度乐观”问题的核心方案。
 在离线训练中，标准 Q-learning 往往会给分布外（OOD）动作打出虚高甚至溢出的分数，导致生成的策略在实际部署时表现极差。CQL 的核心哲学是：**“宁可低估，绝不虚高。对于没见过或不确定的动作，我先假设它很差，直到证据证明它真的好。”**
 
-## 训练的关键步骤
+## 关键步骤
 
 1. **采样 (Sampling)**：从静态离线数据集中读取 $(s, a, r, s')$ 元组。
 2. **计算 Bellman 误差 (TD Loss)**：像普通 DQN 一样计算均方误差损失。
@@ -24,7 +24,7 @@ CQL（Conservative Q-Learning）是解决离线强化学习中“过度乐观”
 4. **加权求和更新**：将 TD Loss 与压制项相加（乘以系数 $\alpha$ ），进行反向传播。
 5. **策略提取**：训练完成后，直接取 $a = \arg\max Q(s, a)$ 作为最优策略。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 保守损失项 (Conservative Penalty)
 
@@ -46,13 +46,14 @@ $$L_{total} = L_{TD} + \alpha \cdot L_{CQL\_reg}$$
 2. 相比在线 `PPO`：CQL 只使用静态数据，不与环境实时交互。
 3. 相比 `TD Learning`：CQL 面向离线分布偏移问题，TD 常用于在线学习。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/offline_rl/cql
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -67,7 +68,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

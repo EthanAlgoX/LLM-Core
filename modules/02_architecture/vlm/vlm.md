@@ -97,3 +97,33 @@ image_prefix = llava_projector(vision_tokens)
 multimodal_input = concat(image_prefix, prompt_tokens)
 answer_b = llm.generate(multimodal_input)
 ```
+
+---
+## 定义与目标
+
+- **定义**：本节主题用于解释该模块的核心概念与实现思路。
+- **目标**：帮助读者快速建立问题抽象、方法路径与工程落地方式。
+## 关键步骤
+
+1. 明确输入/输出与任务边界。
+2. 按模块主流程执行核心算法或系统步骤。
+3. 记录指标并做对比分析，形成可复用结论。
+## 关键公式（逻辑表达）
+
+\[
+\text{Result} = \text{Core Method}(\text{Input}, \text{Config}, \text{Constraints})
+\]
+
+符号说明：
+- \(\text{Input}\)：任务输入。
+- \(\text{Config}\)：训练或推理配置。
+- \(\text{Constraints}\)：方法约束（如资源、稳定性或安全边界）。
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
+```

@@ -5,7 +5,17 @@
 
 Agent 是大语言模型从“对话框”向“生产力工具”演进的核心形态。
 
-> **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use
+## 定义与目标
+
+- **定义**：Agent 是具备“规划-执行-观察-反思”闭环能力的 LLM 系统。
+- **目标**：让模型从单轮回答升级为多步骤任务执行，并可调用外部工具完成真实操作。
+
+## 关键步骤
+
+1. 理解目标并拆分任务（Planning）。
+2. 按步骤调用工具执行，并持续观察反馈（Act + Observe）。
+3. 根据反馈修正计划（Re-plan）。
+4. 在满足停止条件后汇总输出最终答案（Finalize）。
 
 ---
 
@@ -33,6 +43,12 @@ Agent 是大语言模型从“对话框”向“生产力工具”演进的核�
 - **Human-in-the-Loop (HITL)**：在关键动作前强制引入人工确认机制。
 
 ---
+
+## 关键公式（逻辑表达）
+
+\[
+\mathrm{Agent} = \mathrm{LLM} + \mathrm{Planning} + \mathrm{Memory} + \mathrm{Tool\ Use}
+\]
 
 ## 🛠️ 主流框架对比 (Frameworks)
 
@@ -65,16 +81,9 @@ NanoBot 是一个极简主义（~4k 行代码）但功能全备的 Agent 架构�
 
 - **Delegation**：主智能体通过 `SpawnTool` 派生子智能体执行背景任务，子智能体完成后发送系统消息（Bus Message）回传，主智能体收到信号后再总结给用户。
 
----
-
-### 📂 模块实战
-
-本目录下包含：
-
-- `data/`：模拟工具及其元数据定义。
+## 关键步骤代码（纯文档示例）
 
 ```python
-# 关键步骤代码（纯文档示例）
 state = {"goal": user_query, "scratchpad": []}
 
 while not task_finished(state):
@@ -85,3 +94,10 @@ while not task_finished(state):
 
 answer = llm_finalize(state)
 ```
+
+## 子模块导航
+
+- `memory_rag`: 记忆与检索机制。
+- `orchestration`: ReAct、Plan-and-Execute 与流程编排。
+- `multi_agent`: 多智能体协作范式。
+- `openclaw`: 本地优先 Agent 架构案例。

@@ -9,7 +9,7 @@
 - **类型**：策略评估与梯度加权技术。
 - **作用**：它是 PPO / Actor-Critic 等算法的核心输入。通过计算“超额收益”，它能显著降低策略梯度的方差，让模型更稳定地学习。
 
-## 什么是 Advantage（优势）？
+## 定义与目标
 
 在强化学习中，优势（Advantage）衡量的是：**“在特定状态下，执行某个动作比平均水平好多少？”**
 
@@ -18,7 +18,7 @@
 
 它就像是一个对比器，消除了状态本身的“基础分”（Value），只关注动作带来的“增量分”。
 
-## 计算的关键步骤
+## 关键步骤
 
 1. **采样 (Trajectory Generation)**：模型与环境交互，产生带有奖励 $r$ 的序列。
 2. **价值估计 (Value Estimation)**：通过 Critic 网络预测每个状态的期望分 $V(s)$。
@@ -29,7 +29,7 @@
    - **GAE 方式**：平滑地加权多步残差（最常用，如 PPO）。
 5. **策略更新**：用优势值作为权重去更新策略参数。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 基础定义
 
@@ -57,13 +57,14 @@ $$A(s, a) = Q(s, a) - V(s)$$
 2. 相比 `Policy Gradient`：本模块关注“估计器”，PG关注“更新目标”。
 3. 相比 `TD Learning`：TD 更偏价值函数更新，本模块偏策略优化输入信号分析。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/advantage
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -78,7 +79,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

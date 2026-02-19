@@ -9,7 +9,7 @@
 - **类型**：无模型（Model-Free）价值学习。
 - **作用**：它是强化学习中最具代表性的思想之一。它结合了蒙特卡洛（采样）和动态规划（迭代）的优点，实现了“边走边学”，无需等待任务结束。
 
-## 什么是 TD Learning？
+## 定义与目标
 
 TD（Temporal-Difference，时序差分）学习是强化学习的基石。其核心哲学是：**“用昨天的经验预估今天，并用今天的实际结果修正昨天的预估。”**
 
@@ -17,7 +17,7 @@ TD（Temporal-Difference，时序差分）学习是强化学习的基石。其�
 - 它不需要像动态规划那样预先知道环境的所有概率模型。
 - 它通过“时间上的差异”（TD Error）来不断自我进化。
 
-## 训练的关键步骤（以 Q-Learning 为例）
+## 关键步骤
 
 1. **初始化**：创建一个 Q 表（Q-Table），记录每个“状态-动作”对的初始分值。
 2. **选择动作**：采用 $\epsilon$ -greedy 策略，平衡探索（尝试新动作）与利用（选择已知最高分动作）。
@@ -25,7 +25,7 @@ TD（Temporal-Difference，时序差分）学习是强化学习的基石。其�
 4. **计算目标 (TD Target)**：预估未来的最大收益： $Target = r + \gamma \max_{a'} Q(s', a')$。
 5. **更新 Q 值**：根据目标与当前值的差异（TD Error）进行修正。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. TD 误差 (TD Error)
 
@@ -46,13 +46,14 @@ $$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a'
 2. 相比 `GAE`：GAE 是优势估计方法，TD 是更基础的价值更新思想。
 3. 相比 `Policy Gradient`：TD 主要学习值函数，PG 直接优化策略。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/td_learning
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -67,7 +68,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

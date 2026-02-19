@@ -17,7 +17,7 @@
 - **FP16/BF16 (Half Precision)**：精度较低，范围窄，但计算快且省内存。
 **策略**：在计算密集型且对精度不敏感的操作（如矩阵乘法）中使用 FP16/BF16，而在数值范围敏感的累计操作（如权重更新）中保留 FP32。
 
-## 关键训练步骤
+## 关键步骤
 
 1. **维护 FP32 权重副本 (Master Weights)**：
    - 在内存/显存中保留一份 FP32 的权重副本，用于在更新时保持精度。
@@ -28,7 +28,7 @@
 4. **梯度更新 (FP32)**：
    - 得到 FP16 梯度后，将其还原（Unscale）并转换回 FP32，然后作用于 Master Weights。
 
-## 核心数学逻辑
+## 关键公式
 
 ### 1. 损失缩放公式
 
@@ -134,10 +134,18 @@ benchmark_precision(torch.bfloat16)  # BF16（A100 约 2x 提速）
 
 ---
 
-## 原始脚本运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/systems/mixed_precision
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
+
+---
+## 定义与目标
+
+- **定义**：本节主题用于解释该模块的核心概念与实现思路。
+- **目标**：帮助读者快速建立问题抽象、方法路径与工程落地方式。

@@ -9,7 +9,7 @@
 - **类型**：高级优势估计技术。
 - **作用**：它是 PPO 等现代强化学习算法的标配。通过指数加权平均多步残差，它在保证方向正确（低偏差）的同时，大幅降低了训练的波动性（低方差）。
 
-## 什么是 GAE？
+## 定义与目标
 
 GAE（Generalized Advantage Estimation）是一种通过“折衷”来提升训练效率的方法。
 如果只看一步奖励（TD），虽然稳定但可能“短视”；如果看完整条序列（MC），虽然长远但波动异常剧烈。GAE 引入了一个因子 $\lambda$，通过对所有可能的步长进行加权平滑，找到了一个平衡点。
@@ -32,7 +32,7 @@ GAE（Generalized Advantage Estimation）是一种通过“折衷”来提升训
 - **GAE 的做法**：它像一个经验丰富的面试官，它会看你这一次的表现，同时也会参考你接下来的几步表现，甚至稍微瞄一眼更长远的发挥。它通过 $\lambda$ 因子，把“眼前的利益”和“长远的反馈”加权平均了一下。
 - **意义**：GAE 让模型更新时不再“大起大落”，它给出的“优势信号”既包含了长远的目光，又过滤掉了没必要的杂音。
 
-## 计算的关键步骤
+## 关键步骤
 
 1. **TD 残差计算 (Compute Temporal Difference)**：
    - 首先计算每一步的即时差异： $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ 。
@@ -43,7 +43,7 @@ GAE（Generalized Advantage Estimation）是一种通过“折衷”来提升训
 4. **损失计算与反向传播**：
    - 将估算出的 $A_t$ 代入策略梯度公式进行更新。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. TD 残差 (TD Error)
 
@@ -66,13 +66,14 @@ $$\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \del
 2. 相比 `Advantage` 模块：`advantage` 是多方法对比，`gae` 专注 GAE 训练过程。
 3. 相比 `Actor-Critic`：GAE 常作为 Actor-Critic 的优势估计组件。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/gae
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -86,7 +87,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

@@ -9,11 +9,11 @@
 - **类型**：直接策略搜索（Policy-based RL）。
 - **作用**：它是强化学习中最直观的一类算法，直接对策略参数进行梯度上升。它是 PPO 和 Actor-Critic 等高级算法的鼻祖。
 
-## 什么是 Policy Gradient？
+## 定义与目标
 
 策略梯度（Policy Gradient）是一类直接对策略进行参数化的强化学习方法。不同于学习价值函数（Q-learning），它直接通过优化神经网络输出的概率分布来最大化期望奖励。其核心哲学是：**“如果一个行为带来了好结果，那就增加它出现的概率；反之，则降低它。”**
 
-## 训练的关键步骤
+## 关键步骤
 
 1. **采样 (Trajectory Generation)**：让模型（Actor）根据当前概率生成一段完整的对话轨迹 $\tau$。
 2. **回报计算 (Return Calculation)**：计算该路径上获得的总奖励 $R(\tau)$。
@@ -21,7 +21,7 @@
 4. **策略更新 (Weight Update)**：沿着梯度方向更新模型参数 $\theta$。
 5. **迭代 (Iteration)**：采样新数据，不断循环，使模型向高奖励的方向偏移。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 目标函数 (Objective)
 
@@ -133,10 +133,12 @@ for prompt in prompts:
 
 ---
 
-## 原始脚本运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/alignment/policy_gradient
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```

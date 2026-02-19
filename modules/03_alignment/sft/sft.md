@@ -62,181 +62,40 @@ $$L(\theta) = - \sum_{i=1}^{T} \log P_\theta(y_i | x, y_{1}, \dots, y_{i-1})$$
 
 ### Step 1: 环境准备
 
-```bash
-# 安装 LLaMA Factory
-git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git
-cd LLaMA-Factory
-pip install -e ".[torch,metrics]"
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
-### Step 2: 数据集准备
+---
+## 定义与目标
 
-LLaMA Factory 使用 `data/dataset_info.json` 注册数据集。自定义数据集只需两步：
+- **定义**：本节主题用于解释该模块的核心概念与实现思路。
+- **目标**：帮助读者快速建立问题抽象、方法路径与工程落地方式。
+## 关键步骤
 
-**2a. 准备 JSONL 数据文件**（Alpaca 格式）：
+1. 明确输入/输出与任务边界。
+2. 按模块主流程执行核心算法或系统步骤。
+3. 记录指标并做对比分析，形成可复用结论。
+## 关键公式（逻辑表达）
 
-```json
-[
-  {
-    "instruction": "请解释什么是 Transformer 中的注意力机制。",
-    "input": "",
-    "output": "Transformer 中的注意力机制（Attention Mechanism）是一种让模型在处理序列时，能够动态关注不同位置信息的方法..."
-  },
-  {
-    "instruction": "将以下文本翻译成英文。",
-    "input": "大语言模型正在改变人工智能的格局。",
-    "output": "Large language models are reshaping the landscape of artificial intelligence."
-  }
-]
-```
+\[
+\text{Result} = \text{Core Method}(\text{Input}, \text{Config}, \text{Constraints})
+\]
 
-**2b. 在 `dataset_info.json` 中注册**：
-
-```json
-{
-  "my_custom_sft": {
-    "file_name": "my_custom_sft.json",
-    "columns": {
-      "prompt": "instruction",
-      "query": "input",
-      "response": "output"
-    }
-  }
-}
-```
-
-### Step 3: 训练配置（YAML）
-
-创建训练配置文件 `examples/train_lora/my_sft.yaml`：
-
-```yaml
-### 模型配置
-model_name_or_path: Qwen/Qwen2.5-7B           # 基座模型（HuggingFace ID 或本地路径）
-trust_remote_code: true
-
-### 微调方式
-stage: sft                                      # 训练阶段：sft
-do_train: true
-finetuning_type: lora                           # 微调类型：lora / full / freeze
-
-### LoRA 超参
-lora_target: all                                # 对所有线性层注入 LoRA
-lora_rank: 64                                   # 秩越大，表达力越强，但显存越多
-lora_alpha: 128                                 # 缩放系数，通常为 rank 的 2 倍
-lora_dropout: 0.05
-
-### 数据配置
-dataset: my_custom_sft                          # 对应 dataset_info.json 中的 key
-template: qwen                                  # 对话模板（qwen / llama3 / chatglm 等）
-cutoff_len: 2048                                # 最大序列长度
-preprocessing_num_workers: 16
-
-### 训练超参
-per_device_train_batch_size: 2
-gradient_accumulation_steps: 8                  # 有效批次 = 2 × 8 = 16
-num_train_epochs: 3.0
-learning_rate: 1.0e-4
-lr_scheduler_type: cosine
-warmup_ratio: 0.1
-bf16: true                                      # BF16 混合精度（A100/H100）
-gradient_checkpointing: true                    # 用时间换显存
-
-### 日志与保存
-logging_steps: 10
-save_steps: 500
-output_dir: saves/qwen2.5-7b/lora/my_sft
-report_to: tensorboard
-```
-
-### Step 4: 启动训练
-
-```bash
-# 方式一：CLI 命令行启动（推荐）
-llamafactory-cli train examples/train_lora/my_sft.yaml
-
-# 方式二：WebUI 可视化启动
-llamafactory-cli webui
-```
-
-> **显存估算**：Qwen2.5-7B + LoRA (rank=64) + BF16 + Gradient Checkpointing ≈ **16~20GB VRAM**（单卡 A100/4090 可跑）。
-
-### Step 5: 合并 LoRA 权重
-
-训练完成后，LoRA 权重需要合并回基座模型才能独立部署：
-
-```yaml
-# merge_lora.yaml
-model_name_or_path: Qwen/Qwen2.5-7B
-adapter_name_or_path: saves/qwen2.5-7b/lora/my_sft
-template: qwen
-finetuning_type: lora
-export_dir: models/qwen2.5-7b-sft-merged        # 合并后的完整模型输出路径
-export_size: 4                                    # 每个分片大小 (GB)
-export_legacy_format: false
-```
-
-```bash
-llamafactory-cli export merge_lora.yaml
-```
-
-### Step 6: 推理验证
-
-```bash
-# 快速对话测试（使用 LoRA 适配器，无需合并）
-llamafactory-cli chat examples/train_lora/my_sft.yaml
-```
-
-或使用 Python 加载合并后的模型：
+符号说明：
+- \(\text{Input}\)：任务输入。
+- \(\text{Config}\)：训练或推理配置。
+- \(\text{Constraints}\)：方法约束（如资源、稳定性或安全边界）。
+## 关键步骤代码（纯文档示例）
 
 ```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
-model_path = "models/qwen2.5-7b-sft-merged"
-tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(model_path, trust_remote_code=True, device_map="auto")
-
-messages = [{"role": "user", "content": "请解释什么是 LoRA 微调？"}]
-text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-inputs = tokenizer(text, return_tensors="pt").to(model.device)
-
-outputs = model.generate(**inputs, max_new_tokens=512, temperature=0.7, top_p=0.9)
-print(tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True))
-```
-
----
-
-## 🔧 进阶：多 GPU / DeepSpeed 分布式训练
-
-```yaml
-# 在 YAML 中添加 DeepSpeed 配置
-deepspeed: examples/deepspeed/ds_z2_config.json   # ZeRO-2（推荐 SFT）
-```
-
-```bash
-# 多卡启动
-CUDA_VISIBLE_DEVICES=0,1,2,3 llamafactory-cli train examples/train_lora/my_sft.yaml
-```
-
----
-
-## 📊 训练监控
-
-```bash
-# 查看 TensorBoard 训练曲线
-tensorboard --logdir saves/qwen2.5-7b/lora/my_sft
-```
-
-**关键指标**：
-
-- `train/loss`：应平滑下降至 1.0 以下。
-- `eval/loss`：若与 train/loss 差距持续增大，说明**过拟合**，需减少 epoch 或增加数据。
-
----
-
-## 原始脚本运行
-
-本模块也提供了不依赖框架的纯 PyTorch SFT 实现，供理解底层机制：
-
-```bash
-# 纯文档仓库：历史脚本命令已归档
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```

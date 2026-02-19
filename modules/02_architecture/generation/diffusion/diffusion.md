@@ -9,7 +9,7 @@
 - **类型**：基于得分/噪声的生成模型。
 - **作用**：它是当前 AI 绘画（Stable Diffusion）、视频生成（Sora）等生成式 AI 的核心技术。它不直接生成数据，而是学会如何将“混乱的噪声”梳理成“有意义的数据”。
 
-## 什么是 Diffusion？
+## 定义与目标
 
 扩散模型（Diffusion Models）是一种通过**迭代去噪**来生成数据的模型。
 想象你有一张清晰的照片，你不断往上面洒墨水（加噪），直到它变成一团漆黑。扩散模型学习的就是这个过程的逆过程：**给定一团墨水，预测刚才那次洒墨水的轨迹，从而一点点擦掉墨水，还原出照片**。
@@ -24,7 +24,7 @@
 3. **反向采样 (Reverse Sampling/Inference)**：
    - 从纯高斯噪声开始，利用训练好的模型，一步步预测并剔除噪声，最终还原出训练集分布中的样本。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 前向一步加噪 (Forward Sampling)
 
@@ -48,13 +48,14 @@ $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1-\alpha_t}{\sqrt{1-\ba
 2. 相比 GAN：扩散训练通常更稳定，但采样步骤更多。
 3. 相比自回归：扩散更偏连续去噪链式生成。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/pre_train/generation/diffusion
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -69,7 +70,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

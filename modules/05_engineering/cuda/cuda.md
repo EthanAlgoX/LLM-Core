@@ -9,12 +9,12 @@
 - **类型**：并行计算架构与编程模型。
 - **作用**：CUDA (Compute Unified Device Architecture) 是由 NVIDIA 推出的运算平台。它让开发者能够利用 GPU 的成千上万个核心来加速原本在 CPU 上运行缓慢的数值密集型任务（如矩阵乘法、卷积运算）。
 
-## 什么是 CUDA？
+## 定义与目标
 
 简单来说，CUDA 是深度学习的“引擎”。
 如果说 CPU 是一位精通各种杂活的“全能主管”，那么 GPU 就是由几千名只擅长算数的“计算员”组成的阵列。CUDA 则是这支阵列的**调度手册**，它负责向这些计算员分派任务，并收集他们的计算结果。
 
-## 关键编程步骤
+## 关键步骤
 
 1. **Host-to-Device 数据拷贝**：
    - 将内存（CPU）中的数据通过 PCIe 总线拷贝到显存（GPU）。
@@ -135,21 +135,31 @@ with torch.profiler.profile(
         prof.step()
 ```
 
-```bash
-# NVIDIA Nsight Systems 命令行性能分析
-TRAIN_ENTRY="<training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
-nsys profile -o report python "$TRAIN_ENTRY"
-
-# 查看 GPU 利用率
-nvidia-smi dmon -s u -d 1
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ---
+## 关键公式（逻辑表达）
 
-## 原始脚本运行
+\[
+\text{Result} = \text{Core Method}(\text{Input}, \text{Config}, \text{Constraints})
+\]
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/systems/cuda
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+符号说明：
+- \(\text{Input}\)：任务输入。
+- \(\text{Config}\)：训练或推理配置。
+- \(\text{Constraints}\)：方法约束（如资源、稳定性或安全边界）。
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```

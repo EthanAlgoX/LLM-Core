@@ -9,7 +9,7 @@
 - **类型**：序列决策数学模型。
 - **作用**：它是所有强化学习问题的共同底座。无论是在线 PPO 还是离线 BCQ，其底层逻辑都可以抽象为一个 MDP 过程。
 
-## 什么是 MDP？
+## 定义与目标
 
 MDP（Markov Decision Process，马尔可夫决策过程）是一个描述**智能体（Agent）**与**环境（Environment）**交互的数学模型。
 其核心特性是“马尔可夫性”：**未来仅取决于现在，而与过去无关**。即只要知道了当前状态，我们就拥有了决定下一步动作所需的全部信息。
@@ -22,7 +22,7 @@ MDP（Markov Decision Process，马尔可夫决策过程）是一个描述**智�
 4. **奖励函数 $R(s, a, s')$ (Rewards)**：环境给出的反馈得分。
 5. **折扣因子 $\gamma$ (Discount)**：对未来奖励的重视程度（0到1之间）。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 贝尔曼方程 (Bellman Equation)
 
@@ -63,13 +63,14 @@ $$V^{\ast}(s) = \max_{a \in A} \sum_{s' \in S} P(s'|s, a) [R(s, a, s') + \gamma 
 2. 相比 `Policy Gradient`：MDP 是问题定义，不限定具体求解算法。
 3. 相比 `CQL/BCQ`：后者是离线 RL 具体算法，不是基础框架定义。
 
-## 运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/mdp
-
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -84,7 +85,7 @@ conda activate finetune
 
 ## 目录文件说明（重点）
 
-- `历史脚本（归档）`：主流程代码，通常是可直接运行的单文件脚本。
+- 关键步骤代码：见“关键步骤代码（纯文档示例）”章节。
 - `data/`：示例数据、训练样本或数据索引配置。
 - `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
 - `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。

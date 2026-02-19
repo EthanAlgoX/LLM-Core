@@ -9,12 +9,12 @@
 - **类型**：直接偏好学习（Direct Preference Learning）。
 - **作用**：取代复杂的“奖励模型 + PPO”流程，直接通过对比“好回答”与“坏回答”，将人类的偏好注入模型中。
 
-## 什么是 DPO？
+## 定义与目标
 
 DPO（Direct Preference Optimization）是由斯坦福大学提出的一种简化版对齐算法。它的核心思想是：**不再训练一个裁判（奖励模型），而是直接让模型在“好坏对”中学习。**
 它在数学上证明了，通过对数比例（Log-Ratio）的优化，可以达到与传统 RLHF 相同的对齐效果，但工程实现难度降低了 90%。
 
-## DPO 训练的关键步骤
+## 关键步骤
 
 1. **构建偏好对 (Preference Pairs)**：准备数据，格式为 `(Prompt, Chosen_Answer, Rejected_Answer)`。
 2. **加载双模型**：
@@ -24,7 +24,7 @@ DPO（Direct Preference Optimization）是由斯坦福大学提出的一种简�
 4. **计算对数比例差距 (Log-Ratio Gap)**：计算待训模型相对于参考模型，在 Chosen 上的进步是否比在 Rejected 上的进步更大。
 5. **偏好更新 (Optimization)**：通过 Sigmoid 激活函数和梯度下降，拉大好坏答案之间的差距。
 
-## 核心原理与关键公式
+## 关键公式
 
 ### 1. 关键公式：DPO 损失函数
 
@@ -100,57 +100,12 @@ bf16: true
 output_dir: saves/qwen2.5-7b/lora/dpo
 ```
 
-```bash
-llamafactory-cli train dpo_config.yaml
-```
-
-> **显存注意**：DPO 需同时维护 Policy + Reference 两个模型，显存需求约为 SFT 的 **2 倍**。
-
-### 方式二：TRL 库（HuggingFace）
-
 ```python
-from trl import DPOTrainer, DPOConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from datasets import load_dataset
-
-# 1. 加载模型
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")
-ref_model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")  # 冻结参考模型
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B")
-
-# 2. 加载偏好数据
-dataset = load_dataset("json", data_files="data/dpo_pairs.json")
-
-# 3. 训练配置
-training_args = DPOConfig(
-    output_dir="saves/dpo",
-    beta=0.1,                           # KL 约束强度
-    per_device_train_batch_size=1,
-    gradient_accumulation_steps=16,
-    learning_rate=5e-6,
-    num_train_epochs=2,
-    bf16=True,
-)
-
-# 4. 启动 DPO 训练
-trainer = DPOTrainer(
-    model=model,
-    ref_model=ref_model,
-    args=training_args,
-    train_dataset=dataset["train"],
-    tokenizer=tokenizer,
-)
-trainer.train()
-```
-
----
-
-## 原始脚本运行
-
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/alignment/dpo
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -161,3 +116,14 @@ conda activate finetune
 - `training_curves.png`
 - `summary.json`
 - `log_history.json`
+
+---
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
+```

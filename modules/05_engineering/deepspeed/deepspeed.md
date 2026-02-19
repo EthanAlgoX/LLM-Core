@@ -9,7 +9,7 @@
 - **类型**：大规模深度学习系统框架。
 - **作用**：DeepSpeed 是微软开发的高性能训练库。它通过 **ZeRO (Zero Redundancy Optimizer)** 等突破性技术，极大地降低了训练超大模型所需的显存，使我们能够在有限的硬件资源上训练出更大的模型。
 
-## 什么是 DeepSpeed？
+## 定义与目标
 
 DeepSpeed 是大模型训练的“超级内存管理器”。
 在普通的分布式训练中，每个 GPU 都会完整地保存一份优化器状态、梯度和参数。对于千亿级模型，这会瞬间撑爆显存。DeepSpeed 的核心思想是：**“既然是分布式，为什么不把这些数据也分布开来存呢？”**
@@ -23,7 +23,7 @@ DeepSpeed 是大模型训练的“超级内存管理器”。
 3. **ZeRO-3 (Parameter Partitioning)**：
    - 在 ZeRO-2 的基础上，将模型参数本身也切分分布。这意味着每张卡只存模型的一部分，需要时再临时拉取。
 
-## 关键集成步骤
+## 关键步骤
 
 1. **配置 JSON 编写**：
    - 定义 `zero_optimization` 级别、混合精度 (fp16/bf16)、梯度累加步数等。
@@ -117,50 +117,12 @@ for batch in dataloader:
 
 ### Step 3: 启动命令
 
-```bash
-TRAIN_ENTRY="<training_entry>"  # 训练入口占位符（由你自己的外部工程提供）
-
-# 单机多卡
-deepspeed --num_gpus=4 "$TRAIN_ENTRY" --deepspeed ds_config.json
-
-# 多机多卡（hostfile 方式）
-deepspeed --hostfile=hostfile.txt --num_gpus=8 "$TRAIN_ENTRY" --deepspeed ds_config.json
-```
-
-`hostfile.txt` 格式：
-
-```text
-node1 slots=8
-node2 slots=8
-```
-
-### 与 LLaMA Factory / HuggingFace Trainer 集成
-
-```yaml
-# 在 LLaMA Factory YAML 中启用 DeepSpeed
-deepspeed: ds_config.json               # 自动取代默认分布式后端
-```
-
 ```python
-# 在 HuggingFace TrainingArguments 中启用
-from transformers import TrainingArguments
-
-args = TrainingArguments(
-    output_dir="saves/model",
-    deepspeed="ds_config.json",          # 一行即可
-    bf16=True,
-    per_device_train_batch_size=2,
-)
-```
-
----
-
-## 原始脚本运行
-
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/systems/deepspeed
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 ## 输出结果
@@ -171,3 +133,24 @@ conda activate finetune
 - `training_curves.png`
 - `summary.json`
 - `deepspeed_config_auto.json`
+
+---
+## 关键公式（逻辑表达）
+
+\[
+\text{Result} = \text{Core Method}(\text{Input}, \text{Config}, \text{Constraints})
+\]
+
+符号说明：
+- \(\text{Input}\)：任务输入。
+- \(\text{Config}\)：训练或推理配置。
+- \(\text{Constraints}\)：方法约束（如资源、稳定性或安全边界）。
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
+```

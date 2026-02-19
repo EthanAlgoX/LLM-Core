@@ -32,7 +32,7 @@
    - **Advantage 公式**： $A_i = \frac{Reward_i - \mathrm{Mean}(Rewards)}{\mathrm{Std}(Rewards)}$
 3. **原理**：只要你的回答比同组的其他“兄弟”好，你就获得正向激励。这种横向对比天然抹平了题目难度的干扰。
 
-## 核心原理与数学公式
+## 关键公式
 
 ### 1. 组内优势函数 (Group Relative Advantage)
 
@@ -128,70 +128,32 @@ bf16: true
 output_dir: saves/qwen2.5-7b/lora/grpo
 ```
 
-```bash
-llamafactory-cli train grpo_config.yaml
-```
-
-> **显存估算**：GRPO 无需 Critic，但 `num_generations=8` 意味着每步生成 8 条回复。7B + LoRA + 8 采样 ≈ **40~60GB VRAM**（建议多卡或 ZeRO-3）。
-
-### 方式二：TRL 库 + 自定义奖励
-
 ```python
-from trl import GRPOTrainer, GRPOConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import re
-
-# 1. 加载模型
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B")
-
-# 2. 定义可验证奖励函数
-def accuracy_reward(completions, references, **kwargs):
-    """提取答案并与标准答案对比"""
-    rewards = []
-    for completion, ref in zip(completions, references):
-        # 提取 <answer>...</answer> 中的内容
-        match = re.search(r"<answer>(.*?)</answer>", completion)
-        predicted = match.group(1).strip() if match else ""
-        rewards.append(1.0 if predicted == ref else 0.0)
-    return rewards
-
-def format_reward(completions, **kwargs):
-    """检查输出格式是否包含 think + answer 标签"""
-    rewards = []
-    for completion in completions:
-        has_think = "<think>" in completion and "</think>" in completion
-        has_answer = "<answer>" in completion and "</answer>" in completion
-        rewards.append(1.0 if has_think and has_answer else 0.0)
-    return rewards
-
-# 3. GRPO 配置
-training_args = GRPOConfig(
-    output_dir="saves/grpo",
-    num_generations=8,                   # 每题生成 G 个候选
-    per_device_train_batch_size=1,
-    gradient_accumulation_steps=4,
-    learning_rate=5e-7,
-    bf16=True,
-)
-
-# 4. 启动 GRPO 训练
-trainer = GRPOTrainer(
-    model=model,
-    args=training_args,
-    train_dataset=dataset,
-    tokenizer=tokenizer,
-    reward_funcs=[accuracy_reward, format_reward],  # 多奖励函数组合
-)
-trainer.train()
-```
-
----
-
-## 原始脚本运行
-
-```bash
-# 纯文档仓库：历史脚本命令已归档
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
 
 **可视化**：默认输出至 `output/grpo_metrics`。关注 `reward`（总分）与 `reward_std`（组内差异）的变化趋势。
+
+---
+## 定义与目标
+
+- **定义**：本节主题用于解释该模块的核心概念与实现思路。
+- **目标**：帮助读者快速建立问题抽象、方法路径与工程落地方式。
+## 关键步骤
+
+1. 明确输入/输出与任务边界。
+2. 按模块主流程执行核心算法或系统步骤。
+3. 记录指标并做对比分析，形成可复用结论。
+## 关键步骤代码（纯文档示例）
+
+```python
+# 关键流程示意（与具体工程实现解耦）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
+```

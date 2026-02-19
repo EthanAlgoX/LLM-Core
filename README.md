@@ -173,5 +173,7 @@
 python scripts/check_markdown_links.py README.md modules docs
 ```
 
+- 结构模板：`docs/MODULE_DOC_TEMPLATE.md`
+- 结构规范：`docs/DOC_STYLE.md`（推荐章节顺序：通俗理解→定义与目标→关键步骤→关键公式→关键步骤代码）
 - 术语一致性：以 `docs/TERMINOLOGY.md` 为唯一规范，新增术语先入表再落文档。
 - 结构一致性：改动 `modules/` 后同步更新 README 导航与索引表。

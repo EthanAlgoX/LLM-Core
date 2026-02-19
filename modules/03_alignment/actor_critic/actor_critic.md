@@ -9,7 +9,7 @@
 - **类型**：混合架构（Policy-based + Value-based）。
 - **作用**：它是 PPO / RLHF 的底层范式。通过“行为者-判官”协作，在提升模型性能的同时，极大降低了学习过程中的不确定性（方差）。
 
-## 什么是 Actor-Critic？
+## 定义与目标
 
 Actor-Critic 是一种将“策略梯度”与“价值评估”相结合的经典模型架构：
 
@@ -18,7 +18,7 @@ Actor-Critic 是一种将“策略梯度”与“价值评估”相结合的经�
 
 在 LLM 训练中，Critic 就像是一个专业的会计，时刻盯着 Actor 的产出，判断其是否超预期地获得了高分。
 
-## 训练的关键步骤
+## 关键步骤
 
 1. **采样 (Sampling)**：Actor 接受指令，生成一组对话。
 2. **打分 (Reward Calculation)**：模型获得一个奖励分（来自 RM 模型）。
@@ -28,7 +28,7 @@ Actor-Critic 是一种将“策略梯度”与“价值评估”相结合的经�
    - **更新 Actor**：如果优势为正，增加该生成行为出现的概率。
    - **更新 Critic**：减小其预估分与真实分数之间的误差，使其预测更准。
 
-## 核心数学公式
+## 关键公式
 
 ### 1. 优势估计 (Advantage)
 
@@ -137,10 +137,12 @@ model = AutoModelForCausalLMWithValueHead.from_pretrained("Qwen/Qwen2.5-7B")
 
 ---
 
-## 原始脚本运行
+## 关键步骤代码（纯文档示例）
 
-```bash
-cd <YOUR_PROJECT_ROOT>/post_train/alignment/actor_critic
-conda activate finetune
-# 纯文档仓库：历史脚本命令已归档
+```python
+# 关键步骤代码（示意）
+state = init_state()
+for step in range(num_steps):
+    state = step_update(state)
+metrics = evaluate(state)
 ```
