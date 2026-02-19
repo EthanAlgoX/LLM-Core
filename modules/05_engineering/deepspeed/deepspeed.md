@@ -23,6 +23,12 @@ DeepSpeed 是大模型训练的“超级内存管理器”。
 3. **ZeRO-3 (Parameter Partitioning)**：
    - 在 ZeRO-2 的基础上，将模型参数本身也切分分布。这意味着每张卡只存模型的一部分，需要时再临时拉取。
 
+## 适用场景与边界
+
+- **适用场景**：用于分布式训练、推理加速与系统瓶颈定位。
+- **不适用场景**：不适用于缺少性能观测指标的“盲调”优化。
+- **使用边界**：优化结论受硬件拓扑、并行策略与请求分布影响。
+
 ## 关键步骤
 
 1. **配置 JSON 编写**：
@@ -137,12 +143,12 @@ metrics = evaluate(state)
 ---
 ## 关键公式（逻辑表达）
 
-`Result = CoreMethod(Input, Config, Constraints)`
+`GlobalBatch = micro_batch * grad_accum * data_parallel`
 
 符号说明：
-- `Input`：任务输入。
-- `Config`：训练或推理配置。
-- `Constraints`：方法约束（如资源、稳定性或安全边界）。
+- `micro_batch`：单卡每步样本数。
+- `grad_accum`：梯度累积步数。
+- `data_parallel`：数据并行副本数。
 ## 关键步骤代码（纯文档示例）
 
 ```python
@@ -152,3 +158,24 @@ for step in range(num_steps):
     state = step_update(state)
 metrics = evaluate(state)
 ```
+
+## 工程实现要点
+
+- 先建立基准（TTFT/吞吐/显存），再做分项优化。
+- 并行策略、精度策略与算子优化要协同评估。
+- 保留压测脚本与配置快照，确保优化可复验。
+
+## 常见错误与排查
+
+- **症状**：吞吐提升但延迟恶化。  
+  **原因**：批处理策略偏向吞吐，牺牲了单请求时延。  
+  **解决**：按业务目标拆分延迟/吞吐档位并分别调参。
+- **症状**：多机训练效率低。  
+  **原因**：通信开销或并行划分与硬件拓扑不匹配。  
+  **解决**：重排并行维度并用 profiler 定位通信热点。
+
+## 参考资料
+
+- [Megatron-LM](https://github.com/NVIDIA/Megatron-LM)
+- [DeepSpeed](https://www.deepspeed.ai/)
+
