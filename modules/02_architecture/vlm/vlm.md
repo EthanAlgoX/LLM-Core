@@ -110,14 +110,12 @@ answer_b = llm.generate(multimodal_input)
 3. 记录指标并做对比分析，形成可复用结论。
 ## 关键公式（逻辑表达）
 
-\[
-\text{Result} = \text{Core Method}(\text{Input}, \text{Config}, \text{Constraints})
-\]
+`Result = CoreMethod(Input, Config, Constraints)`
 
 符号说明：
-- \(\text{Input}\)：任务输入。
-- \(\text{Config}\)：训练或推理配置。
-- \(\text{Constraints}\)：方法约束（如资源、稳定性或安全边界）。
+- `Input`：任务输入。
+- `Config`：训练或推理配置。
+- `Constraints`：方法约束（如资源、稳定性或安全边界）。
 ## 关键步骤代码（纯文档示例）
 
 ```python
