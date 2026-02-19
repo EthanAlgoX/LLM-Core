@@ -14,6 +14,21 @@
 
 ---
 
+## 🧭 快速导航（章节入口）
+
+- 侧边栏式章节目录：[`docs/NAVIGATION.md`](./docs/NAVIGATION.md)
+- 目标导向学习路径：[`docs/LEARNING_PATH.md`](./docs/LEARNING_PATH.md)
+- 文档模板：[`docs/MODULE_DOC_TEMPLATE.md`](./docs/MODULE_DOC_TEMPLATE.md)
+- 文档规范：[`docs/DOC_STYLE.md`](./docs/DOC_STYLE.md)
+
+### 学习路径建议
+
+1. 面试冲刺：`Transformer -> Alignment -> Inference -> 经典模型`
+2. 工程落地：`Architecture -> CUDA/并行 -> Inference -> PEFT`
+3. 研究进阶：`RL 基础 -> RLHF/GRPO -> Offline RL -> 经典案例`
+
+---
+
 ## 🌐 LLM 核心知识图谱 (Core Knowledge Map)
 
 ### 1. 理论根基：算法与优化 (Theory & Optimization)
@@ -29,6 +44,7 @@
 
 | 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
 | --- | --- | --- | --- |
+| 架构总览 | [Architecture Overview](./modules/02_architecture/02_architecture.md) | LLM/VLM/生成模块的统一入口与学习顺序 | 先看“总地图”再深入子模块，避免知识割裂 |
 | 基础架构 | [Transformer Core](./modules/02_architecture/llm/llm.md) | **MHSA**、**Normalization (RMSNorm)** 与 **RoPE 旋转位置编码** | LLM 的"身体"——每个词怎么被感知并编码成向量 |
 | 注意力内核 | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) | **MHA / GQA / MQA** 变体与 **Flash Attention** 工程实现 | 模型"读文章"时同时关注多个角度，Flash Attention 让这更快更省显存 |
 | 扩展架构 | [MoE (Mixture of Experts)](./modules/02_architecture/llm/llm.md) | **Expert Parallelism**、**Load Balancing** 与稀疏计算优化 | 超大模型拆成多个"专家"，每次只激活少数几个，省算力 |
@@ -75,6 +91,7 @@
 
 | 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
 | --- | --- | --- | --- |
+| 进阶总览 | [Advanced Topics Overview](./modules/04_advanced_topics/04_advanced_topics.md) | 进阶主题入口与方法边界说明 | 当标准训练范式不够时，知道该去哪看什么方法 |
 | 离线对齐总览 | [Offline RL Overview](./modules/04_advanced_topics/offline_rl/offline_rl.md) | 在无环境交互前提下，利用离线轨迹数据进行策略优化的核心范式 | 不和真实环境交互，只用"历史经验数据"学习，像人类读案例复盘一样 |
 | 算法复现 | [Offline RL](./modules/04_advanced_topics/offline_rl/offline_rl.md) | **Offline RL 系统详述** 与数据分布偏移（Distribution Shift）对抗策略 | 离线数据和真实分布有差距，需专门设计算法防止策略学偏 |
 | 代表算法 | [BCQ](./modules/04_advanced_topics/offline_rl/bcq/bcq.md) / [CQL](./modules/04_advanced_topics/offline_rl/cql/cql.md) | **外推误差 (Extrapolation Error) 抑制** 与 **下界 Q 学习 (Lower Bound Q-learning)** | BCQ 约束动作别乱飞；CQL 让 Q 值保守低估——两者都防止 AI 对没见过的情况过度自信 |
@@ -85,6 +102,7 @@
 
 | 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
 | --- | --- | --- | --- |
+| 案例总览 | [Classic Models Overview](./modules/07_classic_models/07_classic_models.md) | 工业级模型案例导航与复盘框架 | 不只看结果，更看“为什么这个路线能赢” |
 | ChatGPT / InstructGPT | [ChatGPT 解析](./modules/07_classic_models/chatgpt/chatgpt.md) | **RLHF 三阶段**（SFT → RM → PPO）与 **KL 约束对齐** | 第一个把 RL + 人类偏好大规模落地的对话 AI，定义了 RLHF 行业标准 |
 | DeepSeek-R1 | [DeepSeek-R1 解析](./modules/07_classic_models/deepseek_r1/deepseek_r1.md) | **GRPO 算法**、**可验证奖励**与推理能力自发涌现 | 用纯强化学习让模型自发学会"一步步思考"，无需任何 CoT 标注数据 |
 | Qwen3 | [Qwen3 解析](./modules/07_classic_models/qwen3/qwen3.md) | **混合思考模式**、**Dense + MoE 双轨**与四阶段后训练 | 同一模型内动态切换深度推理和快速回答，兼顾效率与能力 |
@@ -136,15 +154,15 @@
 
 - `modules/`: 核心知识组件
   - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
-  - `02_architecture/`: 架构核心 (LLM, VLM, MoE, Quantization, Diffusion, DiT)
+  - `02_architecture/`: 架构核心 (总览 + LLM, VLM, Generation, Diffusion, DiT)
   - `03_alignment/`: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL, Data Synthesis)
-  - `04_advanced_topics/`: 进阶课题 (Offline RL: BCQ, CQL)
+  - `04_advanced_topics/`: 进阶课题 (总览 + Offline RL: BCQ, CQL)
   - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)
   - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Multi-Agent, OpenClaw)
-  - `07_classic_models/`: 经典解析 (ChatGPT, DeepSeek-R1, Qwen3)
+  - `07_classic_models/`: 经典解析 (总览 + ChatGPT, DeepSeek-R1, Qwen3)
 - `tools/`: 历史脚本（归档，默认不作为当前文档体系的一部分）
 - `output/`: 历史输出目录（归档）
-- `docs/`: 文档规范与术语表（如 `DOC_STYLE.md`、`TERMINOLOGY.md`）
+- `docs/`: 文档规范、章节导航与学习路径（如 `NAVIGATION.md`、`LEARNING_PATH.md`、`DOC_STYLE.md`、`TERMINOLOGY.md`）
 - `scripts/`: 文档检查脚本（如链接检查）
 
 ---
@@ -174,6 +192,6 @@ python scripts/check_markdown_links.py README.md modules docs
 ```
 
 - 结构模板：`docs/MODULE_DOC_TEMPLATE.md`
-- 结构规范：`docs/DOC_STYLE.md`（推荐章节顺序：通俗理解→定义与目标→关键步骤→关键公式→关键步骤代码）
+- 结构规范：`docs/DOC_STYLE.md`（推荐章节顺序：通俗理解→定义与目标→适用场景与边界→关键步骤→关键公式→关键步骤代码）
 - 术语一致性：以 `docs/TERMINOLOGY.md` 为唯一规范，新增术语先入表再落文档。
-- 结构一致性：改动 `modules/` 后同步更新 README 导航与索引表。
+- 结构一致性：改动 `modules/` 后同步更新 README、`docs/NAVIGATION.md` 与 `docs/LEARNING_PATH.md`。

@@ -1,75 +1,40 @@
 # Generation & Decoding (推理与生成优化)
 
 > [!TIP]
-> **一句话通俗理解**：生成优化的核心是把首字延迟、吞吐和显存三者做动态平衡，让模型在高并发下稳定逐 token 输出。
+> **一句话通俗理解**：生成优化是在质量不明显下降的前提下，把“首字延迟、吞吐、显存”三件事同时做平衡。
 
-LLM 推理是将训练好的模型转化为实际生产力的关键环节。本模块解析从注意力算子优化到解码策略选择的完整推理链路。
+## 定义与目标
 
----
+- **定义**：Generation & Decoding 关注大模型推理阶段的解码策略、缓存机制与系统级优化。
+- **目标**：在高并发场景下稳定提升响应速度和资源利用率，并保持可接受的输出质量。
 
-## 核心组件解析
+## 适用场景与边界
 
-### 1. Flash Attention (IO 感知注意力)
+- **适用场景**：在线对话、批量生成、低延迟服务和高吞吐推理集群。
+- **不适用场景**：不适用于离线训练阶段的收敛问题分析。
+- **使用边界**：优化收益受硬件带宽、请求分布和模型结构共同制约。
 
-**问题**：标准 Attention 需要将 $N \times N$ 的注意力矩阵写入 HBM（显存），IO 成本极高。
+## 关键步骤
 
-**解决方案**：将 Q/K/V 分块加载到 SRAM（片上缓存），在 SRAM 内完成计算，避免大矩阵的 HBM 读写。
+1. 选择解码策略（Greedy、Top-k、Top-p、Beam）并明确质量目标。
+2. 引入 KV Cache，避免历史 token 重复计算。
+3. 使用 Flash Attention、Continuous Batching 等机制提升吞吐。
+4. 按目标场景调节延迟与吞吐（TTFT vs TPS）权衡。
 
-| 版本 | 核心改进 |
-| --- | --- |
-| **Flash Attention v1** | 分块计算 + Online Softmax，消除 $O(N^2)$ HBM 写入 |
-| **Flash Attention v2** | 优化并行策略，减少非矩阵乘法运算，提升 GPU 利用率 |
-| **Flash Attention v3** | 针对 Hopper 架构 (H100) 的异步流水线优化 |
+## 关键公式
 
-- **复杂度**：计算 $O(N^2)$ 不变，但 HBM IO 降至 $O(N)$，实际速度提升 2-4x。
+$$
+\text{Global Batch} = \text{micro\_batch} \times \text{grad\_accum} \times \text{data\_parallel\_size}
+$$
 
-### 2. KV Cache 管理
+符号说明：
+- `micro_batch`：单卡单步处理样本数。
+- `grad_accum`：梯度累积步数。
+- `data_parallel_size`：数据并行副本数。
 
-- **基础 KV Cache**：缓存历史 Token 的 K/V，推理时只计算新 Token。
-- **PagedAttention (vLLM)**：将 KV Cache 分页管理（类似操作系统虚拟内存），消除显存碎片，支持更大批量。
-- **MQA / GQA**：
-  - **Multi-Query Attention (MQA)**：所有 Head 共享同一组 K/V，显著减少 KV Cache 体积。
-  - **Grouped-Query Attention (GQA)**：折中方案，多个 Head 共享一组 K/V（LLaMA-3 采用）。
-
-### 3. 解码策略 (Decoding Strategies)
-
-| 策略 | 原理 | 适用场景 |
-| --- | --- | --- |
-| **Greedy Search** | 每步选概率最高的 Token | 确定性任务（代码生成） |
-| **Beam Search** | 维护 K 条候选序列，取最优 | 机器翻译、摘要 |
-| **Temperature Sampling** | 调整 Softmax 温度控制分布锐度 | 创意写作 |
-| **Top-k Sampling** | 只从概率最高的 k 个 Token 中采样 | 通用对话 |
-| **Top-p (Nucleus)** | 从累积概率超过 p 的最小集合中采样 | 平衡质量与多样性 |
-
-### 4. 投机采样 (Speculative Decoding)
-
-- **动机**：大模型推理是内存带宽瓶颈，GPU 算力大量闲置。
-- **方案**：用小模型（Draft Model）快速生成多个候选 Token，大模型（Target Model）并行验证，接受或拒绝。
-- **效果**：在不改变输出分布的前提下，推理速度提升 2-3x。
-
-### 5. 量化推理 (Quantization)
-
-| 方案 | 精度 | 显存节省 | 质量损失 |
-| --- | --- | --- | --- |
-| **FP16/BF16** | 半精度 | 50% vs FP32 | 几乎无 |
-| **INT8 (W8A8)** | 8-bit | ~75% vs FP32 | 极小 |
-| **INT4 (GPTQ/AWQ)** | 4-bit | ~87.5% vs FP32 | 可接受 |
-| **GGUF (llama.cpp)** | 混合精度 | 灵活 | 取决于量化位数 |
-
----
-
-## 工程实现要点
-
-- **吞吐量瓶颈**：推理通常是内存带宽瓶颈（Memory-Bound），而非计算瓶颈（Compute-Bound）。
-- **批处理策略**：连续批处理（Continuous Batching）允许不同长度的请求动态组批，大幅提升 GPU 利用率。
-- **延迟 vs 吞吐**：单请求延迟优化（减少 TTFT）与批量吞吐优化（增大 batch size）存在根本性权衡。
-
----
-
-## 📂 模块实战
+## 关键步骤代码（纯文档示例）
 
 ```python
-# 关键步骤代码（纯文档示例）
 tokens = prompt_tokens
 kv_cache = None
 
@@ -85,59 +50,36 @@ for _ in range(max_new_tokens):
 decoded_text = tokenizer.decode(tokens[0])
 ```
 
----
-## 定义与目标
+## 子模块导航
 
-- **定义**：Generation & Decoding (推理与生成优化) 属于“模型架构模块，关注 Transformer、多模态与生成机制的核心设计。”范畴。
-- **目标**：理解结构选择如何影响模型表达能力、训练稳定性与推理效率。
-## 适用场景与边界
+- [Diffusion](./diffusion/diffusion.md)
+- [DiT](./dit/dit.md)
 
-- **适用场景**：用于模型结构选型、模块拆解与架构原理学习。
-- **不适用场景**：不适用于脱离数据与训练策略单独评估最终能力。
-- **使用边界**：实际效果受参数规模、数据分布和推理策略共同影响。
+## 工程实现要点
 
-## 关键步骤
-
-1. 确定核心结构（注意力、位置编码、归一化与前馈层）。
-2. 结合序列长度与显存预算设计训练/推理路径。
-3. 通过统一评测集比较结构变体的效果与效率差异。
-## 关键公式（逻辑表达）
-
-`Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) * V`
-
-符号说明：
-- `Q, K, V`：查询、键、值向量。
-- `d_k`：键向量维度，用于缩放。
-- `softmax`：将注意力分数归一化。
-## 关键步骤代码（纯文档示例）
-
-```python
-# 关键流程示意（与具体工程实现解耦）
-state = init_state()
-for step in range(num_steps):
-    state = step_update(state)
-metrics = evaluate(state)
-```
+- 推理常见瓶颈是内存带宽而不是纯算力，需优先做 IO 优化。
+- 连续批处理可显著提高 GPU 利用率，但要防止长尾请求拖慢整体时延。
+- 量化（INT8/INT4）和缓存策略需要联合评估，避免出现“省显存但质量掉点过大”。
 
 ## 常见错误与排查
 
-- **症状**：长序列下显存快速爆炸。  
-  **原因**：KV Cache 与注意力开销评估不足。  
-  **解决**：提前做显存预算并限制 max length 或采用更优缓存策略。
-- **症状**：结构改动后效果不稳定。  
-  **原因**：训练配置与初始化策略未同步调整。  
-  **解决**：固定基线配置，逐项 ablation 并记录每次改动。
+- **症状**：吞吐上去了，但首字延迟（TTFT）变差。  
+  **原因**：批处理策略过度偏向吞吐，排队等待增加。  
+  **解决**：拆分低延迟与高吞吐服务档位，分别调参。
+- **症状**：长上下文下显存爆炸。  
+  **原因**：KV Cache 预算不足或分页策略缺失。  
+  **解决**：增加 KV 分页和长度上限控制。
 
 ## 与相近方法对比
 
 | 方法 | 优点 | 局限 | 适用场景 |
 | --- | --- | --- | --- |
-| 本文主题方法 | 紧贴本节问题定义 | 依赖数据与实现质量 | 适合结构化评测与迭代优化 |
-| 对比方法A | 上手成本更低 | 能力上限可能受限 | 快速原型与基线对照 |
-| 对比方法B | 上限潜力更高 | 调参与资源成本更高 | 高要求生产或复杂任务场景 |
+| Flash + KV + 动态批处理 | 吞吐高、资源利用率好 | 系统实现复杂 | 线上高并发推理 |
+| 仅静态批处理 | 实现简单 | 对变长请求不友好 | 负载稳定的离线任务 |
+| 仅改解码策略 | 接入快 | 系统瓶颈改善有限 | 快速实验与参数调优 |
 
 ## 参考资料
 
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - [FlashAttention](https://arxiv.org/abs/2205.14135)
-
+- [vLLM](https://arxiv.org/abs/2309.06180)
+- [Speculative Decoding](https://arxiv.org/abs/2302.01318)
