@@ -24,9 +24,7 @@
 
 ## 关键公式
 
-\[
-\text{Global Batch} = \text{micro\_batch} \times \text{grad\_accum} \times \text{data\_parallel\_size}
-\]
+`GlobalBatch = micro_batch * grad_accum * data_parallel_size`
 
 符号说明：
 - `micro_batch`：单卡每次前向样本数。
@@ -79,4 +77,3 @@ for step, batch in enumerate(loader):
 
 - [Megatron-LM](https://github.com/NVIDIA/Megatron-LM)
 - [DeepSpeed](https://www.deepspeed.ai/)
-
