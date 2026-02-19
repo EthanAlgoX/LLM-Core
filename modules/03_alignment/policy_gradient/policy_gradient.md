@@ -30,8 +30,8 @@ $$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [R(\tau)]$$
 
 $$\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t | s_t) G_t \right]$$
 
-- ** $\nabla_\theta \log \pi_\theta(a_t | s_t)$ **：表示如何调整参数才能让某个动作概率变大。
-- ** $G_t$ (Return)**：该动作带来的总回报。它是梯度的权重。
+- **$\nabla_\theta \log \pi_\theta(a_t | s_t)$**：表示如何调整参数才能让某个动作概率变大。
+- **$G_t$ (Return)**：该动作带来的总回报。它是梯度的权重。
 
 ### 3. Log-Derivative Trick (对数微分技巧)
 
@@ -47,28 +47,93 @@ $$\nabla_\theta \pi_\theta = \pi_\theta \frac{\nabla_\theta \pi_\theta}{\pi_\the
 2. 相比 `PPO`：Policy Gradient 通常没有 clip 约束，更新稳定性更依赖超参。
 3. 相比 `RLHF`：这里只是优化算法视角，不是完整人类反馈流水线。
 
-## 运行
+## 🛠️ 工程实战：REINFORCE 算法实现
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.distributions import Categorical
+
+class PolicyNetwork(nn.Module):
+    """简单策略网络：输入状态，输出动作概率"""
+    def __init__(self, state_dim, action_dim, hidden=128):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_dim, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, action_dim),
+            nn.Softmax(dim=-1),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+    def select_action(self, state):
+        probs = self.forward(state)
+        dist = Categorical(probs)
+        action = dist.sample()
+        return action, dist.log_prob(action)
+
+# REINFORCE 训练循环
+policy = PolicyNetwork(state_dim=4, action_dim=2)
+optimizer = optim.Adam(policy.parameters(), lr=1e-3)
+
+for episode in range(1000):
+    log_probs, rewards = [], []
+    state = env.reset()
+
+    # 采样一条完整轨迹
+    while not done:
+        state_tensor = torch.FloatTensor(state)
+        action, log_prob = policy.select_action(state_tensor)
+        next_state, reward, done, _ = env.step(action.item())
+
+        log_probs.append(log_prob)
+        rewards.append(reward)
+        state = next_state
+
+    # 计算折扣回报 G_t
+    returns = []
+    G = 0
+    for r in reversed(rewards):
+        G = r + 0.99 * G         # γ = 0.99
+        returns.insert(0, G)
+    returns = torch.tensor(returns)
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)  # Baseline: 标准化
+
+    # 策略梯度更新
+    loss = -sum(lp * Gt for lp, Gt in zip(log_probs, returns))
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+```
+
+### 在 LLM 中的对应
+
+在 LLM 微调场景中，REINFORCE 的思想体现为：
+
+```python
+# 伪代码：LLM 策略梯度
+for prompt in prompts:
+    response = model.generate(prompt)           # Actor 采样
+    reward = reward_model(prompt, response)      # RM 打分
+
+    log_prob = model.log_prob(response | prompt) # 计算对数概率
+    loss = -log_prob * reward                    # 策略梯度
+    loss.backward()
+```
+
+> **注意**：原始 REINFORCE 方差极大，实际 LLM 训练中都使用 PPO/GRPO 等带 Baseline/Clipping 的改进版本。
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/policy_gradient
-
 conda activate finetune
-python code/policy_gradient.py --reward-model <奖励模型路径或名称>
+python code/policy_gradient.py
 ```
-
-## 输出结果
-
-默认输出到 `output/policy_gradient_metrics`，包含：
-
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `log_history.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

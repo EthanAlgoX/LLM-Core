@@ -42,28 +42,110 @@
 2. 相比 `DeepSpeed`：CUDA 是底层执行层，DeepSpeed 是上层系统优化。
 3. 相比算法模块：CUDA 不改变学习目标，仅影响训练效率。
 
-## 运行
+## 🛠️ 工程实战
+
+### Triton Kernel 编写（推荐入门方式）
+
+Triton 是 OpenAI 开源的 GPU 编程语言，比原生 CUDA C 更易上手：
+
+```python
+import triton
+import triton.language as tl
+import torch
+
+@triton.jit
+def vector_add_kernel(
+    x_ptr, y_ptr, output_ptr,
+    n_elements,
+    BLOCK_SIZE: tl.constexpr,
+):
+    """GPU 并行向量加法 Kernel"""
+    pid = tl.program_id(0)                          # 当前线程块 ID
+    offsets = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)  # 每个线程负责的元素索引
+    mask = offsets < n_elements                       # 边界检查
+
+    x = tl.load(x_ptr + offsets, mask=mask)
+    y = tl.load(y_ptr + offsets, mask=mask)
+    tl.store(output_ptr + offsets, x + y, mask=mask)
+
+# 调用
+def vector_add(x: torch.Tensor, y: torch.Tensor):
+    output = torch.empty_like(x)
+    n = x.numel()
+    grid = lambda meta: (triton.cdiv(n, meta["BLOCK_SIZE"]),)
+    vector_add_kernel[grid](x, y, output, n, BLOCK_SIZE=1024)
+    return output
+
+x = torch.randn(10000, device="cuda")
+y = torch.randn(10000, device="cuda")
+result = vector_add(x, y)
+```
+
+### PyTorch 自定义 CUDA Extension
+
+```python
+# 使用 torch.utils.cpp_extension 编译自定义算子
+from torch.utils.cpp_extension import load_inline
+
+cuda_source = """
+__global__ void relu_kernel(float* x, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        x[idx] = fmaxf(x[idx], 0.0f);
+    }
+}
+
+torch::Tensor custom_relu(torch::Tensor x) {
+    int n = x.numel();
+    int threads = 256;
+    int blocks = (n + threads - 1) / threads;
+    relu_kernel<<<blocks, threads>>>(x.data_ptr<float>(), n);
+    return x;
+}
+"""
+
+custom_ops = load_inline(
+    name="custom_ops",
+    cpp_sources="torch::Tensor custom_relu(torch::Tensor x);",
+    cuda_sources=cuda_source,
+    functions=["custom_relu"],
+)
+
+x = torch.randn(1000, device="cuda")
+result = custom_ops.custom_relu(x)  # 自定义 CUDA ReLU
+```
+
+### GPU 性能分析
+
+```python
+# PyTorch Profiler
+with torch.profiler.profile(
+    activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+    schedule=torch.profiler.schedule(wait=1, warmup=1, active=3),
+    on_trace_ready=torch.profiler.tensorboard_trace_handler("./profiler_logs"),
+) as prof:
+    for step, batch in enumerate(dataloader):
+        output = model(batch)
+        loss = criterion(output, labels)
+        loss.backward()
+        optimizer.step()
+        prof.step()
+```
+
+```bash
+# NVIDIA Nsight Systems 命令行性能分析
+nsys profile -o report python train.py
+
+# 查看 GPU 利用率
+nvidia-smi dmon -s u -d 1
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/cuda
-
 conda activate finetune
 python code/cuda.py
 ```
-
-## 输出结果
-
-默认输出到 `output/cuda_metrics`，包含：
-
-- `benchmark.csv`
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

@@ -38,3 +38,94 @@ GQA 在保持 MHA 精度（多组特征表达）的同时，显著降低了 KV C
    - 具备外推性（Relative Position），通过复数乘法实现，对长文本友好。
 3. **KV Cache 显存如何计算？**
    - $2 \times \mathrm{layers} \times \mathrm{heads} \times \mathrm{dim} \times \mathrm{precision}$ (针对每个 Token)。
+
+---
+
+## 🛠️ 工程实战
+
+### Flash Attention 使用
+
+```python
+# 方式一：PyTorch 原生（2.0+）
+import torch
+import torch.nn.functional as F
+
+q = torch.randn(1, 32, 4096, 128, device="cuda", dtype=torch.bfloat16)  # [B, H, N, D]
+k = torch.randn(1, 32, 4096, 128, device="cuda", dtype=torch.bfloat16)
+v = torch.randn(1, 32, 4096, 128, device="cuda", dtype=torch.bfloat16)
+
+# 自动启用 Flash Attention（SDPA）
+with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
+    output = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+
+# 方式二：flash-attn 库
+from flash_attn import flash_attn_func
+
+# [B, N, H, D] 格式
+q = q.transpose(1, 2)  # → [1, 4096, 32, 128]
+k = k.transpose(1, 2)
+v = v.transpose(1, 2)
+output = flash_attn_func(q, k, v, causal=True)
+```
+
+### GQA (Grouped-Query Attention) 实现
+
+```python
+import torch.nn as nn
+
+class GroupedQueryAttention(nn.Module):
+    """GQA: Query 分组共享 KV，Llama 3 / Qwen2.5 标配"""
+    def __init__(self, d_model=4096, n_heads=32, n_kv_heads=8):
+        super().__init__()
+        self.n_heads = n_heads
+        self.n_kv_heads = n_kv_heads
+        self.head_dim = d_model // n_heads
+        self.n_rep = n_heads // n_kv_heads   # 每组 KV 被多少个 Q 共享
+
+        self.wq = nn.Linear(d_model, n_heads * self.head_dim, bias=False)
+        self.wk = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wv = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wo = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(self, x):
+        B, N, _ = x.shape
+        q = self.wq(x).view(B, N, self.n_heads, self.head_dim)
+        k = self.wk(x).view(B, N, self.n_kv_heads, self.head_dim)
+        v = self.wv(x).view(B, N, self.n_kv_heads, self.head_dim)
+
+        # 扩展 KV 头以匹配 Q 头数量
+        k = k.repeat_interleave(self.n_rep, dim=2)  # [B, N, 8, D] → [B, N, 32, D]
+        v = v.repeat_interleave(self.n_rep, dim=2)
+
+        # 转为 [B, H, N, D] 用于 SDPA
+        q, k, v = [t.transpose(1, 2) for t in (q, k, v)]
+        output = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        output = output.transpose(1, 2).contiguous().view(B, N, -1)
+        return self.wo(output)
+
+# 对比显存：MHA 32 KV heads vs GQA 8 KV heads → KV Cache 省 75%
+```
+
+### RoPE（旋转位置编码）
+
+```python
+import torch
+
+def precompute_freqs_cis(dim: int, end: int, theta: float = 10000.0):
+    """预计算 RoPE 频率"""
+    freqs = 1.0 / (theta ** (torch.arange(0, dim, 2).float() / dim))
+    t = torch.arange(end)
+    freqs = torch.outer(t, freqs)
+    freqs_cis = torch.polar(torch.ones_like(freqs), freqs)  # 复数形式
+    return freqs_cis
+
+def apply_rotary_emb(xq, xk, freqs_cis):
+    """将 RoPE 应用到 Q 和 K"""
+    xq_ = torch.view_as_complex(xq.float().reshape(*xq.shape[:-1], -1, 2))
+    xk_ = torch.view_as_complex(xk.float().reshape(*xk.shape[:-1], -1, 2))
+    xq_out = torch.view_as_real(xq_ * freqs_cis).flatten(-2)
+    xk_out = torch.view_as_real(xk_ * freqs_cis).flatten(-2)
+    return xq_out.type_as(xq), xk_out.type_as(xk)
+
+# 用法：freqs_cis = precompute_freqs_cis(128, 8192)  # dim=128, max_len=8192
+```

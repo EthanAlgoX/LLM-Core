@@ -47,28 +47,89 @@ $$GradAccum = \frac{GlobalBatchSize}{MicroBatchSize \times DP_{size}}$$
 2. 相比 `DeepSpeed`：Megatron偏模型并行，DeepSpeed偏 ZeRO 与系统优化。
 3. 相比 `mixed_precision`：并行策略解决规模问题，精度策略解决效率问题。
 
-## 运行
+## 🛠️ 工程实战
+
+### Megatron-LM 预训练启动
+
+```bash
+# 关键参数：3D 并行配置
+TENSOR_PARALLEL=4          # TP: 同节点内 NVLink 互联的卡数
+PIPELINE_PARALLEL=2        # PP: 跨节点的流水线段数
+DATA_PARALLEL=2            # DP: 自动计算 = WORLD_SIZE / (TP × PP)
+WORLD_SIZE=16              # 总 GPU 数 = 4 × 2 × 2
+
+# 启动 Megatron-LM GPT 预训练
+torchrun --nproc_per_node=4 --nnodes=4 --node_rank=$NODE_RANK \
+    --master_addr=$MASTER_ADDR --master_port=6000 \
+    pretrain_gpt.py \
+    --tensor-model-parallel-size $TENSOR_PARALLEL \
+    --pipeline-model-parallel-size $PIPELINE_PARALLEL \
+    --num-layers 32 \
+    --hidden-size 4096 \
+    --num-attention-heads 32 \
+    --seq-length 4096 \
+    --max-position-embeddings 4096 \
+    --micro-batch-size 1 \
+    --global-batch-size 64 \
+    --lr 1.5e-4 \
+    --min-lr 1.5e-5 \
+    --lr-decay-style cosine \
+    --train-iters 100000 \
+    --bf16 \
+    --data-path my_dataset_text_document \
+    --tokenizer-type HFTokenizer \
+    --tokenizer-model Qwen/Qwen2.5-7B \
+    --save checkpoints/megatron_gpt \
+    --save-interval 1000 \
+    --log-interval 10
+```
+
+### Megatron + DeepSpeed 联合训练
+
+```bash
+# 结合 Megatron 的模型并行 + DeepSpeed 的 ZeRO 优化
+deepspeed --num_gpus=8 pretrain_gpt.py \
+    --tensor-model-parallel-size 4 \
+    --pipeline-model-parallel-size 2 \
+    --deepspeed \
+    --deepspeed_config ds_config.json \
+    --zero-stage 1 \
+    --bf16
+```
+
+### PyTorch 层面理解 TP 切分
+
+```python
+import torch
+import torch.distributed as dist
+
+# 张量并行核心：列切分 Linear
+class ColumnParallelLinear(torch.nn.Module):
+    """将 Linear 的输出维度按 TP 分到不同 GPU"""
+    def __init__(self, in_features, out_features, tp_size):
+        super().__init__()
+        self.tp_size = tp_size
+        self.out_per_partition = out_features // tp_size
+        self.weight = torch.nn.Parameter(
+            torch.randn(self.out_per_partition, in_features)
+        )
+
+    def forward(self, x):
+        # 每张卡只计算 out_features / tp_size 列
+        output = torch.nn.functional.linear(x, self.weight)
+        return output  # 后续通过 AllReduce 汇总
+
+# 示例：4096 → 16384 的 MLP，4 卡 TP
+# 每卡只存 4096 → 4096 的权重（1/4）
+mlp = ColumnParallelLinear(4096, 16384, tp_size=4)
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/pre_train/llm/megatron
-
 conda activate finetune
 python code/megatron.py
 ```
-
-## 输出结果
-
-默认输出到 `output/megatron_metrics`，包含：
-
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `megatron_config_auto.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

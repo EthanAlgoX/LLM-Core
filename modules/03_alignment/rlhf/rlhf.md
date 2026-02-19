@@ -65,10 +65,110 @@ $$\max_{\pi_\theta} \mathbb{E}_{x \sim D, y \sim \pi_\theta(y|x)} [r_\phi(x, y) 
 | **优化目标** | 符合人言（即时） | 符合人言（即时） | 任务闭环（长程成功率） |
 | **工程复杂度** | 高 | 低 | 极高（涉及环境模拟与多智能体博弈） |
 
-## 运行与输出
+## 🛠️ 工程实战：RLHF 三阶段流水线
 
-1. **执行**：`python code/rlhf.py --reward-model <你的RM路径>`
-2. **指标解读**：
-   - `reward`：应随 Step 稳步上升。
-   - `kl`：应保持在稳定区间（如 1.0~5.0），如果过高说明模型在胡说八道。
-   - `loss`：PPO 的损失函数波动较大，重点看 Reward 趋势。
+### LLaMA Factory 一站式 RLHF
+
+```bash
+# ========== Stage 1: SFT ===========
+llamafactory-cli train stage1_sft.yaml
+
+# ========== Stage 2: RM =============
+llamafactory-cli train stage2_rm.yaml
+
+# ========== Stage 3: PPO ============
+llamafactory-cli train stage3_ppo.yaml
+```
+
+**Stage 1 - SFT YAML**：
+
+```yaml
+model_name_or_path: Qwen/Qwen2.5-7B
+stage: sft
+dataset: my_sft_data
+template: qwen
+finetuning_type: lora
+lora_rank: 64
+output_dir: saves/stage1_sft
+```
+
+**Stage 2 - Reward Model YAML**：
+
+```yaml
+model_name_or_path: Qwen/Qwen2.5-7B
+adapter_name_or_path: saves/stage1_sft     # 从 SFT 继续
+stage: rm                                   # 训练奖励模型
+dataset: my_preference_pairs                # 偏好对数据
+template: qwen
+finetuning_type: lora
+output_dir: saves/stage2_rm
+```
+
+**Stage 3 - PPO YAML**：
+
+```yaml
+model_name_or_path: Qwen/Qwen2.5-7B
+adapter_name_or_path: saves/stage1_sft     # Actor 初始化自 SFT
+stage: ppo
+reward_model: saves/stage2_rm              # 指向 RM
+dataset: my_ppo_prompts                    # Prompt-only
+template: qwen
+finetuning_type: lora
+ppo_epochs: 4
+learning_rate: 1.0e-6
+output_dir: saves/stage3_ppo
+```
+
+### TRL 完整 RLHF Pipeline
+
+```python
+from trl import SFTTrainer, RewardTrainer, PPOTrainer, PPOConfig
+from trl import AutoModelForCausalLMWithValueHead
+from transformers import AutoModelForSequenceClassification
+
+# ---- Stage 1: SFT ----
+sft_trainer = SFTTrainer(
+    model="Qwen/Qwen2.5-7B",
+    train_dataset=sft_dataset,
+    max_seq_length=2048,
+)
+sft_trainer.train()
+sft_trainer.save_model("saves/sft_model")
+
+# ---- Stage 2: Reward Model ----
+rm_model = AutoModelForSequenceClassification.from_pretrained(
+    "saves/sft_model", num_labels=1
+)
+rm_trainer = RewardTrainer(
+    model=rm_model,
+    train_dataset=preference_dataset,    # (chosen, rejected) pairs
+)
+rm_trainer.train()
+rm_trainer.save_model("saves/rm_model")
+
+# ---- Stage 3: PPO ----
+ppo_model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/sft_model")
+ref_model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/sft_model")
+
+ppo_config = PPOConfig(batch_size=4, learning_rate=1e-6, ppo_epochs=4)
+ppo_trainer = PPOTrainer(ppo_config, ppo_model, ref_model, tokenizer)
+
+for batch in prompt_dataloader:
+    responses = ppo_trainer.generate(batch["input_ids"])
+    rewards = reward_model.score(batch["input_ids"], responses)
+    stats = ppo_trainer.step(batch["input_ids"], responses, rewards)
+```
+
+---
+
+## 原始脚本运行
+
+```bash
+python code/rlhf.py --reward-model <你的RM路径>
+```
+
+**指标解读**：
+
+- `reward`：应随 Step 稳步上升。
+- `kl`：应保持在 1.0~5.0，过高说明模型在胡说八道。
+- `loss`：PPO 损失波动较大，重点看 Reward 趋势。

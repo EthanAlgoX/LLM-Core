@@ -51,28 +51,93 @@ $$L_{critic} = \frac{1}{2} (V_\phi(s_t) - G_t)^2$$
 2. 相比 `PPO`：Actor-Critic 是结构范式，PPO 是具体优化目标/约束策略。
 3. 相比 `GAE`：GAE 是优势估计技术，可作为 Actor-Critic 的组成部分。
 
-## 运行
+## 🛠️ 工程实战：Actor-Critic 实现
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.distributions import Categorical
+
+class ActorCritic(nn.Module):
+    """Actor-Critic 共享底层特征"""
+    def __init__(self, state_dim, action_dim, hidden=128):
+        super().__init__()
+        # 共享特征提取层
+        self.shared = nn.Sequential(
+            nn.Linear(state_dim, hidden),
+            nn.ReLU(),
+        )
+        # Actor Head: 输出动作概率
+        self.actor = nn.Sequential(
+            nn.Linear(hidden, action_dim),
+            nn.Softmax(dim=-1),
+        )
+        # Critic Head: 输出 V(s) 状态价值
+        self.critic = nn.Linear(hidden, 1)
+
+    def forward(self, x):
+        features = self.shared(x)
+        action_probs = self.actor(features)
+        state_value = self.critic(features)
+        return action_probs, state_value
+
+# 训练循环
+model = ActorCritic(state_dim=4, action_dim=2)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+gamma = 0.99
+
+for episode in range(1000):
+    state = env.reset()
+    done = False
+
+    while not done:
+        state_tensor = torch.FloatTensor(state)
+        probs, value = model(state_tensor)
+
+        # Actor: 采样动作
+        dist = Categorical(probs)
+        action = dist.sample()
+
+        next_state, reward, done, _ = env.step(action.item())
+        _, next_value = model(torch.FloatTensor(next_state))
+
+        # Critic: 计算 TD 目标与 Advantage
+        td_target = reward + gamma * next_value * (1 - done)
+        advantage = td_target - value              # A(s) = R + γV(s') - V(s)
+
+        # 双向更新
+        actor_loss = -dist.log_prob(action) * advantage.detach()  # 策略梯度
+        critic_loss = advantage.pow(2)                             # 价值回归
+
+        loss = actor_loss + 0.5 * critic_loss      # 联合损失
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        state = next_state
+```
+
+### 在 LLM（PPO）中的对应
+
+```python
+# PPO 中的 Actor-Critic 架构
+from trl import AutoModelForCausalLMWithValueHead
+
+# 自动为 CausalLM 加装 Value Head（Critic）
+model = AutoModelForCausalLMWithValueHead.from_pretrained("Qwen/Qwen2.5-7B")
+
+# model.pretrained_model → Actor（生成回复）
+# model.v_head           → Critic（预估价值）
+# 训练时两者同步更新
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/actor_critic
-
 conda activate finetune
-python code/actor_critic.py --reward-model <奖励模型路径或名称>
+python code/actor_critic.py
 ```
-
-## 输出结果
-
-默认输出到 `output/actor_critic_metrics`，包含：
-
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `log_history.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

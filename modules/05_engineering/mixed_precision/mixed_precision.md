@@ -46,28 +46,95 @@ $$\mathrm{Update\_Gradient} = \frac{\nabla_{\theta_{FP16}} (\mathrm{Scaled\_Loss
 2. 相比 `DeepSpeed`：混合精度是局部技术点，可被 DeepSpeed 集成。
 3. 相比算法模块：不改变目标函数，仅改变计算方式。
 
-## 运行
+## 🛠️ 工程实战
+
+### PyTorch AMP（自动混合精度）
+
+```python
+import torch
+from torch.cuda.amp import autocast, GradScaler
+
+model = MyModel().cuda()
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+scaler = GradScaler()  # FP16 专用的 Loss Scaler
+
+for batch in dataloader:
+    inputs, labels = batch["input_ids"].cuda(), batch["labels"].cuda()
+
+    # 自动将部分计算转为 FP16
+    with autocast(dtype=torch.float16):
+        outputs = model(inputs, labels=labels)
+        loss = outputs.loss
+
+    # Loss Scaling + 反向传播
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+    optimizer.zero_grad()
+```
+
+### BF16 训练（A100/H100 推荐）
+
+```python
+# BF16 不需要 GradScaler（范围与 FP32 一致）
+with autocast(dtype=torch.bfloat16):
+    outputs = model(inputs, labels=labels)
+    loss = outputs.loss
+
+loss.backward()
+optimizer.step()
+optimizer.zero_grad()
+```
+
+### HuggingFace Trainer 中启用
+
+```python
+from transformers import TrainingArguments
+
+args = TrainingArguments(
+    output_dir="saves/model",
+    bf16=True,                  # 启用 BF16（A100+）
+    # fp16=True,                # 或启用 FP16（V100/T4）
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=8,
+)
+```
+
+### 精度对比基准测试
+
+```python
+import torch
+import time
+
+def benchmark_precision(dtype, n=1000):
+    """对比不同精度的矩阵乘法性能"""
+    a = torch.randn(4096, 4096, device="cuda", dtype=dtype)
+    b = torch.randn(4096, 4096, device="cuda", dtype=dtype)
+
+    # 预热
+    for _ in range(10):
+        _ = torch.mm(a, b)
+    torch.cuda.synchronize()
+
+    start = time.time()
+    for _ in range(n):
+        _ = torch.mm(a, b)
+    torch.cuda.synchronize()
+
+    elapsed = time.time() - start
+    print(f"{dtype}: {elapsed:.3f}s ({n/elapsed:.0f} ops/s)")
+
+benchmark_precision(torch.float32)   # FP32 基准
+benchmark_precision(torch.float16)   # FP16（V100 约 2x 提速）
+benchmark_precision(torch.bfloat16)  # BF16（A100 约 2x 提速）
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/mixed_precision
-
 conda activate finetune
 python code/mixed_precision.py
 ```
-
-## 输出结果
-
-默认输出到 `output/mixed_precision_metrics`，包含：
-
-- `training_metrics.csv`
-- `training_curves.png`
-- `summary.json`
-- `mixed_precision_resolved_amp.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。
