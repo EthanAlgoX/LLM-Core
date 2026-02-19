@@ -1,5 +1,8 @@
 # OpenClaw 架构深度解析
 
+> [!TIP]
+> **一句话通俗理解**：可本地运行的完整 Agent 框架，用文件系统做记忆，用消息总线解耦通信
+
 > OpenClaw 是一个开源的本地优先（Local-First）AI Agent 框架，GitHub 150K+ Stars。其核心不是 LLM 本身，而是一个让 AI 能执行真实操作（Shell、文件、浏览器）的受控执行运行时。
 
 ---
@@ -153,6 +156,7 @@ Local (node-llama-cpp) → OpenAI → Gemini
 - **危险命令**：沙箱执行、审计日志
 
 **缓解措施**：
+
 - 隔离机器/账户运行
 - 最小权限工具
 - 容器化部署

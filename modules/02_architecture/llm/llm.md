@@ -1,5 +1,8 @@
 # Transformer Core (大语言模型架构)
 
+> [!TIP]
+> **一句话通俗理解**：LLM 的"身体"——每个词怎么被感知并编码成向量
+
 LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件的设计动机是理解所有后续技术的基础。
 
 > **核心公式**： $\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$

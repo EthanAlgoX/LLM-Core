@@ -1,5 +1,8 @@
 # CQL（Conservative Q-Learning）
 
+> [!TIP]
+> **一句话通俗理解**：BCQ 约束动作别乱飞；CQL 让 Q 值保守低估——两者都防止 AI 对没见过的情况过度自信
+
 ## 定位与分类
 
 - **阶段**：离线强化学习（Offline RL）。
@@ -35,7 +38,7 @@ $$L_{CQL\_reg} = \mathbb{E}_{s \sim D} \left[ \log \sum_a \exp(Q(s, a)) - \mathb
 
 $$L_{total} = L_{TD} + \alpha \cdot L_{CQL\_reg}$$
 
-- ** $\alpha$ (Alpha)**：保守系数。 $\alpha$ 越大，模型越“怂”（保守）； $\alpha$ 越小，模型越接近普通 DQN。
+- **$\alpha$ (Alpha)**：保守系数。 $\alpha$ 越大，模型越“怂”（保守）； $\alpha$ 越小，模型越接近普通 DQN。
 
 ## 与相近方法区别
 

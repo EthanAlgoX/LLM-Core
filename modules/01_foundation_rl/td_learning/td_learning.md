@@ -1,5 +1,8 @@
 # TD Learning（时序差分学习）
 
+> [!TIP]
+> **一句话通俗理解**：Q-Learning (Off-policy) 与 SARSA (On-policy) 差异
+
 ## 定位与分类
 
 - **阶段**：强化学习核心基础（RL Core）。
@@ -34,8 +37,8 @@ $$\delta_t = R_{t+1} + \gamma V(s_{t+1}) - V(s_t)$$
 
 $$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a') - Q(s, a)]}_{\mathrm{TD Error}}$$
 
-- ** $\alpha$ (Learning Rate)**：学习率，决定了新知识覆盖旧知识的速度。
-- ** $\gamma$ (Discount Factor)**：折扣因子，决定了我们多在乎长远利益。
+- **$\alpha$ (Learning Rate)**：学习率，决定了新知识覆盖旧知识的速度。
+- **$\gamma$ (Discount Factor)**：折扣因子，决定了我们多在乎长远利益。
 
 ## 与相近方法区别
 

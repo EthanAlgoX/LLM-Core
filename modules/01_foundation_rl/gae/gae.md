@@ -1,5 +1,8 @@
 # GAE（Generalized Advantage Estimation）
 
+> [!TIP]
+> **一句话通俗理解**：GAE、多步回报 与训练稳定性方差权衡
+
 ## 定位与分类
 
 - **阶段**：策略优化的核心组件。

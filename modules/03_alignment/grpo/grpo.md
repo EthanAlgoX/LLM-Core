@@ -1,5 +1,8 @@
 # GRPO (Group Relative Policy Optimization) 组内相对策略优化
 
+> [!TIP]
+> **一句话通俗理解**：DeepSeek 的秘诀：同时生成多个答案，优质的胜出，让模型学会"推理"
+
 ## 定位与分类
 
 - **阶段**：后训练（Post-training）之对齐/推理增强阶段。

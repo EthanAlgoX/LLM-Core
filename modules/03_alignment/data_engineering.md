@@ -1,5 +1,8 @@
 # 数据工程与模型评估 (Data & Evaluation)
 
+> [!TIP]
+> **一句话通俗理解**：训练数据的质量决定模型上限，用 LLM 来给 LLM 打分做筛选
+
 ## 数据处理 (Data Processing)
 
 高质量数据是 LLM 能力的上限。

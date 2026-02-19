@@ -1,5 +1,8 @@
 # Agentic Reasoning (智能体推理)
 
+> [!TIP]
+> **一句话通俗理解**：让 AI 从"回答问题"升级为"主动做事"——思考、记忆、用工具、迭代执行
+
 Agent 是大语言模型从“对话框”向“生产力工具”演进的核心形态。
 
 > **核心逻辑**：Agent = LLM + Planning + Memory + Tool Use

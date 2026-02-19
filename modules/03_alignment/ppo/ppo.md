@@ -1,5 +1,8 @@
 # PPO (Proximal Policy Optimization) 强化学习对齐
 
+> [!TIP]
+> **一句话通俗理解**：给 AI 两个答案让它选好的，通过"偏好打分"驯化它说人话
+
 ## 定位与分类
 
 - **阶段**：后训练（Post-training）之 RLHF 对齐阶段。

@@ -1,5 +1,8 @@
 # Transformer 注意力机制 (Attention Mechanisms)
 
+> [!TIP]
+> **一句话通俗理解**：模型"读文章"时同时关注多个角度，Flash Attention 让这更快更省显存
+
 ## 定位与分类
 
 - **阶段**：模型架构设计 / 推理优化。
