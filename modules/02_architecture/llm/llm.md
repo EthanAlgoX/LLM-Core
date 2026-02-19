@@ -5,6 +5,13 @@
 
 LLM 的核心架构是 Transformer Decoder-Only 结构。理解其每个组件的设计动机是理解所有后续技术的基础。
 
+## 经典 Transformer 与 LLM 关系
+
+- 对于 **原始 Transformer（seq2seq）**，`Encoder + Decoder` 的表述是准确的：
+  - `Encoder` 通过多层 self-attention 并行建模输入序列中 token 的全局依赖，得到上下文语义表示。
+  - `Decoder` 在生成时使用 masked self-attention 保持自回归约束，并通过 cross-attention 融合 Encoder 语义表示，按 next-token prediction 逐步生成输出。
+- 对于 **主流 LLM（GPT/LLaMA/Qwen）**，通常采用 `Decoder-only` 架构，不包含独立 Encoder，也不使用经典 seq2seq 的 cross-attention。
+
 ## 定义与目标
 
 - **定义**：Transformer Decoder-Only 是当前主流 LLM 的基础架构。
@@ -128,4 +135,3 @@ logits = lm_head(final_rmsnorm(x))  # [B, T, vocab_size]
 
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - [FlashAttention](https://arxiv.org/abs/2205.14135)
-
