@@ -67,10 +67,10 @@ python run.py --module ppo --toy
 | 领域 | 核心内容 | 原理技术要点 |
 | --- | --- | --- |
 | 智能体总览 | [Agentic Overview](./modules/06_agent/06_agent.md) | 核心逻辑：**LLM + Planning + Memory + Toolkit** 深度解析 |
-| 信息检索 | [Memory & RAG](./modules/06_agent/06_agent.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
-| 编排范式 | [Agent Orchestration](./modules/06_agent/06_agent.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 |
+| 记忆与检索 | [Memory & RAG](./modules/06_agent/memory_rag/memory_rag.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** |
+| 编排范式 | [Agent Orchestration](./modules/06_agent/orchestration/orchestration.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 |
 | 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** |
-| 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/06_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
+| 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/multi_agent/multi_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** |
 | 本地Agent框架 | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) | **Gateway + Runtime**、**文件记忆系统**、**Heartbeat 事件驱动** 与 **混合检索** |
 
 ### 6. 进阶课题：离线强化学习 (Advanced Topics: Offline RL)
@@ -91,16 +91,35 @@ python run.py --module ppo --toy
 - **KV Cache**：显存占用 = `2 × layers × heads × head_dim × precision_bytes`。
 - **量化增益**：通过 **定点量化** (INT4/INT8)，显存占用可降低 50%-75%。
 
-### 2. 系统演进：从 Dense 到 MoE
+### 2. 注意力机制变体
 
-- **MoE 优势**：通过稀疏激活，在不显著增加计算量的前提下极大扩展模型参数量。
-- **并行瓶颈**：专家并行 (EP) 会引入额外的 All-to-All 通信开销，需配合负载均衡。
+| 机制 | 特点 | 显存优化 |
+|-----|------|---------|
+| MHA | Multi-Head Attention | 标准 |
+| MQA | Multi-Query Attention | KV 头=1 |
+| GQA | Grouped-Query Attention | 折中方案 |
 
-### 3. Agent 架构演进
+### 3. 对齐算法演进
+
+| 阶段 | 算法 | 核心思想 |
+|-----|------|---------|
+| SFT | Supervised Fine-Tuning | 模仿学习 |
+| RLHF | PPO + Reward Model | 人类反馈强化学习 |
+| DPO | Direct Preference Optimization | 离线对比优化 |
+| GRPO | Group Relative Policy Optimization | 组内相对优势 |
+
+### 4. Agent 架构演进
 
 - **ReAct 范式**：协同推理（Reason）与行动（Act），动态调整计划。
 - **Plan and Execute**：先计划再执行，适合长链条任务。
 - **Multi-Agent Mesh**：去中心化编排，支持分布式决策与角色分担。
+
+### 5. 分布式训练策略
+
+- **数据并行 (DP)**：副本间切分数据，All-Reduce 同步梯度
+- **张量并行 (TP)**：切分层内权重，All-Gather 激活
+- **流水线并行 (PP)**：按层切分 Stage，Bubble 时间
+- **专家并行 (EP)**：MoE 特有，All-to-All 路由专家
 
 ---
 
@@ -108,11 +127,11 @@ python run.py --module ppo --toy
 
 - `modules/`: 核心知识组件
   - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
-  - `02_architecture/`: 架构核心 (LLM, VLM, MoE, Quantization)
-  - `03_alignment/`: 对齐技术 (SFT, PEFT, Agentic-RL, Data Engineering)
+  - `02_architecture/`: 架构核心 (LLM, VLM, MoE, Quantization, Diffusion, DiT)
+  - `03_alignment/`: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL)
   - `04_advanced_topics/`: 进阶课题 (Offline RL: BCQ, CQL)
-  - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, EP)
-  - `06_agent/`: 智能体 (RAG, Mesh, Multi-Agent, State Machine)
+  - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)
+  - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Multi-Agent, OpenClaw)
 - `tools/`: 自动化回归测试工具
 - `output/`: 训练产物、日志与测试报告
 
@@ -123,11 +142,15 @@ python run.py --module ppo --toy
 | 模型分类 | 代表模型 | 核心解析文档 |
 | :--- | :--- | :--- |
 | **基础语言模型 (LLM)** | LLaMA-3 / Transformer | [Transformer Core](./modules/02_architecture/llm/llm.md) |
+| **注意力机制** | Flash Attention | [Attention Mechanisms](./modules/02_architecture/llm/attention.md) |
 | **多模态 VLM** | **LLaVA** | [LLaVA 详述](./modules/02_architecture/vlm/llava/llava.md) |
 | **多模态 VLM** | **Flamingo** | [Flamingo 详述](./modules/02_architecture/vlm/flamingo/flamingo.md) |
 | **多模态 VLM** | **BLIP-2** | [BLIP-2 详述](./modules/02_architecture/vlm/blip2/blip2.md) |
+| **生成模型** | Diffusion / DiT | [Diffusion](./modules/02_architecture/generation/diffusion/diffusion.md) / [DiT](./modules/02_architecture/generation/dit/dit.md) |
 | **推理增强模型** | DeepSeek (GRPO) | [GRPO 对齐范式](./modules/03_alignment/grpo/grpo.md) |
 | **分布式框架** | Megatron-LM | [Megatron 并行策略](./modules/05_engineering/megatron/megatron.md) |
+| **推理框架** | vLLM / sglang | [推理框架](./modules/05_engineering/inference/inference.md) |
+| **本地Agent** | OpenClaw | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) |
 
 ---
 

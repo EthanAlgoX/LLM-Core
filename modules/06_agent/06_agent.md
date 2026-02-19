@@ -10,40 +10,24 @@ Agent 是大语言模型从“对话框”向“生产力工具”演进的核�
 
 ### 1. 规划 (Planning)
 
-规划层决定了 Agent 如何拆分复杂任务。常用模式包括：
-
-- **ReAct (Reason + Act)**：协同推理与行动。模型根据 Observation 动态调整 Thought。适用于交互频繁、不确定性高的任务。
-- **Plan and Execute**：先通过 Planner 生成完整 Task List，再由 Executor 逐一执行。适用于逻辑清晰、长链条的复杂工程任务。
-- **CoT (Chain of Thought)**：思维链引导。
-- **ToT (Tree of Thoughts)**：针对复杂决策，探索多条可能路径并进行回溯。
-- **Self-Ask**：模型在回答前先自我询问子问题，适合复杂事实检索。
+规划层决定了 Agent 如何拆分复杂任务。详见 [Agent Orchestration](./orchestration/orchestration.md)
 
 ### 2. 编排与状态机 (Orchestration & State Machine)
 
-任务编排不仅是线性的，还需要容错、分支与异步处理。
-
-- **状态机编排 (State Machine)**：将 Agent 的不同执行阶段定义为“状态”，通过明确的转移条件驱动（如 **LangGraph**）。适用于生成可靠性要求极高的工程流。
-- **异步编排 (Async Orchestration)**：利用 **Message Bus**（如 **OpenClaw Mesh**）解耦请求与响应。Agent 可以在后台异步执行，完成后通过总线反馈。
-- **Conditional Routing**：根据 LLM 的输出结果动态路由到不同的子任务或不同能力的模型。
+任务编排不仅是线性的，还需要容错、分支与异步处理。详见 [Agent Orchestration](./orchestration/orchestration.md)
 
 ### 3. 多智能体协作 (Multi-Agent Systems)
 
-- **去中心化协作 (Decentralized)**：智能体之间通过标准协议通信，如 **AutoGen**、**MetaGPT**。每个 Agent 拥有独立 Persona 与职责分布。
-- **Swarm Intelligence**：通过大量轻量化 Agent 的涌现行为解决极其复杂的分布式问题。
-- **通信协议与共识**：定义 Agent 间交换信息的 Schema，确保协作过程中的数据一致性。
+详见 [Multi-Agent Systems](./multi_agent/multi_agent.md)
 
 ### 4. 记忆与检索 (Memory & RAG)
 
-- **短期记忆 (Short-term)**：利用 Context Window 存储对话历史和中间思考过程。
-- **长期记忆 (Long-term) - RAG 架构**：
-    1. **Query 理解**：意图识别、实体提取或查询扩展（Query Expansion）。
-    2. **向量检索 (Vector Search)**：计算 **Embedding** 相似度，从向量库召回候选集。
-    3. **Rerank 模型**：对召回结果进行精排，解决语义稀释问题。
+详见 [Memory & RAG](./memory_rag/memory_rag.md)
 
 ### 5. 工具集成与人工干预 (Tools & HITL)
 
 - **Tool-augmented**：通过 Function Calling 驱动外部能力。
-- **Human-in-the-Loop (HITL)**：在关键动作（如写库、转账、发送敏感信息）前强制引入人工确认机制，提供调试与纠偏入口。
+- **Human-in-the-Loop (HITL)**：在关键动作前强制引入人工确认机制。
 
 ---
 
