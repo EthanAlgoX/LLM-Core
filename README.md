@@ -84,6 +84,16 @@ python run.py --module ppo --toy
 
 ---
 
+### 7. 经典解析：工业级模型案例 (Classic Model Analysis)
+
+| 领域 | 核心内容 | 原理技术要点 | 一句话理解 |
+| --- | --- | --- | --- |
+| ChatGPT / InstructGPT | [ChatGPT 解析](./modules/07_classic_models/chatgpt/chatgpt.md) | **RLHF 三阶段**（SFT → RM → PPO）与 **KL 约束对齐** | 第一个把 RL + 人类偏好大规模落地的对话 AI，定义了 RLHF 行业标准 |
+| DeepSeek-R1 | [DeepSeek-R1 解析](./modules/07_classic_models/deepseek_r1/deepseek_r1.md) | **GRPO 算法**、**可验证奖励**与推理能力自发涌现 | 用纯强化学习让模型自发学会"一步步思考"，无需任何 CoT 标注数据 |
+| Qwen3 | [Qwen3 解析](./modules/07_classic_models/qwen3/qwen3.md) | **混合思考模式**、**Dense + MoE 双轨**与四阶段后训练 | 同一模型内动态切换深度推理和快速回答，兼顾效率与能力 |
+
+---
+
 ## 🧠 核心技术参考 (Technical Reference)
 
 ### 1. 显存计算与容量估算 (Memory & Compute)
@@ -129,10 +139,11 @@ python run.py --module ppo --toy
 - `modules/`: 核心知识组件
   - `01_foundation_rl/`: 理论根基 (MDP, TD, GAE)
   - `02_architecture/`: 架构核心 (LLM, VLM, MoE, Quantization, Diffusion, DiT)
-  - `03_alignment/`: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL)
+  - `03_alignment/`: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL, Data Synthesis)
   - `04_advanced_topics/`: 进阶课题 (Offline RL: BCQ, CQL)
   - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)
   - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Multi-Agent, OpenClaw)
+  - `07_classic_models/`: 经典解析 (ChatGPT, DeepSeek-R1, Qwen3)
 - `tools/`: 自动化回归测试工具
 - `output/`: 训练产物、日志与测试报告
 
