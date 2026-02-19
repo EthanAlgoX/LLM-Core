@@ -49,8 +49,8 @@ $$\mathrm{Update\_Gradient} = \frac{\nabla_{\theta_{FP16}} (\mathrm{Scaled\_Loss
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/mixed_precision
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/systems/mixed_precision
+
 conda activate finetune
 python code/mixed_precision.py
 ```

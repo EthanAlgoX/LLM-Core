@@ -46,8 +46,8 @@ $$Q(s, a) \leftarrow Q(s, a) + \alpha \underbrace{[R + \gamma \max_{a'} Q(s', a'
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/td_learning
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/td_learning
+
 conda activate finetune
 python code/td_learning.py
 ```

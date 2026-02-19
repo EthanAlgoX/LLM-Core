@@ -45,8 +45,8 @@ $$P(y | x) = \prod_{t=1}^L P(y_t | y_{<t}, x_{<t})$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/flamingo
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/vlm/flamingo
+
 conda activate finetune
 python code/flamingo.py --dry-run
 ```

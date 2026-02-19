@@ -50,8 +50,8 @@ $$GradAccum = \frac{GlobalBatchSize}{MicroBatchSize \times DP_{size}}$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/llm/megatron
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/llm/megatron
+
 conda activate finetune
 python code/megatron.py
 ```

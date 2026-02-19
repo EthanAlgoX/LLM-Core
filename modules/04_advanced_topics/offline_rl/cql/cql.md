@@ -46,8 +46,8 @@ $$L_{total} = L_{TD} + \alpha \cdot L_{CQL\_reg}$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/offline_rl/cql
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/offline_rl/cql
+
 conda activate finetune
 python code/cql.py
 ```

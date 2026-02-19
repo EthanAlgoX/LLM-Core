@@ -66,8 +66,8 @@ $$\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \del
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/gae
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/gae
+
 conda activate finetune
 python code/gae.py
 ```

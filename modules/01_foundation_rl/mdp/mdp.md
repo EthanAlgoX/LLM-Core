@@ -63,8 +63,8 @@ $$V^{\ast}(s) = \max_{a \in A} \sum_{s' \in S} P(s'|s, a) [R(s, a, s') + \gamma 
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/mdp
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/mdp
+
 conda activate finetune
 python code/mdp.py
 ```

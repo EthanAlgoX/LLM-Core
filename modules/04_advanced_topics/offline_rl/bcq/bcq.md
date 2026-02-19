@@ -45,8 +45,8 @@ $$Q(s, a) \leftarrow r + \gamma \max_{a' \mathrm{ s.t. } \frac{\pi_b(a'|s')}{\ma
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/offline_rl/bcq
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/offline_rl/bcq
+
 conda activate finetune
 python code/bcq.py
 ```

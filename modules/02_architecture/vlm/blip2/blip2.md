@@ -47,8 +47,8 @@ $$L_{itm} = \mathbb{E}[y \log p_{itm}(v, t) + (1-y) \log(1 - p_{itm}(v, t))]$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/blip2
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/vlm/blip2
+
 conda activate finetune
 python code/blip2.py --dry-run
 ```

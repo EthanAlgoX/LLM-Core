@@ -50,8 +50,8 @@ $$\nabla_\theta \pi_\theta = \pi_\theta \frac{\nabla_\theta \pi_\theta}{\pi_\the
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/policy_gradient
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/alignment/policy_gradient
+
 conda activate finetune
 python code/policy_gradient.py --reward-model <奖励模型路径或名称>
 ```

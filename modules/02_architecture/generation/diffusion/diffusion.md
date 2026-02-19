@@ -48,8 +48,8 @@ $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1-\alpha_t}{\sqrt{1-\ba
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/generation/diffusion
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/generation/diffusion
+
 conda activate finetune
 python code/diffusion.py
 ```

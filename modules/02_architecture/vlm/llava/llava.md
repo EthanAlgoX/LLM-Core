@@ -47,8 +47,8 @@ $$L = - \sum_{i=1}^L \log p_\theta(x_i | x_{<i}, I)$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/vlm/llava
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/vlm/llava
+
 conda activate finetune
 python code/llava.py --dry-run
 ```

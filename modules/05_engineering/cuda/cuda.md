@@ -45,8 +45,8 @@
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/cuda
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/systems/cuda
+
 conda activate finetune
 python code/cuda.py
 ```

@@ -54,8 +54,8 @@ $$L_{critic} = \frac{1}{2} (V_\phi(s_t) - G_t)^2$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/alignment/actor_critic
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/alignment/actor_critic
+
 conda activate finetune
 python code/actor_critic.py --reward-model <奖励模型路径或名称>
 ```

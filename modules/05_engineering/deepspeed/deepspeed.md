@@ -47,8 +47,8 @@ $$Memory_{ZeRO3} \approx \frac{Memory_{Baseline}}{N}$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/systems/deepspeed
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/systems/deepspeed
+
 conda activate finetune
 python code/deepspeed.py
 ```

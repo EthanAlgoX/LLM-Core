@@ -51,8 +51,8 @@ $$\min_\theta \mathbb{E}_{x_0, \epsilon, t} [ \| \epsilon - \mathrm{DiT}_\theta(
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/pre_train/generation/dit
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/pre_train/generation/dit
+
 conda activate finetune
 python code/dit.py
 ```

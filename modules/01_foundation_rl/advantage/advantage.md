@@ -57,8 +57,8 @@ $$A(s, a) = Q(s, a) - V(s)$$
 ## 运行
 
 ```bash
-cd /Users/yunxuanhan/Documents/workspace/ai/Finetune/post_train/rl_basics/advantage
-source /opt/anaconda3/etc/profile.d/conda.sh
+cd <YOUR_PROJECT_ROOT>/post_train/rl_basics/advantage
+
 conda activate finetune
 python code/advantage.py
 ```
