@@ -1,7 +1,7 @@
 # TD Learning（时序差分学习）
 
 > [!TIP]
-> **一句话通俗理解**：Q-Learning (Off-policy) 与 SARSA (On-policy) 差异
+> **一句话通俗理解**：TD Learning 边交互边自举更新价值估计，不等回合结束也能持续学习并加速收敛。
 
 ## 定位与分类
 

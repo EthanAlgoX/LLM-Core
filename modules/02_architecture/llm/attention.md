@@ -1,7 +1,7 @@
 # Transformer 注意力机制 (Attention Mechanisms)
 
 > [!TIP]
-> **一句话通俗理解**：模型"读文章"时同时关注多个角度，Flash Attention 让这更快更省显存
+> **一句话通俗理解**：注意力机制通过 Q-K 匹配动态分配信息流，GQA/MQA 与 FlashAttention 在精度与成本间给出不同工程折中。
 
 ## 定位与分类
 

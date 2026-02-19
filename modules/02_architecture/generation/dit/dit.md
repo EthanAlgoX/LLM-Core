@@ -1,7 +1,7 @@
 # DiT（Diffusion Transformer）
 
 > [!TIP]
-> **一句话通俗理解**：AI 画图原理：从噪声图一步步去噪，变成目标图片
+> **一句话通俗理解**：DiT 用 Transformer 替代 U-Net 处理扩散过程中的 token 化图像表示，在规模化训练下提升生成质量。
 
 ## 定位与分类
 

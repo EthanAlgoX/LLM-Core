@@ -1,7 +1,7 @@
 # RLHF (Reinforcement Learning from Human Feedback) 人类反馈强化学习
 
 > [!TIP]
-> **一句话通俗理解**：在沙盒里练习，让 Agent 从实战模拟中学会完成复杂的真实任务
+> **一句话通俗理解**：RLHF 通过 SFT、奖励建模和策略优化三段式闭环，把人类偏好显式注入模型行为。
 
 ## 定位与分类
 
