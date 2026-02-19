@@ -16,9 +16,9 @@
 假设模型权重的更新量 $\Delta W$ 是 **低秩 (Low-Rank)** 的。
 我们可以将 $\Delta W$ 分解为两个极小的矩阵相乘：
 
-$$\Delta W = A \times B$$
+`DeltaW = A * B`
 
-- 其中 $W \in \mathbb{R}^{d \times k}$，$A \in \mathbb{R}^{d \times r}$，$B \in \mathbb{R}^{r \times k}$，秩 $r \ll d, k$。
+- 其中 `W in R^(d x k)`，`A in R^(d x r)`，`B in R^(r x k)`，秩 `r << min(d, k)`。
 
 ### 训练与推理
 
@@ -214,4 +214,3 @@ metrics = evaluate(state)
 
 - [InstructGPT](https://arxiv.org/abs/2203.02155)
 - [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)
-
