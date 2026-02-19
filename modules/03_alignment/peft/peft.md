@@ -63,3 +63,89 @@ $$\Delta W = A \times B$$
    - LoRA 收敛通常更快，因为它优化的是低秩残差，更容易在局部搜索到最优解。
 3. PEFT 在多模态模型中的应用？
    - 常用于固定 ViT 编码器，仅对 Projector 或 LLM 部分进行 LoRA 微调，实现跨模态对齐。
+
+---
+
+## 🛠️ 工程实战
+
+### 方式一：PEFT 库（HuggingFace 原生）
+
+```python
+from peft import LoraConfig, get_peft_model, TaskType
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# 1. 加载基座模型
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")
+
+# 2. 定义 LoRA 配置
+lora_config = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=64,                          # 秩（推荐 8~64）
+    lora_alpha=128,                # 缩放系数，通常 = 2 × r
+    lora_dropout=0.05,
+    target_modules="all-linear",   # 对所有线性层注入 LoRA
+)
+
+# 3. 包装模型
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+# 输出示例：trainable params: 83,886,080 || all params: 7,699,726,336 || trainable%: 1.089%
+```
+
+### 方式二：QLoRA（4-bit 量化 + LoRA）
+
+```python
+from transformers import BitsAndBytesConfig
+import torch
+
+# 4-bit 量化配置
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",          # NormalFloat4，精度优于 FP4
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_use_double_quant=True,     # 二次量化，再省几百 MB
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-7B",
+    quantization_config=bnb_config,
+    device_map="auto",
+)
+
+# 然后同样使用 get_peft_model 包装
+model = get_peft_model(model, lora_config)
+# QLoRA: 7B 模型仅需 ~6GB VRAM
+```
+
+### 方式三：LLaMA Factory 一键微调
+
+```yaml
+# peft_lora.yaml
+model_name_or_path: Qwen/Qwen2.5-7B
+finetuning_type: lora              # 或 qlora（自动启用 4-bit）
+quantization_bit: 4                # 启用 QLoRA
+lora_rank: 64
+lora_target: all
+stage: sft
+dataset: my_custom_sft
+template: qwen
+output_dir: saves/qwen2.5-7b/qlora
+```
+
+```bash
+llamafactory-cli train peft_lora.yaml
+```
+
+### LoRA 权重合并与导出
+
+```python
+from peft import PeftModel
+
+# 加载基座 + LoRA adapter
+base_model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B")
+model = PeftModel.from_pretrained(base_model, "saves/qwen2.5-7b/qlora")
+
+# 合并权重（推理零延迟）
+merged_model = model.merge_and_unload()
+merged_model.save_pretrained("models/qwen2.5-7b-merged")
+```

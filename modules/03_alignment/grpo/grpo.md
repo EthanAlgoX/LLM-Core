@@ -37,8 +37,8 @@
 
 $$A_i = \frac{r_i - \mathrm{mean}(r_1, r_2, \dots, r_G)}{\mathrm{std}(r_1, r_2, \dots, r_G)}$$
 
-- ** $r_i$ **：第 $i$ 个回答获得的显式奖励分数。
-- ** $\mathrm{mean}$ 与 $\mathrm{std}$ **：这组回答奖励分的平均值和标准差。
+- **$r_i$**：第 $i$ 个回答获得的显式奖励分数。
+- **$\mathrm{mean}$ 与 $\mathrm{std}$**：这组回答奖励分的平均值和标准差。
 - **直觉理解**：这是一种**归一化**操作。它将绝对分数转化为了“在该组中的表现排名”。
 
 ### 2. 目标优化函数 (Objective Function)
@@ -47,7 +47,7 @@ GRPO 沿用了 PPO 的剪切（Clipped）思想，但在计算期望时是在组
 
 $$J_{GRPO}(\theta) = \mathbb{E} \left[ q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}} \right] \left( \frac{1}{G} \sum_{i=1}^G L_i^{CLIP}(\theta) - \beta D_{KL}(\pi_\theta || \pi_{ref}) \right)$$
 
-- ** $\frac{1}{G} \sum$ **：对整组回答的损失进行平均。
+- **$\frac{1}{G} \sum$**：对整组回答的损失进行平均。
 - **KL 散度约束**：同样保留了 KL 惩罚，防止模型为了赢得组内竞争而写出乱码。
 
 ### 场景分析：组内对比如何奏效？
@@ -78,9 +78,117 @@ $$J_{GRPO}(\theta) = \mathbb{E} \left[ q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\t
 | `scale_rewards` | `"group"` | 开启组内标准化模式。这是 GRPO 的核心开关。 |
 | `learning_rate` | `5e-7` | 极低的学习率，防止策略梯度在采样不足时产生抖动。 |
 
-## 运行与输出
+## 🛠️ 工程实战：GRPO 训练
 
-1. **启动**：`python code/grpo_demo.py`
-2. **可视化**：默认输出至 `output/grpo_metrics`。
-   - 关注 `reward`（总分）与各分项（如 `correctness_reward`）的增长。
-   - `reward_std` 反映了组内回答的多样性与差距。
+### 方式一：LLaMA Factory
+
+**数据格式**（与 PPO 类似，Prompt-only + 可验证奖励）：
+
+```json
+[
+  {"instruction": "计算 (3 + 5) × 2 = ?", "input": "", "output": "16"},
+  {"instruction": "求解方程 2x + 3 = 11", "input": "", "output": "x = 4"}
+]
+```
+
+**训练配置 YAML**：
+
+```yaml
+### GRPO 训练配置
+model_name_or_path: Qwen/Qwen2.5-7B
+stage: grpo                             # 关键：设为 grpo（而非 ppo）
+do_train: true
+finetuning_type: lora
+
+### GRPO 特有参数
+num_generations: 8                      # 每题采样 G 个答案（核心超参）
+pref_beta: 0.04                         # KL 约束强度
+
+### 奖励配置（可验证奖励，无需 RM）
+reward_funcs: accuracy,format           # 内置奖励函数：准确率 + 格式检查
+
+### LoRA
+lora_rank: 64
+lora_target: all
+
+### 数据
+dataset: my_math_data
+template: qwen
+cutoff_len: 4096                        # 推理任务需要更长上下文
+
+### 训练
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 5.0e-7                   # 极低学习率，GRPO 对梯度更敏感
+num_train_epochs: 1
+bf16: true
+output_dir: saves/qwen2.5-7b/lora/grpo
+```
+
+```bash
+llamafactory-cli train grpo_config.yaml
+```
+
+> **显存估算**：GRPO 无需 Critic，但 `num_generations=8` 意味着每步生成 8 条回复。7B + LoRA + 8 采样 ≈ **40~60GB VRAM**（建议多卡或 ZeRO-3）。
+
+### 方式二：TRL 库 + 自定义奖励
+
+```python
+from trl import GRPOTrainer, GRPOConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import re
+
+# 1. 加载模型
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B")
+
+# 2. 定义可验证奖励函数
+def accuracy_reward(completions, references, **kwargs):
+    """提取答案并与标准答案对比"""
+    rewards = []
+    for completion, ref in zip(completions, references):
+        # 提取 <answer>...</answer> 中的内容
+        match = re.search(r"<answer>(.*?)</answer>", completion)
+        predicted = match.group(1).strip() if match else ""
+        rewards.append(1.0 if predicted == ref else 0.0)
+    return rewards
+
+def format_reward(completions, **kwargs):
+    """检查输出格式是否包含 think + answer 标签"""
+    rewards = []
+    for completion in completions:
+        has_think = "<think>" in completion and "</think>" in completion
+        has_answer = "<answer>" in completion and "</answer>" in completion
+        rewards.append(1.0 if has_think and has_answer else 0.0)
+    return rewards
+
+# 3. GRPO 配置
+training_args = GRPOConfig(
+    output_dir="saves/grpo",
+    num_generations=8,                   # 每题生成 G 个候选
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=4,
+    learning_rate=5e-7,
+    bf16=True,
+)
+
+# 4. 启动 GRPO 训练
+trainer = GRPOTrainer(
+    model=model,
+    args=training_args,
+    train_dataset=dataset,
+    tokenizer=tokenizer,
+    reward_funcs=[accuracy_reward, format_reward],  # 多奖励函数组合
+)
+trainer.train()
+```
+
+---
+
+## 原始脚本运行
+
+```bash
+python code/grpo_demo.py
+```
+
+**可视化**：默认输出至 `output/grpo_metrics`。关注 `reward`（总分）与 `reward_std`（组内差异）的变化趋势。

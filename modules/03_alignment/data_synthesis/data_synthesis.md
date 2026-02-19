@@ -71,11 +71,124 @@
 
 ---
 
-## 📂 实战参考
+## 🛠️ 工程实战
 
-| 工具/框架 | 功能 |
-| --- | --- |
-| **LLM-Blender** | 多模型回复融合，选出最优答案 |
-| **Evol-Instruct** | 指令复杂化扩展（增加约束、反转问题等） |
-| **WizardLM** | 基于 Evol-Instruct 的开源合成数据集 |
-| **Rejection Sampling** | 用奖励模型/执行器过滤候选样本 |
+### 1. Self-Instruct 蒸馏合成
+
+```python
+from openai import OpenAI
+import json
+
+client = OpenAI()  # 或使用 vLLM 本地部署的 Teacher 模型
+
+# 种子指令（人工编写 5~10 条高质量样本）
+seed_instructions = [
+    "请解释什么是梯度消失问题，以及如何解决。",
+    "用 Python 实现二叉树的层序遍历。",
+]
+
+# 让 Teacher 模型基于种子生成新指令
+def generate_instructions(seed, n=50):
+    prompt = f"""基于以下示例指令，生成 {n} 条新的、多样化的指令。
+要求：覆盖不同难度和领域（数学、代码、常识推理、创意写作）。
+
+示例：
+{json.dumps(seed, ensure_ascii=False, indent=2)}
+
+请以 JSON 数组格式输出。"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=1.0,
+    )
+    return json.loads(response.choices[0].message.content)
+
+# 为每条指令生成回复
+def generate_response(instruction):
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": instruction}],
+        temperature=0.7,
+    )
+    return response.choices[0].message.content
+
+# 构建 SFT 数据集
+new_instructions = generate_instructions(seed_instructions, n=100)
+dataset = []
+for inst in new_instructions:
+    resp = generate_response(inst)
+    dataset.append({"instruction": inst, "input": "", "output": resp})
+
+with open("data/synthetic_sft.json", "w") as f:
+    json.dump(dataset, f, ensure_ascii=False, indent=2)
+```
+
+### 2. 拒绝采样（Rejection Sampling）
+
+```python
+from vllm import LLM, SamplingParams
+
+llm = LLM(model="Qwen/Qwen2.5-7B")
+
+def rejection_sampling(prompt, answer, n_samples=16, threshold=0.8):
+    """生成 N 个候选，用验证器筛选高质量样本"""
+    params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=2048, n=n_samples)
+    outputs = llm.generate([prompt], params)[0]
+
+    accepted = []
+    for output in outputs.outputs:
+        response = output.text
+        # 验证器：检查答案是否正确（数学/代码可用执行器）
+        score = verify_answer(response, answer)
+        if score >= threshold:
+            accepted.append({"instruction": prompt, "output": response, "score": score})
+
+    return accepted
+
+def verify_answer(response, ground_truth):
+    """示例：提取数字答案并对比"""
+    import re
+    match = re.search(r"\\boxed\{(.+?)\}", response)
+    if match and match.group(1).strip() == str(ground_truth):
+        return 1.0
+    return 0.0
+
+# 批量采样
+for problem in math_problems:
+    samples = rejection_sampling(problem["question"], problem["answer"])
+    high_quality_data.extend(samples)
+```
+
+### 3. Evol-Instruct 指令进化
+
+```python
+EVOL_PROMPT = """请将以下简单指令改写为更复杂、更具挑战性的版本。
+你可以通过以下方式增加复杂度：
+1. 增加约束条件（如"不使用循环"、"时间复杂度 O(n)"）
+2. 增加推理深度（需要多步推理才能解答）
+3. 增加领域融合（结合多个知识点）
+
+原始指令：{instruction}
+
+改写后的复杂指令（仅输出改写结果）："""
+
+def evolve_instruction(instruction, rounds=3):
+    """多轮进化，逐步增加难度"""
+    current = instruction
+    for _ in range(rounds):
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": EVOL_PROMPT.format(instruction=current)}],
+            temperature=0.9,
+        )
+        current = response.choices[0].message.content
+    return current
+
+# 示例
+simple = "写一个排序算法"
+complex_inst = evolve_instruction(simple)
+# 输出: "实现一个混合排序算法，对小于16个元素的子数组使用插入排序，
+#        对更大的子数组使用归并排序，要求时间复杂度 O(n log n)，
+#        空间复杂度 O(1)，并用 Python 类型注解标注所有参数。"
+```

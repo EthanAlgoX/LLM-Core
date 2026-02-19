@@ -31,11 +31,11 @@ $$L_{DPO}(\pi_\theta; \pi_{ref}) = -\mathbb{E}_{(x, y_w, y_l) \sim D} \left[ \lo
 
 **公式拆解与理解：**
 
-- ** $\pi_\theta$ 与 $\pi_{ref}$ **：当前优化的模型与冻结的参考模型（通常是 SFT 后的模型）。
-- ** $y_w$ (Chosen) 与 $y_l$ (Rejected)**：偏好对中的“好答案”与“坏答案”。
-- ** $\log \frac{\pi_\theta}{\pi_{ref}}$ (Log-Ratio)**：衡量当前模型相对于参考模型，对某个回答概率的“提升程度”。
+- **$\pi_\theta$ 与 $\pi_{ref}$**：当前优化的模型与冻结的参考模型（通常是 SFT 后的模型）。
+- **$y_w$ (Chosen) 与 $y_l$ (Rejected)**：偏好对中的“好答案”与“坏答案”。
+- **$\log \frac{\pi_\theta}{\pi_{ref}}$ (Log-Ratio)**：衡量当前模型相对于参考模型，对某个回答概率的“提升程度”。
 - **偏好边际 (Preference Margin)**：括号内的两项相减，代表了模型对“好答案”的提升程度是否远大于对“坏答案”的提升程度。
-- ** $\beta$ (Beta 系数)**：调节因子。控制对偏好的敏感度，同时也起到了类似 PPO 中 KL 散度的约束作用，防止模型跑得太偏。
+- **$\beta$ (Beta 系数)**：调节因子。控制对偏好的敏感度，同时也起到了类似 PPO 中 KL 散度的约束作用，防止模型跑得太偏。
 
 ### 2. 深度解读：为什么它能取代奖励模型？
 
@@ -49,11 +49,103 @@ $$L_{DPO}(\pi_\theta; \pi_{ref}) = -\mathbb{E}_{(x, y_w, y_l) \sim D} \left[ \lo
 2. 相比 `PPO/RLHF`：DPO 不需要在线 rollouts，工程更简洁。
 3. 相比 `GRPO`：DPO 常基于成对偏好数据，GRPO 常基于组内多采样奖励比较。
 
-## 运行
+## 🛠️ 工程实战：DPO 训练
+
+### 方式一：LLaMA Factory（推荐）
+
+**数据格式**（偏好对格式，在 `dataset_info.json` 中注册）：
+
+```json
+[
+  {
+    "instruction": "解释量子纠缠",
+    "input": "",
+    "chosen": "量子纠缠是一种量子力学现象，两个粒子的状态相互关联...",
+    "rejected": "量子纠缠就是两个东西连在一起。"
+  }
+]
+```
+
+**训练配置 YAML**：
+
+```yaml
+### DPO 训练配置
+model_name_or_path: Qwen/Qwen2.5-7B
+stage: dpo                              # 关键：设为 dpo
+do_train: true
+finetuning_type: lora
+
+### DPO 特有参数
+pref_beta: 0.1                          # β 系数，控制偏好敏感度（默认 0.1）
+pref_loss: sigmoid                      # 损失类型：sigmoid / hinge / ipo
+
+### LoRA
+lora_rank: 64
+lora_target: all
+
+### 数据
+dataset: my_dpo_data                    # 偏好对数据集
+template: qwen
+cutoff_len: 2048
+
+### 训练
+per_device_train_batch_size: 1          # DPO 需要同时加载 chosen + rejected，显存翻倍
+gradient_accumulation_steps: 16
+num_train_epochs: 2.0
+learning_rate: 5.0e-6                   # DPO 学习率通常比 SFT 低一个数量级
+bf16: true
+output_dir: saves/qwen2.5-7b/lora/dpo
+```
+
+```bash
+llamafactory-cli train dpo_config.yaml
+```
+
+> **显存注意**：DPO 需同时维护 Policy + Reference 两个模型，显存需求约为 SFT 的 **2 倍**。
+
+### 方式二：TRL 库（HuggingFace）
+
+```python
+from trl import DPOTrainer, DPOConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
+
+# 1. 加载模型
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")
+ref_model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B", device_map="auto")  # 冻结参考模型
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B")
+
+# 2. 加载偏好数据
+dataset = load_dataset("json", data_files="data/dpo_pairs.json")
+
+# 3. 训练配置
+training_args = DPOConfig(
+    output_dir="saves/dpo",
+    beta=0.1,                           # KL 约束强度
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=16,
+    learning_rate=5e-6,
+    num_train_epochs=2,
+    bf16=True,
+)
+
+# 4. 启动 DPO 训练
+trainer = DPOTrainer(
+    model=model,
+    ref_model=ref_model,
+    args=training_args,
+    train_dataset=dataset["train"],
+    tokenizer=tokenizer,
+)
+trainer.train()
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/alignment/dpo
-
 conda activate finetune
 python code/dpo.py
 ```
@@ -66,11 +158,3 @@ python code/dpo.py
 - `training_curves.png`
 - `summary.json`
 - `log_history.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

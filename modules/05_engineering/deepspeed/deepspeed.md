@@ -44,11 +44,116 @@ $$Memory_{ZeRO3} \approx \frac{Memory_{Baseline}}{N}$$
 2. 相比 `CUDA`：CUDA 是底层硬件与算子；DeepSpeed 是训练系统层。
 3. 相比 `mixed_precision`：混合精度是技术点，DeepSpeed 是整体训练框架。
 
-## 运行
+## 🛠️ 工程实战
+
+### Step 1: ZeRO 配置文件
+
+```json
+{
+  "zero_optimization": {
+    "stage": 2,
+    "offload_optimizer": {
+      "device": "cpu",
+      "pin_memory": true
+    },
+    "allgather_partitions": true,
+    "allgather_bucket_size": 2e8,
+    "reduce_scatter": true,
+    "reduce_bucket_size": 2e8,
+    "overlap_comm": true,
+    "contiguous_gradients": true
+  },
+  "bf16": {
+    "enabled": true
+  },
+  "gradient_accumulation_steps": 8,
+  "gradient_clipping": 1.0,
+  "train_batch_size": "auto",
+  "train_micro_batch_size_per_gpu": "auto",
+  "wall_clock_breakdown": false
+}
+```
+
+**ZeRO Stage 选择指南**：
+
+| Stage | 切分内容 | 单卡可训规模 (8×A100-80G) | 通信开销 |
+| --- | --- | --- | --- |
+| ZeRO-1 | 优化器状态 | ~30B | 低 |
+| ZeRO-2 | + 梯度 | ~60B | 中 |
+| ZeRO-3 | + 参数 | ~100B+ | 高 |
+
+### Step 2: PyTorch 集成代码
+
+```python
+import deepspeed
+import torch
+from transformers import AutoModelForCausalLM
+
+# 1. 加载模型
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B")
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+
+# 2. DeepSpeed 引擎初始化
+model_engine, optimizer, _, _ = deepspeed.initialize(
+    model=model,
+    optimizer=optimizer,
+    config="ds_config.json",             # 指向上面的 JSON
+)
+
+# 3. 训练循环（替换原生 PyTorch）
+for batch in dataloader:
+    inputs = batch["input_ids"].to(model_engine.device)
+    labels = batch["labels"].to(model_engine.device)
+
+    outputs = model_engine(input_ids=inputs, labels=labels)
+    loss = outputs.loss
+
+    model_engine.backward(loss)          # 替代 loss.backward()
+    model_engine.step()                  # 替代 optimizer.step() + zero_grad()
+```
+
+### Step 3: 启动命令
+
+```bash
+# 单机多卡
+deepspeed --num_gpus=4 train.py --deepspeed ds_config.json
+
+# 多机多卡（hostfile 方式）
+deepspeed --hostfile=hostfile.txt --num_gpus=8 train.py --deepspeed ds_config.json
+```
+
+`hostfile.txt` 格式：
+
+```text
+node1 slots=8
+node2 slots=8
+```
+
+### 与 LLaMA Factory / HuggingFace Trainer 集成
+
+```yaml
+# 在 LLaMA Factory YAML 中启用 DeepSpeed
+deepspeed: ds_config.json               # 自动取代默认分布式后端
+```
+
+```python
+# 在 HuggingFace TrainingArguments 中启用
+from transformers import TrainingArguments
+
+args = TrainingArguments(
+    output_dir="saves/model",
+    deepspeed="ds_config.json",          # 一行即可
+    bf16=True,
+    per_device_train_batch_size=2,
+)
+```
+
+---
+
+## 原始脚本运行
 
 ```bash
 cd <YOUR_PROJECT_ROOT>/post_train/systems/deepspeed
-
 conda activate finetune
 python code/deepspeed.py
 ```
@@ -61,11 +166,3 @@ python code/deepspeed.py
 - `training_curves.png`
 - `summary.json`
 - `deepspeed_config_auto.json`
-
-## 目录文件说明（重点）
-
-- `code/`：主流程代码，通常是可直接运行的单文件脚本。
-- `data/`：示例数据、训练样本或数据索引配置。
-- `models/`：训练完成后导出的最终模型权重（用于推理/部署）。
-- `checkpoints/`：训练过程中的阶段性快照（含 step、优化器状态等），用于断点续训与回溯。
-- `output/`：可视化图、指标表、训练日志与总结文件（如 `csv/png/json`）。

@@ -58,3 +58,101 @@
    - 增加并发请求量，利用 PagedAttention 提升利用率。
 3. **Pined Memory 与性能？**
    - 锁页内存，消除 CPU 数据到 GPU 的驱动拷贝损耗，提升搬运速度。
+
+---
+
+## 🛠️ 工程实战
+
+### vLLM 部署（生产推荐）
+
+```bash
+# 安装
+pip install vllm
+
+# 启动 OpenAI 兼容 API 服务
+vllm serve Qwen/Qwen2.5-7B \
+    --tensor-parallel-size 2 \
+    --max-model-len 8192 \
+    --gpu-memory-utilization 0.9 \
+    --port 8000
+```
+
+```python
+# Python 客户端调用
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="EMPTY")
+response = client.chat.completions.create(
+    model="Qwen/Qwen2.5-7B",
+    messages=[{"role": "user", "content": "什么是 PagedAttention？"}],
+    max_tokens=512,
+    temperature=0.7,
+)
+print(response.choices[0].message.content)
+```
+
+### vLLM 离线批量推理
+
+```python
+from vllm import LLM, SamplingParams
+
+llm = LLM(model="Qwen/Qwen2.5-7B", tensor_parallel_size=2)
+sampling_params = SamplingParams(temperature=0.7, top_p=0.9, max_tokens=512)
+
+prompts = ["解释 KV Cache 的原理", "PagedAttention 如何减少显存碎片？"]
+outputs = llm.generate(prompts, sampling_params)
+
+for output in outputs:
+    print(f"Prompt: {output.prompt}")
+    print(f"Response: {output.outputs[0].text}\n")
+```
+
+### SGLang 部署（复杂任务推荐）
+
+```bash
+# 安装
+pip install sglang[all]
+
+# 启动服务（自动启用 RadixAttention 前缀缓存）
+python -m sglang.launch_server \
+    --model-path Qwen/Qwen2.5-7B \
+    --tp 2 \
+    --port 30000
+```
+
+### 量化部署（GPTQ / AWQ）
+
+```bash
+# 使用 AutoGPTQ 量化
+pip install auto-gptq
+
+# 直接加载社区已量化的模型
+vllm serve Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4 \
+    --quantization gptq \
+    --max-model-len 8192 \
+    --port 8000
+```
+
+```python
+# 或使用 transformers 加载量化模型
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4",
+    device_map="auto",
+)
+# 7B INT4 量化后仅需 ~4GB VRAM
+```
+
+### 性能基准测试
+
+```bash
+# vLLM 内置 benchmark 工具
+python -m vllm.entrypoints.openai.api_server &
+
+# 使用 wrk 或内置工具压测
+python -m vllm.benchmark_serving \
+    --model Qwen/Qwen2.5-7B \
+    --num-prompts 1000 \
+    --request-rate 10
+```

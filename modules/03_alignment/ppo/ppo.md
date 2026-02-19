@@ -15,10 +15,10 @@ $$L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta)\hat{A}_t, \mathr
 
 **公式拆解与理解：**
 
-- ** $r_t(\theta)$ (概率比例)**：当前新策略与旧策略在特定动作上的概率比值。
-- ** $\hat{A}_t$ (Advantage/优势)** ：由 Critic 辅助计算。告诉模型当前的动作比平均水平好多少。
-- ** $\mathrm{clip}(\dots, 1-\epsilon, 1+\epsilon)$ **：剪切机制。如果新旧策略差异超过 $\epsilon$ （通常为 0.1 或 0.2），则强制将比例截断。
-- ** $\min$ 函数**：取两者的最小值。这是一个保守策略：即使 Advantage 非常大，我们也不希望一次性更新太猛；如果更新方向错了， $\min$ 会让模型快速回调。
+- **$r_t(\theta)$ (概率比例)**：当前新策略与旧策略在特定动作上的概率比值。
+- **$\hat{A}_t$ (Advantage/优势)** ：由 Critic 辅助计算。告诉模型当前的动作比平均水平好多少。
+- **$\mathrm{clip}(\dots, 1-\epsilon, 1+\epsilon)$**：剪切机制。如果新旧策略差异超过 $\epsilon$ （通常为 0.1 或 0.2），则强制将比例截断。
+- **$\min$ 函数**：取两者的最小值。这是一个保守策略：即使 Advantage 非常大，我们也不希望一次性更新太猛；如果更新方向错了， $\min$ 会让模型快速回调。
 
 ### 2. LLM 中的特殊约束：KL 惩罚
 
@@ -67,8 +67,109 @@ PPO 训练背后涉及四个关键模型的协作：
 | `ppo_target` | `6.0` | KL 目标值。动态调整惩罚强度，确保模型不脱离人类语言分布。 |
 | `ppo_buffer_size` | `1` | 经验回放池大小，在资源受限时控制单次更新的数据量。 |
 
-## 运行与输出
+## 🛠️ 工程实战：PPO/RLHF 训练
 
-1. **启动**：`python code/ppo.py`
-2. **可视化**：默认输出至 `output/ppo_metrics`。
-   - 建议阅读顺序：`summary.json` (总揽) -> `training_curves.png` (趋势) -> `training_metrics.csv` (细节)。
+### 方式一：LLaMA Factory
+
+**数据格式**（PPO 仅需 Prompt，不需要标准答案）：
+
+```json
+[
+  {"instruction": "请写一首关于秋天的五言绝句。", "input": ""},
+  {"instruction": "如何优化 Python 中的内存使用？", "input": ""}
+]
+```
+
+**训练配置 YAML（需先训练 Reward Model）**：
+
+```yaml
+### Step 1: 训练奖励模型 (reward_model.yaml)
+model_name_or_path: Qwen/Qwen2.5-7B
+stage: rm                               # 奖励模型训练
+finetuning_type: lora
+dataset: my_preference_data              # 偏好对数据（同 DPO 格式）
+template: qwen
+output_dir: saves/qwen2.5-7b/lora/reward
+```
+
+```yaml
+### Step 2: PPO 训练 (ppo_train.yaml)
+model_name_or_path: Qwen/Qwen2.5-7B
+stage: ppo                               # 关键：设为 ppo
+do_train: true
+finetuning_type: lora
+reward_model: saves/qwen2.5-7b/lora/reward   # 指向 RM checkpoint
+
+### PPO 超参
+ppo_epochs: 4                            # 每批数据重复训练次数
+ppo_target: 6.0                          # KL 目标值
+
+### LoRA
+lora_rank: 64
+lora_target: all
+
+### 数据（Prompt-only）
+dataset: my_ppo_prompts
+template: qwen
+
+### 训练
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 1.0e-6                    # 极低学习率，防止 RL 发散
+bf16: true
+output_dir: saves/qwen2.5-7b/lora/ppo
+```
+
+```bash
+# 先训练 RM
+llamafactory-cli train reward_model.yaml
+# 再跑 PPO
+llamafactory-cli train ppo_train.yaml
+```
+
+### 方式二：TRL 库 PPO
+
+```python
+from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
+from transformers import AutoTokenizer, pipeline
+
+# 1. 加载策略模型（带 Value Head）
+model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/qwen2.5-7b-sft")
+ref_model = AutoModelForCausalLMWithValueHead.from_pretrained("saves/qwen2.5-7b-sft")
+tokenizer = AutoTokenizer.from_pretrained("saves/qwen2.5-7b-sft")
+
+# 2. 加载奖励模型（作为打分管道）
+reward_pipeline = pipeline("text-classification", model="saves/reward_model")
+
+# 3. PPO 配置
+ppo_config = PPOConfig(
+    batch_size=4,
+    learning_rate=1e-6,
+    ppo_epochs=4,
+    kl_penalty="kl",                 # KL 约束类型
+    target_kl=6.0,
+)
+
+# 4. PPO 训练循环
+ppo_trainer = PPOTrainer(ppo_config, model, ref_model, tokenizer)
+
+for batch in dataloader:
+    # 生成回复
+    response_tensors = ppo_trainer.generate(batch["input_ids"])
+    # 计算奖励
+    rewards = [reward_pipeline(text)[0]["score"] for text in decoded_responses]
+    # PPO 更新
+    stats = ppo_trainer.step(batch["input_ids"], response_tensors, rewards)
+```
+
+> **显存注意**：PPO 需维护 4 个模型（Actor, Ref, Reward, Critic），显存需求约为 SFT 的 **4 倍**。建议使用 ZeRO-2/3。
+
+---
+
+## 原始脚本运行
+
+```bash
+python code/ppo.py
+```
+
+**可视化**：默认输出至 `output/ppo_metrics`。建议阅读顺序：`summary.json` → `training_curves.png` → `training_metrics.csv`。
