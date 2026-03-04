@@ -83,6 +83,7 @@
 | 智能体总览 | [Agentic Overview](./modules/06_agent/06_agent.md) | 核心逻辑：**LLM + Planning + Memory + Toolkit** 深度解析 | 让 AI 从"回答问题"升级为"主动做事"——思考、记忆、用工具、迭代执行 |
 | 记忆与检索 | [Memory & RAG](./modules/06_agent/memory_rag/memory_rag.md) | **RAG**、**Query 理解**、**向量检索** 与 **Rerank 模型** | AI 自带可检索"知识库"，让它能回答私有或超出训练范围的问题 |
 | 编排范式 | [Agent Orchestration](./modules/06_agent/orchestration/orchestration.md) | **ReAct**、**Plan-and-Execute** 与 **Function Calling** 工具增强 | Agent 的"大脑逻辑"：先思考再行动，遇到新情况随时调整计划 |
+| 框架实战 | [Agent Frameworks](./modules/06_agent/frameworks/frameworks.md) | **LangChain/LangGraph/AutoGen/CrewAI/OpenAI Tool Calling** 最小闭环示例 | 先选框架再写业务逻辑，避免把工程复杂度直接堆到提示词里 |
 | 系统架构 | [Mesh & State Machine](./modules/06_agent/06_agent.md) | **NanoBot 设计模式**、**多层记忆体系** 与 **Conditional Routing** | 用状态机管理 Agent 行为流，保证复杂任务可靠推进不乱套 |
 | 多智能体协作 | [Multi-Agent Systems](./modules/06_agent/multi_agent/multi_agent.md) | **Decentralized Orchestration**、通信协议与 **Human-in-the-Loop** | 多个 AI 各自分工合作，像一个智能团队完成单 Agent 搞不定的任务 |
 | 本地Agent框架 | [OpenClaw 架构](./modules/06_agent/openclaw/openclaw.md) | **Gateway + Runtime**、**文件记忆系统**、**Heartbeat 事件驱动** 与 **混合检索** | 可本地运行的完整 Agent 框架，用文件系统做记忆，用消息总线解耦通信 |
@@ -158,7 +159,7 @@
   - `03_alignment/`: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL, Data Synthesis)
   - `04_advanced_topics/`: 进阶课题 (总览 + Offline RL: BCQ, CQL)
   - `05_engineering/`: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)
-  - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Multi-Agent, OpenClaw)
+  - `06_agent/`: 智能体 (Memory, RAG, Orchestration, Frameworks, Multi-Agent, OpenClaw)
   - `07_classic_models/`: 经典解析 (总览 + ChatGPT, DeepSeek-R1, Qwen3)
 - `tools/`: 历史脚本（归档，默认不作为当前文档体系的一部分）
 - `output/`: 历史输出目录（归档）

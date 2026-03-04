@@ -78,6 +78,8 @@ flowchart LR
 | **LangGraph** | 基于状态机（Graph）的循环逻辑。 | 复杂多智能体协作、需要状态回退的场景。 |
 | **OpenClaw** | 基于文件系统与总线（Bus）的深度嵌入。 | 极低功耗、本地化执行的智能体系统。详见 [OpenClaw 架构解析](./openclaw/openclaw.md) |
 
+框架选型与最小示例代码见：[Agent Frameworks（常见框架与示例代码）](./frameworks/frameworks.md)。
+
 ## 🏛️ 架构案例：NanoBot 设计模式
 
 NanoBot 是一个极简主义（~4k 行代码）但功能全备的 Agent 架构参考。
@@ -121,6 +123,7 @@ answer = llm_finalize(state)
 - `orchestration`: ReAct、Plan-and-Execute 与流程编排。
 - `multi_agent`: 多智能体协作范式。
 - `openclaw`: 本地优先 Agent 架构案例。
+- `frameworks`: 常见 Agent 框架对比与示例代码。
 
 ## 工程实现要点
 

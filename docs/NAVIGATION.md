@@ -67,6 +67,7 @@
 - [06.2 Orchestration](../modules/06_agent/orchestration/orchestration.md)
 - [06.3 Multi-Agent](../modules/06_agent/multi_agent/multi_agent.md)
 - [06.4 OpenClaw](../modules/06_agent/openclaw/openclaw.md)
+- [06.5 Agent Frameworks](../modules/06_agent/frameworks/frameworks.md)
 
 ## 07 经典模型案例（Classic Models）
 
