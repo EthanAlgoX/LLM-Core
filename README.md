@@ -211,7 +211,15 @@ Vercel 部署方式：
 
 - Build Command: `npm run docs:build`
 - Output Directory: `.vitepress/dist`
-- 后续仅需更新 Markdown 并推送 GitHub，Vercel 会自动重新部署
+- 线上地址：`https://llm-core-docs.vercel.app`
+- 仓库已内置 GitHub Actions 自动部署到 Vercel：
+  - PR 触发预览部署：`.github/workflows/vercel-preview.yml`
+  - `main` 分支触发生产部署：`.github/workflows/vercel-production.yml`
+- 首次启用前需要在 GitHub 仓库设置中补 1 个 Secret 和 2 个 Variables：
+  - Secret: `VERCEL_TOKEN`
+  - Variable: `VERCEL_ORG_ID=team_0jujKCEYrmfI4oJA9MNB86z4`
+  - Variable: `VERCEL_PROJECT_ID=prj_ZrjhEzOUYjZKRmVVwH2euR97rN9y`
+- 如果不走 GitHub Actions，也可以本地手动执行：`npx vercel --prod`
 
 - 结构模板：`docs/MODULE_DOC_TEMPLATE.md`
 - 结构规范：`docs/DOC_STYLE.md`（推荐章节顺序：通俗理解→定义与目标→适用场景与边界→关键步骤→关键公式→关键步骤代码）
