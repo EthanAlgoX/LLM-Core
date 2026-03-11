@@ -29,6 +29,7 @@ jobs:
       - name: Exchange Vercel refresh token
         env:
           VERCEL_REFRESH_TOKEN: ${{ secrets.VERCEL_REFRESH_TOKEN }}
+          VERCEL_FALLBACK_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           python - <<'PY'
           import json
@@ -37,25 +38,39 @@ jobs:
           import urllib.request
 
           client_id = "cl_HYyOPBNtFMfHhaUn9L4QPfTZz6TP47bp"
-          with urllib.request.urlopen("https://vercel.com/.well-known/openid-configuration") as resp:
-              config = json.load(resp)
+          access_token = None
+          refresh_token = os.environ.get("VERCEL_REFRESH_TOKEN", "").strip()
+          fallback_token = os.environ.get("VERCEL_FALLBACK_TOKEN", "").strip()
 
-          body = urllib.parse.urlencode(
-              {
-                  "client_id": client_id,
-                  "grant_type": "refresh_token",
-                  "refresh_token": os.environ["VERCEL_REFRESH_TOKEN"],
-              }
-          ).encode()
-          request = urllib.request.Request(
-              config["token_endpoint"],
-              data=body,
-              headers={"Content-Type": "application/x-www-form-urlencoded"},
-          )
-          with urllib.request.urlopen(request) as resp:
-              token_data = json.load(resp)
+          if refresh_token:
+              try:
+                  with urllib.request.urlopen("https://vercel.com/.well-known/openid-configuration") as resp:
+                      config = json.load(resp)
 
-          access_token = token_data["access_token"]
+                  body = urllib.parse.urlencode(
+                      {
+                          "client_id": client_id,
+                          "grant_type": "refresh_token",
+                          "refresh_token": refresh_token,
+                      }
+                  ).encode()
+                  request = urllib.request.Request(
+                      config["token_endpoint"],
+                      data=body,
+                      headers={"Content-Type": "application/x-www-form-urlencoded"},
+                  )
+                  with urllib.request.urlopen(request) as resp:
+                      token_data = json.load(resp)
+                  access_token = token_data["access_token"]
+              except Exception as exc:
+                  print(f"Refresh token exchange failed, falling back to VERCEL_TOKEN: {exc}")
+
+          if not access_token and fallback_token:
+              access_token = fallback_token
+
+          if not access_token:
+              raise RuntimeError("No usable Vercel token is available")
+
           print(f"::add-mask::{access_token}")
           with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
               env_file.write(f"VERCEL_TOKEN={access_token}\n")
