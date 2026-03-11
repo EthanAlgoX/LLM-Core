@@ -216,9 +216,10 @@ Vercel 部署方式：
   - PR 触发预览部署：`.github/workflows/vercel-preview.yml`
   - `main` 分支触发生产部署：`.github/workflows/vercel-production.yml`
 - 首次启用前需要在 GitHub 仓库设置中补 1 个 Secret 和 2 个 Variables：
-  - Secret: `VERCEL_TOKEN`
+  - Secret: `VERCEL_REFRESH_TOKEN`
   - Variable: `VERCEL_ORG_ID=team_0jujKCEYrmfI4oJA9MNB86z4`
   - Variable: `VERCEL_PROJECT_ID=prj_ZrjhEzOUYjZKRmVVwH2euR97rN9y`
+- 工作流会在运行时用 `VERCEL_REFRESH_TOKEN` 动态换取短期 access token，因此不需要在 GitHub 中长期保存 `VERCEL_TOKEN`
 - 如果不走 GitHub Actions，也可以本地手动执行：`npx vercel --prod`
 
 - 结构模板：`docs/MODULE_DOC_TEMPLATE.md`
