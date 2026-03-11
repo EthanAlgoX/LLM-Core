@@ -46,5 +46,8 @@ checkpoint-*/
 **/runs/
 
 # Specific exceptions (if any, though usually we want to ignore all data/models/output)
-apps/web/node_modules/
-apps/web/.next/
+node_modules/
+.vitepress/cache/
+.vitepress/dist/
+.vercel/
+scripts/__pycache__/

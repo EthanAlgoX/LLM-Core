@@ -9,6 +9,7 @@
 > 当前仓库状态：**纯文档仓库**（以知识解析与技术笔记为主）。
 >
 > - `modules/` 下内容为主要学习入口。
+> - 网站构建基于 `VitePress + Vercel + GitHub`。
 > - 根目录 `run.py` 与 `tools/` 中脚本为历史工程文件，不作为当前维护范围，也不保证可执行。
 > - 如需代码复现，请以对应文档中的外部项目/实现链接为准（若文档已提供）。
 
@@ -165,6 +166,7 @@
 - `output/`: 历史输出目录（归档）
 - `docs/`: 文档规范、章节导航与学习路径（如 `NAVIGATION.md`、`LEARNING_PATH.md`、`DOC_STYLE.md`、`TERMINOLOGY.md`）
 - `scripts/`: 文档检查脚本（如链接检查）
+- `.vitepress/`: VitePress 网站配置、主题与静态资源
 
 ---
 
@@ -191,6 +193,25 @@
 # 1) Markdown 本地链接检查（README + modules + docs）
 python scripts/check_markdown_links.py README.md modules docs
 ```
+
+## 🌐 网站本地启动与部署
+
+```bash
+npm install
+npm run docs:dev
+```
+
+默认本地地址：
+
+```text
+http://localhost:5173
+```
+
+Vercel 部署方式：
+
+- Build Command: `npm run docs:build`
+- Output Directory: `.vitepress/dist`
+- 后续仅需更新 Markdown 并推送 GitHub，Vercel 会自动重新部署
 
 - 结构模板：`docs/MODULE_DOC_TEMPLATE.md`
 - 结构规范：`docs/DOC_STYLE.md`（推荐章节顺序：通俗理解→定义与目标→适用场景与边界→关键步骤→关键公式→关键步骤代码）

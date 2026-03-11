@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="LLM-Core logo">
+  <defs>
+    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#g)" />
+  <path d="M31 88V40h12v37h22v11H31zm42 0V40h12v48H73zm24 0V40h12l9 17 10-17h0v48h-12V62l-7 13h-2l-8-13v26H97z" fill="#fff" />
+</svg>
