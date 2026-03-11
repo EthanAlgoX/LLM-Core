@@ -46,3 +46,5 @@ checkpoint-*/
 **/runs/
 
 # Specific exceptions (if any, though usually we want to ignore all data/models/output)
+apps/web/node_modules/
+apps/web/.next/

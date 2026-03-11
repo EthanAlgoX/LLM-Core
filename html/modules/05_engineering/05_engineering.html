@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Systems 分类</title>
+  <meta name="description" content="一句话通俗理解 ：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23b76436'/%3E%3Cstop offset='1' stop-color='%230a6d67'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' font-weight='700' fill='white'%3ELL%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@500;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+  <link rel="stylesheet" href="../../_site/site.css" />
+  <script>
+    (() => {
+      let theme = "light";
+      try {
+        const stored = localStorage.getItem("llm-core-theme");
+        theme = stored === "dark" ? "dark" : "light";
+      } catch (_error) {}
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body data-site-path="modules/05_engineering/05_engineering.html">
+  <div class="scroll-progress"><div class="scroll-progress-bar" id="scroll-progress-bar"></div></div>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand-row">
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-sidebar">Menu</button>
+        <a class="brand-link" href="../../README.html">
+          <span class="brand-mark">LLM</span>
+          <span class="brand-copy">
+            <strong>LLM-Core</strong>
+            <small>Documentation Site</small>
+          </span>
+        </a>
+      </div>
+      <div class="header-actions">
+        <button class="search-button" id="search-button" type="button">Search</button>
+        <button class="theme-button" id="theme-toggle" type="button" aria-pressed="false">Theme</button>
+        <a class="source-button" href="../../../modules/05_engineering/05_engineering.md">Markdown</a>
+      </div>
+    </div>
+  </header>
+  <div class="site-layout">
+    <aside class="site-sidebar" id="site-sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar-head">
+          <p class="sidebar-kicker">Engineering</p>
+          <h2 class="sidebar-title">Systems 分类</h2>
+          <p class="sidebar-summary">一句话通俗理解 ：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。</p>
+        </div>
+        <div class="sidebar-search">
+          <label class="search-label" for="site-search-input">Search docs</label>
+          <input id="site-search-input" class="search-input" type="search" placeholder="Search title, topic, summary" autocomplete="off" />
+          <div class="search-results" id="search-results"></div>
+        </div>
+        <nav class="site-nav">
+          <details class="nav-group" open><summary>Overview<span>1</span></summary>
+          <a class="nav-link" href="../../README.html"><span>LLM-Core: 核心知识解析文档仓库</span><small>本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。</small></a>
+          </details>
+          <details class="nav-group" open><summary>Guides<span>5</span></summary>
+          <a class="nav-link" href="../../docs/DOC_STYLE.html"><span>Documentation Style Guide</span><small>本仓库是文档优先仓库。所有模块文档按统一结构编写，确保读者能从概念快速走到工程实现。</small></a>
+          <a class="nav-link" href="../../docs/LEARNING_PATH.html"><span>LLM-Core 学习路径</span><small>一句话通俗理解：按目标选路线，避免“全学一遍却不会用”。</small></a>
+          <a class="nav-link" href="../../docs/MODULE_DOC_TEMPLATE.html"><span>&lt;主题名&gt;</span><small>一句话通俗理解 ：&lt;用一句话说明它本质上在做什么，以及为什么重要&gt;</small></a>
+          <a class="nav-link" href="../../docs/NAVIGATION.html"><span>LLM-Core 导航索引</span><small>一句话通俗理解：这是 LLM-Core 的侧边栏式目录，按模块和子主题提供一跳直达入口。</small></a>
+          <a class="nav-link" href="../../docs/TERMINOLOGY.html"><span>Terminology Glossary</span><small>Use this file as the single source of truth for preferred terms.</small></a>
+          </details>
+          <details class="nav-group"><summary>RL Foundation<span>5</span></summary>
+          <a class="nav-link" href="../01_foundation_rl/01_foundation_rl.html"><span>RL Basics 分类</span><small>一句话通俗理解 ：从 MDP 到 GAE 的最小闭环，把“如何定义问题、如何估值、如何降方差”串成一条可复现学习路径。</small></a>
+          <a class="nav-link" href="../01_foundation_rl/advantage/advantage.html"><span>Advantage（优势函数学习与对比）</span><small>一句话通俗理解 ：Advantage 用“动作回报 - 状态基线”衡量决策增益，让策略更新聚焦真正带来提升的动作。</small></a>
+          <a class="nav-link" href="../01_foundation_rl/gae/gae.html"><span>GAE（Generalized Advantage Estimation）</span><small>一句话通俗理解 ：GAE 通过指数加权的多步 TD 残差在偏差与方差间折中，让策略梯度既稳又不迟钝。</small></a>
+          <a class="nav-link" href="../01_foundation_rl/mdp/mdp.html"><span>MDP（马尔可夫决策过程）</span><small>一句话通俗理解 ：MDP 用状态、动作、转移、奖励、折扣把决策问题形式化，为价值迭代与策略优化提供统一语义。</small></a>
+          <a class="nav-link" href="../01_foundation_rl/td_learning/td_learning.html"><span>TD Learning（时序差分学习）</span><small>一句话通俗理解 ：TD Learning 边交互边自举更新价值估计，不等回合结束也能持续学习并加速收敛。</small></a>
+          </details>
+          <details class="nav-group"><summary>Architecture<span>10</span></summary>
+          <a class="nav-link" href="../02_architecture/02_architecture.html"><span>Architecture 分类</span><small>一句话通俗理解 ：架构模块回答三个核心问题: 模型怎么“看懂上下文”、怎么“跨模态理解”、怎么“高效生成”。</small></a>
+          <a class="nav-link" href="../02_architecture/generation/diffusion/diffusion.html"><span>Diffusion（扩散模型）</span><small>一句话通俗理解 ：Diffusion 先学会逐步加噪再反向去噪，把生成任务转化为一系列可控的噪声还原步骤。</small></a>
+          <a class="nav-link" href="../02_architecture/generation/dit/dit.html"><span>DiT（Diffusion Transformer）</span><small>一句话通俗理解 ：DiT 用 Transformer 替代 U-Net 处理扩散过程中的 token 化图像表示，在规模化训练下提升生成质量。</small></a>
+          <a class="nav-link" href="../02_architecture/generation/generation.html"><span>Generation &amp; Decoding (推理与生成优化)</span><small>一句话通俗理解 ：生成优化是在质量不明显下降的前提下，把“首字延迟、吞吐、显存”三件事同时做平衡。</small></a>
+          <a class="nav-link" href="../02_architecture/llm/llm.html"><span>Transformer Core (大语言模型架构)</span><small>一句话通俗理解 ：Transformer 通过多头注意力与前馈残差堆叠，将离散 token 编码为可推理的上下文表示并支持自回归生成。</small></a>
+          <a class="nav-link" href="../02_architecture/vlm/blip2/blip2.html"><span>BLIP2</span><small>一句话通俗理解 ：BLIP-2 用 Q-Former 把视觉特征压缩成语言模型可消费的表示，在少量训练下实现图文能力迁移。</small></a>
+          <a class="nav-link" href="../02_architecture/vlm/flamingo/flamingo.html"><span>Flamingo</span><small>一句话通俗理解 ：Flamingo 在冻结大模型前提下插入跨模态注意力层，让语言模型按需读取视觉上下文完成多模态对话。</small></a>
+          <a class="nav-link" href="../02_architecture/vlm/llava/llava.html"><span>LLaVA</span><small>一句话通俗理解 ：LLaVA 通过视觉编码器与 MLP 投影把图像 token 对齐到 LLM 语义空间，实现低成本视觉指令跟随。</small></a>
+          <a class="nav-link" href="../02_architecture/vlm/vlm.html"><span>多模态 VLM (Vision-Language Models)</span><small>一句话通俗理解 ：VLM 的关键是把图像特征“翻译”为语言模型能消费的 token，再让同一套生成机制完成理解和回答。</small></a>
+          <a class="nav-link" href="../02_architecture/llm/attention.html"><span>Transformer 注意力机制 (Attention Mechanisms)</span><small>一句话通俗理解 ：注意力机制通过 Q-K 匹配动态分配信息流，GQA/MQA 与 FlashAttention 在精度与成本间给出不同工程折中。</small></a>
+          </details>
+          <details class="nav-group"><summary>Alignment<span>11</span></summary>
+          <a class="nav-link" href="../03_alignment/03_alignment.html"><span>Alignment 分类</span><small>一句话通俗理解 ：对齐阶段把“会续写”转成“会按人类意图回答”，核心是数据质量、偏好信号和策略约束的联动优化。</small></a>
+          <a class="nav-link" href="../03_alignment/actor_critic/actor_critic.html"><span>Actor-Critic</span><small>一句话通俗理解 ：Actor-Critic 让策略网络负责行动、价值网络负责纠偏，用低方差优势信号提升学习稳定性。</small></a>
+          <a class="nav-link" href="../03_alignment/data_synthesis/data_synthesis.html"><span>数据合成 (Data Synthesis)</span><small>一句话通俗理解 ：数据合成用模型自举扩充训练样本，再借助规则或验证器筛选高质量数据以降低标注成本。 核心问题 ：当真实标注数据稀缺、昂贵或存在隐私风险时，如何用程序或 LLM…</small></a>
+          <a class="nav-link" href="../03_alignment/dpo/dpo.html"><span>DPO（直接偏好优化）</span><small>一句话通俗理解 ：DPO 直接在偏好对上优化策略相对概率，无需单独训练奖励模型即可实现稳定对齐。</small></a>
+          <a class="nav-link" href="../03_alignment/grpo/grpo.html"><span>GRPO (Group Relative Policy Optimization) 组内相对策略优化</span><small>一句话通俗理解 ：GRPO 在同一问题内做组内相对比较，利用标准化优势信号提升推理对齐的样本效率与稳定性。</small></a>
+          <a class="nav-link" href="../03_alignment/peft/peft.html"><span>高效微调 (PEFT: Parameter-Efficient Fine-Tuning)</span><small>一句话通俗理解 ：PEFT 只更新少量可训练参数（如 LoRA），在显存可控的前提下快速迁移模型能力。</small></a>
+          <a class="nav-link" href="../03_alignment/policy_gradient/policy_gradient.html"><span>Policy Gradient（策略梯度）</span><small>一句话通俗理解 ：Policy Gradient 直接最大化期望回报，对离散决策友好但需借助基线与技巧控制方差。</small></a>
+          <a class="nav-link" href="../03_alignment/ppo/ppo.html"><span>PPO (Proximal Policy Optimization) 强化学习对齐</span><small>一句话通俗理解 ：PPO 用裁剪目标限制新旧策略偏移，在可学习性与训练稳定性之间取得工程上最实用的平衡。</small></a>
+          <a class="nav-link" href="../03_alignment/rlhf/rlhf.html"><span>RLHF (Reinforcement Learning from Human Feedback) 人类反馈强化学习</span><small>一句话通俗理解 ：RLHF 通过 SFT、奖励建模和策略优化三段式闭环，把人类偏好显式注入模型行为。</small></a>
+          <a class="nav-link" href="../03_alignment/sft/sft.html"><span>SFT (Supervised Fine-Tuning) 监督微调</span><small>一句话通俗理解 ：SFT 用高质量指令-响应样本做监督学习，先建立可控表达基线再进入偏好对齐阶段。</small></a>
+          <a class="nav-link" href="../03_alignment/data_engineering.html"><span>数据工程与模型评估 (Data &amp; Evaluation)</span><small>一句话通俗理解 ：数据工程通过清洗、配比、去重和评测闭环决定对齐上限，是比模型结构更常见的效果瓶颈。</small></a>
+          </details>
+          <details class="nav-group"><summary>Advanced Topics<span>4</span></summary>
+          <a class="nav-link" href="../04_advanced_topics/04_advanced_topics.html"><span>Advanced Topics 分类</span><small>一句话通俗理解 ：进阶模块聚焦“标准配方之外”的难题，核心是用更强约束解决更高风险场景。</small></a>
+          <a class="nav-link" href="../04_advanced_topics/offline_rl/bcq/bcq.html"><span>BCQ（Batch-Constrained Q-learning）</span><small>一句话通俗理解 ：BCQ 把策略限制在行为数据支持的动作邻域内，减少离线场景中分布外动作带来的价值幻觉。</small></a>
+          <a class="nav-link" href="../04_advanced_topics/offline_rl/cql/cql.html"><span>CQL（Conservative Q-Learning）</span><small>一句话通俗理解 ：CQL 通过保守正则主动压低未见动作 Q 值，降低离线强化学习的过估计风险。</small></a>
+          <a class="nav-link" href="../04_advanced_topics/offline_rl/offline_rl.html"><span>Offline RL 分类</span><small>一句话通俗理解 ：Offline RL 在不与环境交互的条件下仅凭历史轨迹学习策略，关键挑战是分布偏移与价值过估计。</small></a>
+          </details>
+          <details class="nav-group" open><summary>Engineering<span>6</span></summary>
+          <a class="nav-link active" href="05_engineering.html"><span>Systems 分类</span><small>一句话通俗理解 ：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。</small></a>
+          <a class="nav-link" href="cuda/cuda.html"><span>CUDA 专题</span><small>一句话通俗理解 ：CUDA 通过显式控制线程、内存层次与核函数执行路径，把 GPU 吞吐潜力转化为实际训练速度。</small></a>
+          <a class="nav-link" href="deepspeed/deepspeed.html"><span>DeepSpeed 专题</span><small>一句话通俗理解 ：DeepSpeed 以 ZeRO 为核心重构状态存储与通信开销，使超大模型在有限显存下可训练。</small></a>
+          <a class="nav-link" href="inference/inference.html"><span>推理优化 (Inference Optimization)</span><small>一句话通俗理解 ：推理优化围绕 KV Cache、批调度与算子融合，目标是在延迟、吞吐与成本之间找到最优点。</small></a>
+          <a class="nav-link" href="megatron/megatron.html"><span>Megatron 专题</span><small>一句话通俗理解 ：Megatron-LM 通过 TP/PP/DP 组合切分模型与计算图，让超大参数训练跨多机多卡高效扩展。</small></a>
+          <a class="nav-link" href="mixed_precision/mixed_precision.html"><span>混合精度训练（Mixed Precision）</span><small>一句话通俗理解 ：混合精度在保持数值稳定的前提下用低精度计算主路径，并通过 loss scaling 避免梯度下溢。</small></a>
+          </details>
+          <details class="nav-group"><summary>Agent<span>6</span></summary>
+          <a class="nav-link" href="../06_agent/06_agent.html"><span>Agentic Reasoning (智能体推理)</span><small>一句话通俗理解 ：Agent 把语言模型升级为可执行系统：先规划、再调用工具、再反思修正，直到任务完成。</small></a>
+          <a class="nav-link" href="../06_agent/frameworks/frameworks.html"><span>Agent Frameworks（常见框架与示例代码）</span><small>一句话通俗理解 ：Agent 框架是把“模型 + 工具 + 状态 + 编排”打包成可维护工程系统的脚手架。</small></a>
+          <a class="nav-link" href="../06_agent/memory_rag/memory_rag.html"><span>记忆与检索 (Memory &amp; RAG)</span><small>一句话通俗理解 ：Memory 与 RAG 把短期上下文和长期检索结合，让 Agent 在长任务里保持一致性与可追溯性。</small></a>
+          <a class="nav-link" href="../06_agent/multi_agent/multi_agent.html"><span>多智能体系统 (Multi-Agent Systems)</span><small>一句话通俗理解 ：多智能体通过角色分工与协作协议并行处理子任务，提升复杂任务的鲁棒性与执行效率。</small></a>
+          <a class="nav-link" href="../06_agent/openclaw/openclaw.html"><span>OpenClaw 架构深度解析</span><small>一句话通俗理解 ：OpenClaw 以本地优先运行时和文件记忆体系实现可控自动化，强调可审计、可恢复与低耦合。 OpenClaw 是一个开源的本地优先（Local-First…</small></a>
+          <a class="nav-link" href="../06_agent/orchestration/orchestration.html"><span>智能体编排范式 (Agent Orchestration)</span><small>一句话通俗理解 ：编排层定义 Agent 的决策流程与状态转移规则，决定系统能否在复杂场景中稳定推进。</small></a>
+          </details>
+          <details class="nav-group"><summary>Classic Models<span>4</span></summary>
+          <a class="nav-link" href="../07_classic_models/07_classic_models.html"><span>Classic Models 分类</span><small>一句话通俗理解 ：经典模型模块不是“背参数”，而是复盘“为什么这个技术路线在当时能赢”。</small></a>
+          <a class="nav-link" href="../07_classic_models/chatgpt/chatgpt.html"><span>ChatGPT / InstructGPT 经典解析</span><small>一句话通俗理解 ：ChatGPT 通过 RLHF 的工业化落地验证了“预训练 + 对齐”范式，并重塑通用对话模型的产品路径。 一句话理解 ：ChatGPT 是第一个将&quot;语言模…</small></a>
+          <a class="nav-link" href="../07_classic_models/deepseek_r1/deepseek_r1.html"><span>DeepSeek-R1 经典解析</span><small>一句话通俗理解 ：DeepSeek-R1 展示了强化学习驱动推理能力涌现的路线，并以可验证奖励提升复杂任务表现。 一句话理解 ：DeepSeek-R1 通过纯强化学习（无需监…</small></a>
+          <a class="nav-link" href="../07_classic_models/qwen3/qwen3.html"><span>Qwen3 经典解析</span><small>一句话通俗理解 ：Qwen3 通过混合思考与 Dense/MoE 双路线策略，在推理深度、响应速度和部署灵活性间取得平衡。 一句话理解 ：Qwen3 是阿里最强开源模型系列，…</small></a>
+          </details>
+          <details class="nav-group"><summary>Reports<span>24</span></summary>
+          <a class="nav-link" href="../../output/technical_briefs/README.html"><span>面试口述稿索引</span><small>Generated reports and technical brief artifacts.</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/actor_critic.html"><span>actor_critic 面试口述稿</span><small>actor_critic 在本项目中的定位是：Actor-Critic 对齐训练。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/advantage.html"><span>advantage 面试口述稿</span><small>advantage 在本项目中的定位是：优势函数估计对比。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/bcq.html"><span>bcq 面试口述稿</span><small>bcq 在本项目中的定位是：离线 RL：BCQ。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/blip2.html"><span>blip2 面试口述稿</span><small>blip2 在本项目中的定位是：BLIP2 推理示例。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/cql.html"><span>cql 面试口述稿</span><small>cql 在本项目中的定位是：离线 RL：CQL。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/cuda.html"><span>cuda 面试口述稿</span><small>cuda 在本项目中的定位是：CUDA 与吞吐观察。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/deepspeed.html"><span>deepspeed 面试口述稿</span><small>deepspeed 在本项目中的定位是：训练系统优化：DeepSpeed。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/diffusion.html"><span>diffusion 面试口述稿</span><small>diffusion 在本项目中的定位是：扩散模型基础。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/dit.html"><span>dit 面试口述稿</span><small>DiT 用 Transformer 作为扩散模型的去噪骨干，在大规模训练下具备强生成能力。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/dpo.html"><span>dpo 面试口述稿</span><small>直接优化偏好对中 chosen 相对 rejected 的概率，不显式训练奖励模型。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/flamingo.html"><span>flamingo 面试口述稿</span><small>flamingo 在本项目中的定位是：Flamingo 推理示例。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/gae.html"><span>gae 面试口述稿</span><small>GAE 通过加权多步 TD 残差构造优势函数，在偏差和方差之间做可控折中。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/grpo.html"><span>grpo 面试口述稿</span><small>同一 prompt 采样多候选并做组内相对奖励比较，再更新策略。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/llava.html"><span>llava 面试口述稿</span><small>llava 在本项目中的定位是：LLaVA 推理示例。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/mdp.html"><span>mdp 面试口述稿</span><small>MDP 用状态、动作、转移概率与奖励定义决策过程，值迭代通过 Bellman 备份逼近最优值函数。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/megatron.html"><span>megatron 面试口述稿</span><small>megatron 在本项目中的定位是：Megatron 并行训练示例。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/mixed_precision.html"><span>mixed_precision 面试口述稿</span><small>mixed_precision 在本项目中的定位是：混合精度训练。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/policy_gradient.html"><span>policy_gradient 面试口述稿</span><small>policy_gradient 在本项目中的定位是：策略梯度对齐训练。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/ppo.html"><span>ppo 面试口述稿</span><small>通过策略梯度提高奖励，同时用 clip/KL 约束避免策略单步漂移过大。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/rlhf.html"><span>rlhf 面试口述稿</span><small>rlhf 在本项目中的定位是：RLHF 闭环训练。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/sft.html"><span>sft 面试口述稿</span><small>sft 在本项目中的定位是：监督微调，后训练起点。</small></a>
+          <a class="nav-link" href="../../output/technical_briefs/td_learning.html"><span>td_learning 面试口述稿</span><small>td_learning 在本项目中的定位是：TD/Q-learning 基础。</small></a>
+          <a class="nav-link" href="../../output/template_compliance_report.html"><span>Template Compliance Report (2026-02-19 18:37:49)</span><small>Generated reports and technical brief artifacts.</small></a>
+          </details>
+        </nav>
+      </div>
+    </aside>
+    <main class="page-column">
+      <nav class="breadcrumbs"><a href="../../README.html">Home</a>
+<span>Engineering</span>
+<span>Systems 分类</span></nav>
+      <article class="article-shell">
+        <header class="hero">
+          <div class="hero-meta">
+            <span class="hero-pill">Engineering</span>
+            <span class="hero-pill ghost">modules/05_engineering/05_engineering.md</span>
+          </div>
+          <h1 class="hero-title">Systems 分类</h1>
+          <p class="hero-description">一句话通俗理解 ：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。</p>
+        </header>
+
+        <article class="article-content" id="article-content">
+
+<blockquote class="callout callout-tip" data-callout-label="Tip">
+<p><strong>一句话通俗理解</strong>：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。</p>
+</blockquote>
+<h2 id="_1">定义与目标<a aria-label="Jump to heading" class="heading-anchor" href="#_1">#</a></h2>
+<ul>
+<li><strong>定义</strong>：Engineering 模块关注大模型训练与推理的系统级优化，包括算子、并行和显存管理。</li>
+<li><strong>目标</strong>：在同等硬件下提升吞吐、降低显存、缩短训练时长并保持收敛稳定。</li>
+</ul>
+<h2 id="_2">适用场景与边界<a aria-label="Jump to heading" class="heading-anchor" href="#_2">#</a></h2>
+<ul>
+<li><strong>适用场景</strong>：用于分布式训练、推理加速与系统瓶颈定位。</li>
+<li><strong>不适用场景</strong>：不适用于缺少性能观测指标的“盲调”优化。</li>
+<li><strong>使用边界</strong>：优化结论受硬件拓扑、并行策略与请求分布影响。</li>
+</ul>
+<h2 id="_3">关键步骤<a aria-label="Jump to heading" class="heading-anchor" href="#_3">#</a></h2>
+<ol>
+<li>先在单机侧做算子与内核优化（<code>cuda</code>）。</li>
+<li>再用混合精度减少计算与显存开销（<code>mixed_precision</code>）。</li>
+<li>最后引入系统级并行与 ZeRO 优化（<code>deepspeed</code>）。</li>
+</ol>
+<p>建议学习顺序：<code>cuda -&gt; mixed_precision -&gt; deepspeed</code></p>
+<h2 id="_4">关键公式<a aria-label="Jump to heading" class="heading-anchor" href="#_4">#</a></h2>
+<p><code>GlobalBatch = micro_batch * grad_accum * data_parallel_size</code></p>
+<p>符号说明：<br/>
+- <code>micro_batch</code>：单卡每次前向样本数。<br/>
+- <code>grad_accum</code>：梯度累积步数。<br/>
+- <code>data_parallel_size</code>：数据并行副本数。</p>
+<h2 id="_5">关键步骤代码（纯文档示例）<a aria-label="Jump to heading" class="heading-anchor" href="#_5">#</a></h2>
+<pre data-lang="python"><code class="language-python">for step, batch in enumerate(loader):
+    with autocast(enabled=use_mixed_precision):
+        loss = model(batch).loss / grad_accum
+    scaler.scale(loss).backward()
+    if (step + 1) % grad_accum == 0:
+        scaler.step(optimizer)
+        scaler.update()
+        optimizer.zero_grad(set_to_none=True)
+</code></pre>
+<h2 id="_6">子模块导航<a aria-label="Jump to heading" class="heading-anchor" href="#_6">#</a></h2>
+<ul>
+<li><code>cuda</code>: 内核与吞吐分析。</li>
+<li><code>mixed_precision</code>: FP16/BF16 训练实践。</li>
+<li><code>deepspeed</code>: ZeRO 与分布式优化。</li>
+</ul>
+<h2 id="_7">工程实现要点<a aria-label="Jump to heading" class="heading-anchor" href="#_7">#</a></h2>
+<ul>
+<li>先建立基准（TTFT/吞吐/显存），再做分项优化。</li>
+<li>并行策略、精度策略与算子优化要协同评估。</li>
+<li>保留压测脚本与配置快照，确保优化可复验。</li>
+</ul>
+<h2 id="_8">常见错误与排查<a aria-label="Jump to heading" class="heading-anchor" href="#_8">#</a></h2>
+<ul>
+<li><strong>症状</strong>：吞吐提升但延迟恶化。<br/>
+<strong>原因</strong>：批处理策略偏向吞吐，牺牲了单请求时延。<br/>
+<strong>解决</strong>：按业务目标拆分延迟/吞吐档位并分别调参。</li>
+<li><strong>症状</strong>：多机训练效率低。<br/>
+<strong>原因</strong>：通信开销或并行划分与硬件拓扑不匹配。<br/>
+<strong>解决</strong>：重排并行维度并用 profiler 定位通信热点。</li>
+</ul>
+<h2 id="_9">与相近方法对比<a aria-label="Jump to heading" class="heading-anchor" href="#_9">#</a></h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>优点</th>
+<th>局限</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本文主题方法</td>
+<td>紧贴本节问题定义</td>
+<td>依赖数据与实现质量</td>
+<td>适合结构化评测与迭代优化</td>
+</tr>
+<tr>
+<td>对比方法A</td>
+<td>上手成本更低</td>
+<td>能力上限可能受限</td>
+<td>快速原型与基线对照</td>
+</tr>
+<tr>
+<td>对比方法B</td>
+<td>上限潜力更高</td>
+<td>调参与资源成本更高</td>
+<td>高要求生产或复杂任务场景</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="_10">参考资料<a aria-label="Jump to heading" class="heading-anchor" href="#_10">#</a></h2>
+<ul>
+<li><a href="https://github.com/NVIDIA/Megatron-LM" rel="noreferrer" target="_blank">Megatron-LM</a></li>
+<li><a href="https://www.deepspeed.ai/" rel="noreferrer" target="_blank">DeepSpeed</a></li>
+</ul>
+        </article>
+      <footer class="page-footer">
+        <div class="page-footer-grid">
+          <a class="page-card" href="../04_advanced_topics/offline_rl/offline_rl.html"><span class="page-card-label">Previous</span><strong>Offline RL 分类</strong><small>Advanced Topics</small><p>一句话通俗理解 ：Offline RL 在不与环境交互的条件下仅凭历史轨迹学习策略，关键挑战是分布偏移与价值过估计。</p></a>
+          <a class="page-card" href="cuda/cuda.html"><span class="page-card-label">Next</span><strong>CUDA 专题</strong><small>Engineering</small><p>一句话通俗理解 ：CUDA 通过显式控制线程、内存层次与核函数执行路径，把 GPU 吞吐潜力转化为实际训练速度。</p></a>
+        </div>
+      </footer>
+      </article>
+    </main>
+    <aside class="toc-panel">
+      <div class="toc-card">
+        <p class="toc-title">On This Page</p>
+        <nav class="toc-nav" id="toc-nav"></nav>
+      </div>
+    </aside>
+  </div>
+  <script>window.__LLM_CORE_PAGE__ = {"path": "modules/05_engineering/05_engineering.html"};</script>
+  <script src="../../_site/site-data.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script type="module" src="../../_site/site.js"></script>
+</body>
+</html>

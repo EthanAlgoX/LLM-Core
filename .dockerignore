@@ -1,0 +1,12 @@
+.git
+.gitignore
+.next
+node_modules
+apps/web/node_modules
+apps/web/.next
+apps/web/.env
+apps/web/.env.local
+apps/web/.turbo
+html/_site
+**/.DS_Store
+**/*.log

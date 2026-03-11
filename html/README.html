@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM-Core: 核心知识解析文档仓库</title>
+  <meta name="description" content="本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23b76436'/%3E%3Cstop offset='1' stop-color='%230a6d67'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' font-weight='700' fill='white'%3ELL%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@500;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+  <link rel="stylesheet" href="_site/site.css" />
+  <script>
+    (() => {
+      let theme = "light";
+      try {
+        const stored = localStorage.getItem("llm-core-theme");
+        theme = stored === "dark" ? "dark" : "light";
+      } catch (_error) {}
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body data-site-path="README.html">
+  <div class="scroll-progress"><div class="scroll-progress-bar" id="scroll-progress-bar"></div></div>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand-row">
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-sidebar">Menu</button>
+        <a class="brand-link" href="README.html">
+          <span class="brand-mark">LLM</span>
+          <span class="brand-copy">
+            <strong>LLM-Core</strong>
+            <small>Documentation Site</small>
+          </span>
+        </a>
+      </div>
+      <div class="header-actions">
+        <button class="search-button" id="search-button" type="button">Search</button>
+        <button class="theme-button" id="theme-toggle" type="button" aria-pressed="false">Theme</button>
+        <a class="source-button" href="../README.md">Markdown</a>
+      </div>
+    </div>
+  </header>
+  <div class="site-layout">
+    <aside class="site-sidebar" id="site-sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar-head">
+          <p class="sidebar-kicker">Overview</p>
+          <h2 class="sidebar-title">LLM-Core: 核心知识解析文档仓库</h2>
+          <p class="sidebar-summary">本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。</p>
+        </div>
+        <div class="sidebar-search">
+          <label class="search-label" for="site-search-input">Search docs</label>
+          <input id="site-search-input" class="search-input" type="search" placeholder="Search title, topic, summary" autocomplete="off" />
+          <div class="search-results" id="search-results"></div>
+        </div>
+        <nav class="site-nav">
+          <details class="nav-group" open><summary>Overview<span>1</span></summary>
+          <a class="nav-link active" href="README.html"><span>LLM-Core: 核心知识解析文档仓库</span><small>本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。</small></a>
+          </details>
+          <details class="nav-group" open><summary>Guides<span>5</span></summary>
+          <a class="nav-link" href="docs/DOC_STYLE.html"><span>Documentation Style Guide</span><small>本仓库是文档优先仓库。所有模块文档按统一结构编写，确保读者能从概念快速走到工程实现。</small></a>
+          <a class="nav-link" href="docs/LEARNING_PATH.html"><span>LLM-Core 学习路径</span><small>一句话通俗理解：按目标选路线，避免“全学一遍却不会用”。</small></a>
+          <a class="nav-link" href="docs/MODULE_DOC_TEMPLATE.html"><span>&lt;主题名&gt;</span><small>一句话通俗理解 ：&lt;用一句话说明它本质上在做什么，以及为什么重要&gt;</small></a>
+          <a class="nav-link" href="docs/NAVIGATION.html"><span>LLM-Core 导航索引</span><small>一句话通俗理解：这是 LLM-Core 的侧边栏式目录，按模块和子主题提供一跳直达入口。</small></a>
+          <a class="nav-link" href="docs/TERMINOLOGY.html"><span>Terminology Glossary</span><small>Use this file as the single source of truth for preferred terms.</small></a>
+          </details>
+          <details class="nav-group"><summary>RL Foundation<span>5</span></summary>
+          <a class="nav-link" href="modules/01_foundation_rl/01_foundation_rl.html"><span>RL Basics 分类</span><small>一句话通俗理解 ：从 MDP 到 GAE 的最小闭环，把“如何定义问题、如何估值、如何降方差”串成一条可复现学习路径。</small></a>
+          <a class="nav-link" href="modules/01_foundation_rl/advantage/advantage.html"><span>Advantage（优势函数学习与对比）</span><small>一句话通俗理解 ：Advantage 用“动作回报 - 状态基线”衡量决策增益，让策略更新聚焦真正带来提升的动作。</small></a>
+          <a class="nav-link" href="modules/01_foundation_rl/gae/gae.html"><span>GAE（Generalized Advantage Estimation）</span><small>一句话通俗理解 ：GAE 通过指数加权的多步 TD 残差在偏差与方差间折中，让策略梯度既稳又不迟钝。</small></a>
+          <a class="nav-link" href="modules/01_foundation_rl/mdp/mdp.html"><span>MDP（马尔可夫决策过程）</span><small>一句话通俗理解 ：MDP 用状态、动作、转移、奖励、折扣把决策问题形式化，为价值迭代与策略优化提供统一语义。</small></a>
+          <a class="nav-link" href="modules/01_foundation_rl/td_learning/td_learning.html"><span>TD Learning（时序差分学习）</span><small>一句话通俗理解 ：TD Learning 边交互边自举更新价值估计，不等回合结束也能持续学习并加速收敛。</small></a>
+          </details>
+          <details class="nav-group"><summary>Architecture<span>10</span></summary>
+          <a class="nav-link" href="modules/02_architecture/02_architecture.html"><span>Architecture 分类</span><small>一句话通俗理解 ：架构模块回答三个核心问题: 模型怎么“看懂上下文”、怎么“跨模态理解”、怎么“高效生成”。</small></a>
+          <a class="nav-link" href="modules/02_architecture/generation/diffusion/diffusion.html"><span>Diffusion（扩散模型）</span><small>一句话通俗理解 ：Diffusion 先学会逐步加噪再反向去噪，把生成任务转化为一系列可控的噪声还原步骤。</small></a>
+          <a class="nav-link" href="modules/02_architecture/generation/dit/dit.html"><span>DiT（Diffusion Transformer）</span><small>一句话通俗理解 ：DiT 用 Transformer 替代 U-Net 处理扩散过程中的 token 化图像表示，在规模化训练下提升生成质量。</small></a>
+          <a class="nav-link" href="modules/02_architecture/generation/generation.html"><span>Generation &amp; Decoding (推理与生成优化)</span><small>一句话通俗理解 ：生成优化是在质量不明显下降的前提下，把“首字延迟、吞吐、显存”三件事同时做平衡。</small></a>
+          <a class="nav-link" href="modules/02_architecture/llm/llm.html"><span>Transformer Core (大语言模型架构)</span><small>一句话通俗理解 ：Transformer 通过多头注意力与前馈残差堆叠，将离散 token 编码为可推理的上下文表示并支持自回归生成。</small></a>
+          <a class="nav-link" href="modules/02_architecture/vlm/blip2/blip2.html"><span>BLIP2</span><small>一句话通俗理解 ：BLIP-2 用 Q-Former 把视觉特征压缩成语言模型可消费的表示，在少量训练下实现图文能力迁移。</small></a>
+          <a class="nav-link" href="modules/02_architecture/vlm/flamingo/flamingo.html"><span>Flamingo</span><small>一句话通俗理解 ：Flamingo 在冻结大模型前提下插入跨模态注意力层，让语言模型按需读取视觉上下文完成多模态对话。</small></a>
+          <a class="nav-link" href="modules/02_architecture/vlm/llava/llava.html"><span>LLaVA</span><small>一句话通俗理解 ：LLaVA 通过视觉编码器与 MLP 投影把图像 token 对齐到 LLM 语义空间，实现低成本视觉指令跟随。</small></a>
+          <a class="nav-link" href="modules/02_architecture/vlm/vlm.html"><span>多模态 VLM (Vision-Language Models)</span><small>一句话通俗理解 ：VLM 的关键是把图像特征“翻译”为语言模型能消费的 token，再让同一套生成机制完成理解和回答。</small></a>
+          <a class="nav-link" href="modules/02_architecture/llm/attention.html"><span>Transformer 注意力机制 (Attention Mechanisms)</span><small>一句话通俗理解 ：注意力机制通过 Q-K 匹配动态分配信息流，GQA/MQA 与 FlashAttention 在精度与成本间给出不同工程折中。</small></a>
+          </details>
+          <details class="nav-group"><summary>Alignment<span>11</span></summary>
+          <a class="nav-link" href="modules/03_alignment/03_alignment.html"><span>Alignment 分类</span><small>一句话通俗理解 ：对齐阶段把“会续写”转成“会按人类意图回答”，核心是数据质量、偏好信号和策略约束的联动优化。</small></a>
+          <a class="nav-link" href="modules/03_alignment/actor_critic/actor_critic.html"><span>Actor-Critic</span><small>一句话通俗理解 ：Actor-Critic 让策略网络负责行动、价值网络负责纠偏，用低方差优势信号提升学习稳定性。</small></a>
+          <a class="nav-link" href="modules/03_alignment/data_synthesis/data_synthesis.html"><span>数据合成 (Data Synthesis)</span><small>一句话通俗理解 ：数据合成用模型自举扩充训练样本，再借助规则或验证器筛选高质量数据以降低标注成本。 核心问题 ：当真实标注数据稀缺、昂贵或存在隐私风险时，如何用程序或 LLM…</small></a>
+          <a class="nav-link" href="modules/03_alignment/dpo/dpo.html"><span>DPO（直接偏好优化）</span><small>一句话通俗理解 ：DPO 直接在偏好对上优化策略相对概率，无需单独训练奖励模型即可实现稳定对齐。</small></a>
+          <a class="nav-link" href="modules/03_alignment/grpo/grpo.html"><span>GRPO (Group Relative Policy Optimization) 组内相对策略优化</span><small>一句话通俗理解 ：GRPO 在同一问题内做组内相对比较，利用标准化优势信号提升推理对齐的样本效率与稳定性。</small></a>
+          <a class="nav-link" href="modules/03_alignment/peft/peft.html"><span>高效微调 (PEFT: Parameter-Efficient Fine-Tuning)</span><small>一句话通俗理解 ：PEFT 只更新少量可训练参数（如 LoRA），在显存可控的前提下快速迁移模型能力。</small></a>
+          <a class="nav-link" href="modules/03_alignment/policy_gradient/policy_gradient.html"><span>Policy Gradient（策略梯度）</span><small>一句话通俗理解 ：Policy Gradient 直接最大化期望回报，对离散决策友好但需借助基线与技巧控制方差。</small></a>
+          <a class="nav-link" href="modules/03_alignment/ppo/ppo.html"><span>PPO (Proximal Policy Optimization) 强化学习对齐</span><small>一句话通俗理解 ：PPO 用裁剪目标限制新旧策略偏移，在可学习性与训练稳定性之间取得工程上最实用的平衡。</small></a>
+          <a class="nav-link" href="modules/03_alignment/rlhf/rlhf.html"><span>RLHF (Reinforcement Learning from Human Feedback) 人类反馈强化学习</span><small>一句话通俗理解 ：RLHF 通过 SFT、奖励建模和策略优化三段式闭环，把人类偏好显式注入模型行为。</small></a>
+          <a class="nav-link" href="modules/03_alignment/sft/sft.html"><span>SFT (Supervised Fine-Tuning) 监督微调</span><small>一句话通俗理解 ：SFT 用高质量指令-响应样本做监督学习，先建立可控表达基线再进入偏好对齐阶段。</small></a>
+          <a class="nav-link" href="modules/03_alignment/data_engineering.html"><span>数据工程与模型评估 (Data &amp; Evaluation)</span><small>一句话通俗理解 ：数据工程通过清洗、配比、去重和评测闭环决定对齐上限，是比模型结构更常见的效果瓶颈。</small></a>
+          </details>
+          <details class="nav-group"><summary>Advanced Topics<span>4</span></summary>
+          <a class="nav-link" href="modules/04_advanced_topics/04_advanced_topics.html"><span>Advanced Topics 分类</span><small>一句话通俗理解 ：进阶模块聚焦“标准配方之外”的难题，核心是用更强约束解决更高风险场景。</small></a>
+          <a class="nav-link" href="modules/04_advanced_topics/offline_rl/bcq/bcq.html"><span>BCQ（Batch-Constrained Q-learning）</span><small>一句话通俗理解 ：BCQ 把策略限制在行为数据支持的动作邻域内，减少离线场景中分布外动作带来的价值幻觉。</small></a>
+          <a class="nav-link" href="modules/04_advanced_topics/offline_rl/cql/cql.html"><span>CQL（Conservative Q-Learning）</span><small>一句话通俗理解 ：CQL 通过保守正则主动压低未见动作 Q 值，降低离线强化学习的过估计风险。</small></a>
+          <a class="nav-link" href="modules/04_advanced_topics/offline_rl/offline_rl.html"><span>Offline RL 分类</span><small>一句话通俗理解 ：Offline RL 在不与环境交互的条件下仅凭历史轨迹学习策略，关键挑战是分布偏移与价值过估计。</small></a>
+          </details>
+          <details class="nav-group"><summary>Engineering<span>6</span></summary>
+          <a class="nav-link" href="modules/05_engineering/05_engineering.html"><span>Systems 分类</span><small>一句话通俗理解 ：系统工程通过并行、精度、算子与调度协同优化，把大模型训练推理从“能跑”提升到“高效稳定地跑”。</small></a>
+          <a class="nav-link" href="modules/05_engineering/cuda/cuda.html"><span>CUDA 专题</span><small>一句话通俗理解 ：CUDA 通过显式控制线程、内存层次与核函数执行路径，把 GPU 吞吐潜力转化为实际训练速度。</small></a>
+          <a class="nav-link" href="modules/05_engineering/deepspeed/deepspeed.html"><span>DeepSpeed 专题</span><small>一句话通俗理解 ：DeepSpeed 以 ZeRO 为核心重构状态存储与通信开销，使超大模型在有限显存下可训练。</small></a>
+          <a class="nav-link" href="modules/05_engineering/inference/inference.html"><span>推理优化 (Inference Optimization)</span><small>一句话通俗理解 ：推理优化围绕 KV Cache、批调度与算子融合，目标是在延迟、吞吐与成本之间找到最优点。</small></a>
+          <a class="nav-link" href="modules/05_engineering/megatron/megatron.html"><span>Megatron 专题</span><small>一句话通俗理解 ：Megatron-LM 通过 TP/PP/DP 组合切分模型与计算图，让超大参数训练跨多机多卡高效扩展。</small></a>
+          <a class="nav-link" href="modules/05_engineering/mixed_precision/mixed_precision.html"><span>混合精度训练（Mixed Precision）</span><small>一句话通俗理解 ：混合精度在保持数值稳定的前提下用低精度计算主路径，并通过 loss scaling 避免梯度下溢。</small></a>
+          </details>
+          <details class="nav-group"><summary>Agent<span>6</span></summary>
+          <a class="nav-link" href="modules/06_agent/06_agent.html"><span>Agentic Reasoning (智能体推理)</span><small>一句话通俗理解 ：Agent 把语言模型升级为可执行系统：先规划、再调用工具、再反思修正，直到任务完成。</small></a>
+          <a class="nav-link" href="modules/06_agent/frameworks/frameworks.html"><span>Agent Frameworks（常见框架与示例代码）</span><small>一句话通俗理解 ：Agent 框架是把“模型 + 工具 + 状态 + 编排”打包成可维护工程系统的脚手架。</small></a>
+          <a class="nav-link" href="modules/06_agent/memory_rag/memory_rag.html"><span>记忆与检索 (Memory &amp; RAG)</span><small>一句话通俗理解 ：Memory 与 RAG 把短期上下文和长期检索结合，让 Agent 在长任务里保持一致性与可追溯性。</small></a>
+          <a class="nav-link" href="modules/06_agent/multi_agent/multi_agent.html"><span>多智能体系统 (Multi-Agent Systems)</span><small>一句话通俗理解 ：多智能体通过角色分工与协作协议并行处理子任务，提升复杂任务的鲁棒性与执行效率。</small></a>
+          <a class="nav-link" href="modules/06_agent/openclaw/openclaw.html"><span>OpenClaw 架构深度解析</span><small>一句话通俗理解 ：OpenClaw 以本地优先运行时和文件记忆体系实现可控自动化，强调可审计、可恢复与低耦合。 OpenClaw 是一个开源的本地优先（Local-First…</small></a>
+          <a class="nav-link" href="modules/06_agent/orchestration/orchestration.html"><span>智能体编排范式 (Agent Orchestration)</span><small>一句话通俗理解 ：编排层定义 Agent 的决策流程与状态转移规则，决定系统能否在复杂场景中稳定推进。</small></a>
+          </details>
+          <details class="nav-group"><summary>Classic Models<span>4</span></summary>
+          <a class="nav-link" href="modules/07_classic_models/07_classic_models.html"><span>Classic Models 分类</span><small>一句话通俗理解 ：经典模型模块不是“背参数”，而是复盘“为什么这个技术路线在当时能赢”。</small></a>
+          <a class="nav-link" href="modules/07_classic_models/chatgpt/chatgpt.html"><span>ChatGPT / InstructGPT 经典解析</span><small>一句话通俗理解 ：ChatGPT 通过 RLHF 的工业化落地验证了“预训练 + 对齐”范式，并重塑通用对话模型的产品路径。 一句话理解 ：ChatGPT 是第一个将&quot;语言模…</small></a>
+          <a class="nav-link" href="modules/07_classic_models/deepseek_r1/deepseek_r1.html"><span>DeepSeek-R1 经典解析</span><small>一句话通俗理解 ：DeepSeek-R1 展示了强化学习驱动推理能力涌现的路线，并以可验证奖励提升复杂任务表现。 一句话理解 ：DeepSeek-R1 通过纯强化学习（无需监…</small></a>
+          <a class="nav-link" href="modules/07_classic_models/qwen3/qwen3.html"><span>Qwen3 经典解析</span><small>一句话通俗理解 ：Qwen3 通过混合思考与 Dense/MoE 双路线策略，在推理深度、响应速度和部署灵活性间取得平衡。 一句话理解 ：Qwen3 是阿里最强开源模型系列，…</small></a>
+          </details>
+          <details class="nav-group"><summary>Reports<span>24</span></summary>
+          <a class="nav-link" href="output/technical_briefs/README.html"><span>面试口述稿索引</span><small>Generated reports and technical brief artifacts.</small></a>
+          <a class="nav-link" href="output/technical_briefs/actor_critic.html"><span>actor_critic 面试口述稿</span><small>actor_critic 在本项目中的定位是：Actor-Critic 对齐训练。</small></a>
+          <a class="nav-link" href="output/technical_briefs/advantage.html"><span>advantage 面试口述稿</span><small>advantage 在本项目中的定位是：优势函数估计对比。</small></a>
+          <a class="nav-link" href="output/technical_briefs/bcq.html"><span>bcq 面试口述稿</span><small>bcq 在本项目中的定位是：离线 RL：BCQ。</small></a>
+          <a class="nav-link" href="output/technical_briefs/blip2.html"><span>blip2 面试口述稿</span><small>blip2 在本项目中的定位是：BLIP2 推理示例。</small></a>
+          <a class="nav-link" href="output/technical_briefs/cql.html"><span>cql 面试口述稿</span><small>cql 在本项目中的定位是：离线 RL：CQL。</small></a>
+          <a class="nav-link" href="output/technical_briefs/cuda.html"><span>cuda 面试口述稿</span><small>cuda 在本项目中的定位是：CUDA 与吞吐观察。</small></a>
+          <a class="nav-link" href="output/technical_briefs/deepspeed.html"><span>deepspeed 面试口述稿</span><small>deepspeed 在本项目中的定位是：训练系统优化：DeepSpeed。</small></a>
+          <a class="nav-link" href="output/technical_briefs/diffusion.html"><span>diffusion 面试口述稿</span><small>diffusion 在本项目中的定位是：扩散模型基础。</small></a>
+          <a class="nav-link" href="output/technical_briefs/dit.html"><span>dit 面试口述稿</span><small>DiT 用 Transformer 作为扩散模型的去噪骨干，在大规模训练下具备强生成能力。</small></a>
+          <a class="nav-link" href="output/technical_briefs/dpo.html"><span>dpo 面试口述稿</span><small>直接优化偏好对中 chosen 相对 rejected 的概率，不显式训练奖励模型。</small></a>
+          <a class="nav-link" href="output/technical_briefs/flamingo.html"><span>flamingo 面试口述稿</span><small>flamingo 在本项目中的定位是：Flamingo 推理示例。</small></a>
+          <a class="nav-link" href="output/technical_briefs/gae.html"><span>gae 面试口述稿</span><small>GAE 通过加权多步 TD 残差构造优势函数，在偏差和方差之间做可控折中。</small></a>
+          <a class="nav-link" href="output/technical_briefs/grpo.html"><span>grpo 面试口述稿</span><small>同一 prompt 采样多候选并做组内相对奖励比较，再更新策略。</small></a>
+          <a class="nav-link" href="output/technical_briefs/llava.html"><span>llava 面试口述稿</span><small>llava 在本项目中的定位是：LLaVA 推理示例。</small></a>
+          <a class="nav-link" href="output/technical_briefs/mdp.html"><span>mdp 面试口述稿</span><small>MDP 用状态、动作、转移概率与奖励定义决策过程，值迭代通过 Bellman 备份逼近最优值函数。</small></a>
+          <a class="nav-link" href="output/technical_briefs/megatron.html"><span>megatron 面试口述稿</span><small>megatron 在本项目中的定位是：Megatron 并行训练示例。</small></a>
+          <a class="nav-link" href="output/technical_briefs/mixed_precision.html"><span>mixed_precision 面试口述稿</span><small>mixed_precision 在本项目中的定位是：混合精度训练。</small></a>
+          <a class="nav-link" href="output/technical_briefs/policy_gradient.html"><span>policy_gradient 面试口述稿</span><small>policy_gradient 在本项目中的定位是：策略梯度对齐训练。</small></a>
+          <a class="nav-link" href="output/technical_briefs/ppo.html"><span>ppo 面试口述稿</span><small>通过策略梯度提高奖励，同时用 clip/KL 约束避免策略单步漂移过大。</small></a>
+          <a class="nav-link" href="output/technical_briefs/rlhf.html"><span>rlhf 面试口述稿</span><small>rlhf 在本项目中的定位是：RLHF 闭环训练。</small></a>
+          <a class="nav-link" href="output/technical_briefs/sft.html"><span>sft 面试口述稿</span><small>sft 在本项目中的定位是：监督微调，后训练起点。</small></a>
+          <a class="nav-link" href="output/technical_briefs/td_learning.html"><span>td_learning 面试口述稿</span><small>td_learning 在本项目中的定位是：TD/Q-learning 基础。</small></a>
+          <a class="nav-link" href="output/template_compliance_report.html"><span>Template Compliance Report (2026-02-19 18:37:49)</span><small>Generated reports and technical brief artifacts.</small></a>
+          </details>
+        </nav>
+      </div>
+    </aside>
+    <main class="page-column">
+      <nav class="breadcrumbs"><a href="README.html">Home</a>
+<span>LLM-Core: 核心知识解析文档仓库</span></nav>
+      <article class="article-shell">
+        <header class="hero">
+          <div class="hero-meta">
+            <span class="hero-pill">Overview</span>
+            <span class="hero-pill ghost">README.md</span>
+          </div>
+          <h1 class="hero-title">LLM-Core: 核心知识解析文档仓库</h1>
+          <p class="hero-description">本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。</p>
+        </header>
+        <section class="home-hero-panel">
+          <div class="home-hero-copy">
+            <p class="showcase-kicker">Knowledge System</p>
+            <h2>Turn the document collection into a browsable learning site</h2>
+            <p>Use the left navigation for systematic reading, the built-in search for concept jumps, and the grouped modules below for continuous exploration.</p>
+          </div>
+          <div class="home-stat-grid">
+            <div class="home-stat-card"><strong>76</strong><span>Total Pages</span></div>
+            <div class="home-stat-card"><strong>9</strong><span>Main Tracks</span></div>
+            <div class="home-stat-card"><strong>46</strong><span>Module Docs</span></div>
+          </div>
+        </section>
+        <section class="home-showcase">
+          <div class="showcase-intro">
+            <p class="showcase-kicker">Site Index</p>
+            <h2>Browse by module</h2>
+            <p>Jump straight into the main tracks of the LLM-Core knowledge base. Each section card links to its overview page and keeps the full module set one click away.</p>
+          </div>
+          <div class="showcase-grid">
+            <a class="showcase-card" href="docs/DOC_STYLE.html"><span class="showcase-card-count">5 pages</span><strong>Guides</strong><p>Navigation, terminology, style, and learning paths.</p></a>
+            <a class="showcase-card" href="modules/01_foundation_rl/01_foundation_rl.html"><span class="showcase-card-count">5 pages</span><strong>RL Foundation</strong><p>Reinforcement learning basics, estimation, and policy signals.</p></a>
+            <a class="showcase-card" href="modules/02_architecture/02_architecture.html"><span class="showcase-card-count">10 pages</span><strong>Architecture</strong><p>Transformer internals, multimodality, and generative architectures.</p></a>
+            <a class="showcase-card" href="modules/03_alignment/03_alignment.html"><span class="showcase-card-count">11 pages</span><strong>Alignment</strong><p>SFT, preference optimization, and RLHF post-training workflows.</p></a>
+            <a class="showcase-card" href="modules/04_advanced_topics/04_advanced_topics.html"><span class="showcase-card-count">4 pages</span><strong>Advanced Topics</strong><p>Offline RL and more specialized follow-up topics.</p></a>
+            <a class="showcase-card" href="modules/05_engineering/05_engineering.html"><span class="showcase-card-count">6 pages</span><strong>Engineering</strong><p>Systems, kernels, parallelism, and inference optimization.</p></a>
+            <a class="showcase-card" href="modules/06_agent/06_agent.html"><span class="showcase-card-count">6 pages</span><strong>Agent</strong><p>Agent orchestration, memory, and framework patterns.</p></a>
+            <a class="showcase-card" href="modules/07_classic_models/07_classic_models.html"><span class="showcase-card-count">4 pages</span><strong>Classic Models</strong><p>Representative model case studies and retrospectives.</p></a>
+          </div>
+        </section>
+        <section class="home-feature-section">
+          <div class="showcase-intro">
+            <p class="showcase-kicker">Recommended</p>
+            <h2>Recommended reading</h2>
+            <p>Start from these pages if you want the shortest route to the most reused concepts in the repository.</p>
+          </div>
+          <div class="featured-grid">
+            <a class="featured-card" href="modules/02_architecture/llm/llm.html"><span class="featured-card-group">Architecture</span><strong>Transformer Core (大语言模型架构)</strong><p>一句话通俗理解 ：Transformer 通过多头注意力与前馈残差堆叠，将离散 token 编码为可推理的上下文表示并支持自回归生成。</p></a>
+            <a class="featured-card" href="modules/03_alignment/ppo/ppo.html"><span class="featured-card-group">Alignment</span><strong>PPO (Proximal Policy Optimization) 强化学习对齐</strong><p>一句话通俗理解 ：PPO 用裁剪目标限制新旧策略偏移，在可学习性与训练稳定性之间取得工程上最实用的平衡。</p></a>
+            <a class="featured-card" href="modules/02_architecture/generation/generation.html"><span class="featured-card-group">Architecture</span><strong>Generation &amp; Decoding (推理与生成优化)</strong><p>一句话通俗理解 ：生成优化是在质量不明显下降的前提下，把“首字延迟、吞吐、显存”三件事同时做平衡。</p></a>
+            <a class="featured-card" href="modules/01_foundation_rl/01_foundation_rl.html"><span class="featured-card-group">RL Foundation</span><strong>RL Basics 分类</strong><p>一句话通俗理解 ：从 MDP 到 GAE 的最小闭环，把“如何定义问题、如何估值、如何降方差”串成一条可复现学习路径。</p></a>
+            <a class="featured-card" href="modules/02_architecture/vlm/vlm.html"><span class="featured-card-group">Architecture</span><strong>多模态 VLM (Vision-Language Models)</strong><p>一句话通俗理解 ：VLM 的关键是把图像特征“翻译”为语言模型能消费的 token，再让同一套生成机制完成理解和回答。</p></a>
+            <a class="featured-card" href="modules/03_alignment/peft/peft.html"><span class="featured-card-group">Alignment</span><strong>高效微调 (PEFT: Parameter-Efficient Fine-Tuning)</strong><p>一句话通俗理解 ：PEFT 只更新少量可训练参数（如 LoRA），在显存可控的前提下快速迁移模型能力。</p></a>
+          </div>
+        </section>
+        <section class="home-feature-section">
+          <div class="showcase-intro">
+            <p class="showcase-kicker">Learning Paths</p>
+            <h2>Pick a reading route</h2>
+            <p>Choose a route based on your current goal. Each path chains overview pages and high-signal modules into a coherent pass.</p>
+          </div>
+          <div class="track-grid">
+            <section class="track-card"><p class="track-card-kicker">Interview Sprint</p><p class="track-card-summary">从 Transformer、Alignment 到 Inference，快速构建高频面试主线。</p><ol class="track-list">
+              <li><a href="modules/02_architecture/llm/llm.html">Transformer Core (大语言模型架构)</a></li>
+              <li><a href="modules/03_alignment/ppo/ppo.html">PPO (Proximal Policy Optimization) 强化学习对齐</a></li>
+              <li><a href="modules/05_engineering/inference/inference.html">推理优化 (Inference Optimization)</a></li>
+              <li><a href="modules/07_classic_models/chatgpt/chatgpt.html">ChatGPT / InstructGPT 经典解析</a></li>
+            </ol></section>
+            <section class="track-card"><p class="track-card-kicker">Engineering Track</p><p class="track-card-summary">偏系统与落地，把训练、推理、并行和高效微调串成一条路。</p><ol class="track-list">
+              <li><a href="modules/02_architecture/02_architecture.html">Architecture 分类</a></li>
+              <li><a href="modules/05_engineering/cuda/cuda.html">CUDA 专题</a></li>
+              <li><a href="modules/05_engineering/inference/inference.html">推理优化 (Inference Optimization)</a></li>
+              <li><a href="modules/03_alignment/peft/peft.html">高效微调 (PEFT: Parameter-Efficient Fine-Tuning)</a></li>
+            </ol></section>
+            <section class="track-card"><p class="track-card-kicker">Research Track</p><p class="track-card-summary">从 RL 基础延伸到对齐与 Offline RL，适合继续做方法论推演。</p><ol class="track-list">
+              <li><a href="modules/01_foundation_rl/01_foundation_rl.html">RL Basics 分类</a></li>
+              <li><a href="modules/03_alignment/rlhf/rlhf.html">RLHF (Reinforcement Learning from Human Feedback) 人类反馈强化学习</a></li>
+              <li><a href="modules/04_advanced_topics/offline_rl/offline_rl.html">Offline RL 分类</a></li>
+              <li><a href="modules/07_classic_models/deepseek_r1/deepseek_r1.html">DeepSeek-R1 经典解析</a></li>
+            </ol></section>
+          </div>
+        </section>
+        <article class="article-content" id="article-content">
+
+<p>本项目是一个系统的 LLM 核心技术栈解析仓库。聚焦 LLM、VLM 与后训练（Alignment）关键环节的知识梳理，记录并巩固大模型底层原理与工程实践思路。</p>
+<hr/>
+<h2 id="_1">🛠️ 仓库定位与使用方式<a aria-label="Jump to heading" class="heading-anchor" href="#_1">#</a></h2>
+<blockquote>
+<p>当前仓库状态：<strong>纯文档仓库</strong>（以知识解析与技术笔记为主）。</p>
+<ul>
+<li><code>modules/</code> 下内容为主要学习入口。</li>
+<li>根目录 <code>run.py</code> 与 <code>tools/</code> 中脚本为历史工程文件，不作为当前维护范围，也不保证可执行。</li>
+<li>如需代码复现，请以对应文档中的外部项目/实现链接为准（若文档已提供）。</li>
+</ul>
+</blockquote>
+<hr/>
+<h2 id="_2">🧭 快速导航（章节入口）<a aria-label="Jump to heading" class="heading-anchor" href="#_2">#</a></h2>
+<ul>
+<li>侧边栏式章节目录：<a href="docs/NAVIGATION.html"><code>docs/NAVIGATION.md</code></a></li>
+<li>目标导向学习路径：<a href="docs/LEARNING_PATH.html"><code>docs/LEARNING_PATH.md</code></a></li>
+<li>文档模板：<a href="docs/MODULE_DOC_TEMPLATE.html"><code>docs/MODULE_DOC_TEMPLATE.md</code></a></li>
+<li>文档规范：<a href="docs/DOC_STYLE.html"><code>docs/DOC_STYLE.md</code></a></li>
+</ul>
+<h3 id="_3">学习路径建议<a aria-label="Jump to heading" class="heading-anchor" href="#_3">#</a></h3>
+<ol>
+<li>面试冲刺：<code>Transformer -&gt; Alignment -&gt; Inference -&gt; 经典模型</code></li>
+<li>工程落地：<code>Architecture -&gt; CUDA/并行 -&gt; Inference -&gt; PEFT</code></li>
+<li>研究进阶：<code>RL 基础 -&gt; RLHF/GRPO -&gt; Offline RL -&gt; 经典案例</code></li>
+</ol>
+<hr/>
+<h2 id="llm-core-knowledge-map">🌐 LLM 核心知识图谱 (Core Knowledge Map)<a aria-label="Jump to heading" class="heading-anchor" href="#llm-core-knowledge-map">#</a></h2>
+<h3 id="1-theory-optimization">1. 理论根基：算法与优化 (Theory &amp; Optimization)<a aria-label="Jump to heading" class="heading-anchor" href="#1-theory-optimization">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>理论概览</td>
+<td><a href="modules/01_foundation_rl/01_foundation_rl.html">RL foundation</a></td>
+<td>强化学习基础概念、算法分类与学习路径指南</td>
+</tr>
+<tr>
+<td>决策建模</td>
+<td><a href="modules/01_foundation_rl/mdp/mdp.html">MDP 模型复现</a></td>
+<td>MDP 五元组建模与 Bellman 备份方程</td>
+</tr>
+<tr>
+<td>价值学习</td>
+<td><a href="modules/01_foundation_rl/td_learning/td_learning.html">TD Learning</a></td>
+<td>Q-Learning (Off-policy) 与 SARSA (On-policy) 差异</td>
+</tr>
+<tr>
+<td>优势估计</td>
+<td><a href="modules/01_foundation_rl/gae/gae.html">GAE</a> &amp; <a href="modules/01_foundation_rl/advantage/advantage.html">Advantage</a></td>
+<td><strong>GAE</strong>、<strong>多步回报</strong> 与训练稳定性方差权衡</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="2-moe-architecture-scaling">2. 架构核心：变压器、多模态与 MoE (Architecture &amp; Scaling)<a aria-label="Jump to heading" class="heading-anchor" href="#2-moe-architecture-scaling">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>架构总览</td>
+<td><a href="modules/02_architecture/02_architecture.html">Architecture Overview</a></td>
+<td>LLM/VLM/生成模块的统一入口与学习顺序</td>
+<td>先看“总地图”再深入子模块，避免知识割裂</td>
+</tr>
+<tr>
+<td>基础架构</td>
+<td><a href="modules/02_architecture/llm/llm.html">Transformer Core</a></td>
+<td><strong>MHSA</strong>、<strong>Normalization (RMSNorm)</strong> 与 <strong>RoPE 旋转位置编码</strong></td>
+<td>LLM 的"身体"——每个词怎么被感知并编码成向量</td>
+</tr>
+<tr>
+<td>注意力内核</td>
+<td><a href="modules/02_architecture/llm/attention.html">Attention Mechanisms</a></td>
+<td><strong>MHA / GQA / MQA</strong> 变体与 <strong>Flash Attention</strong> 工程实现</td>
+<td>模型"读文章"时同时关注多个角度，Flash Attention 让这更快更省显存</td>
+</tr>
+<tr>
+<td>扩展架构</td>
+<td><a href="modules/02_architecture/llm/llm.html">MoE (Mixture of Experts)</a></td>
+<td><strong>Expert Parallelism</strong>、<strong>Load Balancing</strong> 与稀疏计算优化</td>
+<td>超大模型拆成多个"专家"，每次只激活少数几个，省算力</td>
+</tr>
+<tr>
+<td>模态融合</td>
+<td><a href="modules/02_architecture/vlm/vlm.html">VLM Mapping / Hub</a></td>
+<td><strong>MLP Projector</strong>、<strong>Cross-Attention</strong> 与多模态对齐策略</td>
+<td>把图像"翻译"成语言模型能理解的格式，让 AI 能看图说话</td>
+</tr>
+<tr>
+<td>多媒体生成</td>
+<td><a href="modules/02_architecture/generation/diffusion/diffusion.html">Diffusion</a> / <a href="modules/02_architecture/generation/dit/dit.html">DiT</a></td>
+<td><strong>Diffusion Transformer (DiT)</strong>、<strong>Stable Diffusion</strong> 与生成控制</td>
+<td>AI 画图原理：从噪声图一步步去噪，变成目标图片</td>
+</tr>
+<tr>
+<td>生成推理</td>
+<td><a href="modules/02_architecture/generation/generation.html">Decoding Strategy</a></td>
+<td><strong>KV Cache (PagedAttention)</strong>、<strong>解码策略</strong> 与 <strong>投机采样</strong></td>
+<td>让 AI 吐字又快又省内存——如何高效地一字一字生成文本</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="3-post-training-alignment">3. 能力塑形：微调、对齐与仿真 (Post-Training &amp; Alignment)<a aria-label="Jump to heading" class="heading-anchor" href="#3-post-training-alignment">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>对齐总览</td>
+<td><a href="modules/03_alignment/03_alignment.html">Alignment Overview</a></td>
+<td>后训练对齐全链路解析：从 SFT 到 RLHF 的演进路径</td>
+<td>从"写作业"到"真正听懂人话"，AI 是怎么一步步被调教的</td>
+</tr>
+<tr>
+<td>监督学习</td>
+<td><a href="modules/03_alignment/sft/sft.html">SFT 解析</a></td>
+<td><strong>Supervised Fine-Tuning</strong>、数据质量初筛与指令遵循</td>
+<td>拿人类写的高质量问答对，手把手教模型"怎么说话"</td>
+</tr>
+<tr>
+<td>参数高效微调</td>
+<td><a href="modules/03_alignment/peft/peft.html">PEFT 解析</a></td>
+<td><strong>LoRA</strong>、<strong>Prefix Tuning</strong> 与模型融合 (<strong>Model Merging</strong>)</td>
+<td>只改模型一小部分权重，就能让它学会新技能，省时省显存</td>
+</tr>
+<tr>
+<td>偏好对齐</td>
+<td><a href="modules/03_alignment/ppo/ppo.html">PPO</a> / <a href="modules/03_alignment/dpo/dpo.html">DPO</a></td>
+<td><strong>在线/离线对齐算法</strong>、<strong>奖励模型 (RM)</strong> 与 <strong>隐含偏好优化 (DPO)</strong></td>
+<td>给 AI 两个答案让它选好的，通过"偏好打分"驯化它说人话</td>
+</tr>
+<tr>
+<td>基础算法</td>
+<td><a href="modules/03_alignment/policy_gradient/policy_gradient.html">PG</a> / <a href="modules/03_alignment/actor_critic/actor_critic.html">AC</a></td>
+<td>Policy Gradient (REINFORCE) 与 Actor-Critic 架构基础</td>
+<td>RL 的基础：好结果加分、坏结果扣分，用梯度驱动策略进化</td>
+</tr>
+<tr>
+<td>推理对齐</td>
+<td><a href="modules/03_alignment/grpo/grpo.html">DeepSeek GRPO</a></td>
+<td><strong>GRPO 对齐范式</strong>、奖励模型建模与复杂逻辑链验证</td>
+<td>DeepSeek 的秘诀：同时生成多个答案，优质的胜出，让模型学会"推理"</td>
+</tr>
+<tr>
+<td>智能体强化学习</td>
+<td><a href="modules/03_alignment/rlhf/rlhf.html">Agentic-RL</a></td>
+<td><strong>Agentic-RL 训练范式</strong>、<strong>基于模拟器的演练</strong> 与 <strong>多智能体博弈 (MARL)</strong></td>
+<td>在沙盒里练习，让 Agent 从实战模拟中学会完成复杂的真实任务</td>
+</tr>
+<tr>
+<td>数据合成</td>
+<td><a href="modules/03_alignment/data_synthesis/data_synthesis.html">Data Synthesis</a></td>
+<td><strong>拒绝采样、Evol-Instruct、仿真轨迹合成</strong> 与 <strong>长思维链 (Long CoT) 合成</strong></td>
+<td>真实数据不够用时，让 LLM 自己"造题目"，并用验证器过滤掉低质量样本</td>
+</tr>
+<tr>
+<td>数据与评估</td>
+<td><a href="modules/03_alignment/data_engineering.html">Data &amp; Evaluation</a></td>
+<td><strong>数据处理 (Cleaning)</strong>、<strong>对抗性测试</strong> 与 <strong>LLM-as-a-Judge</strong></td>
+<td>训练数据的质量决定模型上限，用 LLM 来给 LLM 打分做筛选</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="4-pd-engineering-scaling">4. 系统性能：并发、并行与 PD 分离 (Engineering &amp; Scaling)<a aria-label="Jump to heading" class="heading-anchor" href="#4-pd-engineering-scaling">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工程总览</td>
+<td><a href="modules/05_engineering/05_engineering.html">Engineering Overview</a></td>
+<td>模型并行、显存管理与大规模训练系统的技术演进入口</td>
+<td>把一个大到塞不进单张卡的模型，切开分发到成百上千张卡协同训练</td>
+</tr>
+<tr>
+<td>并行策略</td>
+<td><a href="modules/05_engineering/megatron/megatron.html">Distributed Training</a></td>
+<td><strong>3D Parallelism (TP/PP/DP)</strong>、<strong>专家并行 (EP)</strong> 与通信优化</td>
+<td>模型切横刀、纵刀、流水线——三把刀解决超大模型的分布式训练难题</td>
+</tr>
+<tr>
+<td>推理框架</td>
+<td><a href="modules/05_engineering/inference/inference.html">Inference Frameworks</a></td>
+<td><strong>Prefill-Decode 分离</strong>、<strong>PagedAttention</strong> 与算子融合</td>
+<td>让用户提问和 AI 吐字分开跑，显存更省、吞吐更高</td>
+</tr>
+<tr>
+<td>算子与加速</td>
+<td><a href="modules/05_engineering/cuda/cuda.html">CUDA</a> / <a href="modules/05_engineering/mixed_precision/mixed_precision.html">Precision</a></td>
+<td><strong>CUDA Kernel 优化</strong>、<strong>混合精度 (FP16/BF16)</strong> 与量化加速原理</td>
+<td>用低精度浮点数代替 FP32，显存省一半，速度翻倍，效果几乎不变</td>
+</tr>
+<tr>
+<td>工程框架</td>
+<td><a href="modules/05_engineering/deepspeed/deepspeed.html">DeepSpeed</a></td>
+<td><strong>DeepSpeed ZeRO</strong> 系列显存优化与训练流水线</td>
+<td>ZeRO 把优化器状态等分散到每张卡，人人各拿一份不重复，省掉冗余显存</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="5-agents-mesh">5. 应用闭环：自主智能体与多机协作 (Agents &amp; Mesh)<a aria-label="Jump to heading" class="heading-anchor" href="#5-agents-mesh">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>智能体总览</td>
+<td><a href="modules/06_agent/06_agent.html">Agentic Overview</a></td>
+<td>核心逻辑：<strong>LLM + Planning + Memory + Toolkit</strong> 深度解析</td>
+<td>让 AI 从"回答问题"升级为"主动做事"——思考、记忆、用工具、迭代执行</td>
+</tr>
+<tr>
+<td>记忆与检索</td>
+<td><a href="modules/06_agent/memory_rag/memory_rag.html">Memory &amp; RAG</a></td>
+<td><strong>RAG</strong>、<strong>Query 理解</strong>、<strong>向量检索</strong> 与 <strong>Rerank 模型</strong></td>
+<td>AI 自带可检索"知识库"，让它能回答私有或超出训练范围的问题</td>
+</tr>
+<tr>
+<td>编排范式</td>
+<td><a href="modules/06_agent/orchestration/orchestration.html">Agent Orchestration</a></td>
+<td><strong>ReAct</strong>、<strong>Plan-and-Execute</strong> 与 <strong>Function Calling</strong> 工具增强</td>
+<td>Agent 的"大脑逻辑"：先思考再行动，遇到新情况随时调整计划</td>
+</tr>
+<tr>
+<td>框架实战</td>
+<td><a href="modules/06_agent/frameworks/frameworks.html">Agent Frameworks</a></td>
+<td><strong>LangChain/LangGraph/AutoGen/CrewAI/OpenAI Tool Calling</strong> 最小闭环示例</td>
+<td>先选框架再写业务逻辑，避免把工程复杂度直接堆到提示词里</td>
+</tr>
+<tr>
+<td>系统架构</td>
+<td><a href="modules/06_agent/06_agent.html">Mesh &amp; State Machine</a></td>
+<td><strong>NanoBot 设计模式</strong>、<strong>多层记忆体系</strong> 与 <strong>Conditional Routing</strong></td>
+<td>用状态机管理 Agent 行为流，保证复杂任务可靠推进不乱套</td>
+</tr>
+<tr>
+<td>多智能体协作</td>
+<td><a href="modules/06_agent/multi_agent/multi_agent.html">Multi-Agent Systems</a></td>
+<td><strong>Decentralized Orchestration</strong>、通信协议与 <strong>Human-in-the-Loop</strong></td>
+<td>多个 AI 各自分工合作，像一个智能团队完成单 Agent 搞不定的任务</td>
+</tr>
+<tr>
+<td>本地Agent框架</td>
+<td><a href="modules/06_agent/openclaw/openclaw.html">OpenClaw 架构</a></td>
+<td><strong>Gateway + Runtime</strong>、<strong>文件记忆系统</strong>、<strong>Heartbeat 事件驱动</strong> 与 <strong>混合检索</strong></td>
+<td>可本地运行的完整 Agent 框架，用文件系统做记忆，用消息总线解耦通信</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="6-advanced-topics-offline-rl">6. 进阶课题：离线强化学习 (Advanced Topics: Offline RL)<a aria-label="Jump to heading" class="heading-anchor" href="#6-advanced-topics-offline-rl">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>进阶总览</td>
+<td><a href="modules/04_advanced_topics/04_advanced_topics.html">Advanced Topics Overview</a></td>
+<td>进阶主题入口与方法边界说明</td>
+<td>当标准训练范式不够时，知道该去哪看什么方法</td>
+</tr>
+<tr>
+<td>离线对齐总览</td>
+<td><a href="modules/04_advanced_topics/offline_rl/offline_rl.html">Offline RL Overview</a></td>
+<td>在无环境交互前提下，利用离线轨迹数据进行策略优化的核心范式</td>
+<td>不和真实环境交互，只用"历史经验数据"学习，像人类读案例复盘一样</td>
+</tr>
+<tr>
+<td>算法复现</td>
+<td><a href="modules/04_advanced_topics/offline_rl/offline_rl.html">Offline RL</a></td>
+<td><strong>Offline RL 系统详述</strong> 与数据分布偏移（Distribution Shift）对抗策略</td>
+<td>离线数据和真实分布有差距，需专门设计算法防止策略学偏</td>
+</tr>
+<tr>
+<td>代表算法</td>
+<td><a href="modules/04_advanced_topics/offline_rl/bcq/bcq.html">BCQ</a> / <a href="modules/04_advanced_topics/offline_rl/cql/cql.html">CQL</a></td>
+<td><strong>外推误差 (Extrapolation Error) 抑制</strong> 与 <strong>下界 Q 学习 (Lower Bound Q-learning)</strong></td>
+<td>BCQ 约束动作别乱飞；CQL 让 Q 值保守低估——两者都防止 AI 对没见过的情况过度自信</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<h3 id="7-classic-model-analysis">7. 经典解析：工业级模型案例 (Classic Model Analysis)<a aria-label="Jump to heading" class="heading-anchor" href="#7-classic-model-analysis">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>领域</th>
+<th>核心内容</th>
+<th>原理技术要点</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>案例总览</td>
+<td><a href="modules/07_classic_models/07_classic_models.html">Classic Models Overview</a></td>
+<td>工业级模型案例导航与复盘框架</td>
+<td>不只看结果，更看“为什么这个路线能赢”</td>
+</tr>
+<tr>
+<td>ChatGPT / InstructGPT</td>
+<td><a href="modules/07_classic_models/chatgpt/chatgpt.html">ChatGPT 解析</a></td>
+<td><strong>RLHF 三阶段</strong>（SFT → RM → PPO）与 <strong>KL 约束对齐</strong></td>
+<td>第一个把 RL + 人类偏好大规模落地的对话 AI，定义了 RLHF 行业标准</td>
+</tr>
+<tr>
+<td>DeepSeek-R1</td>
+<td><a href="modules/07_classic_models/deepseek_r1/deepseek_r1.html">DeepSeek-R1 解析</a></td>
+<td><strong>GRPO 算法</strong>、<strong>可验证奖励</strong>与推理能力自发涌现</td>
+<td>用纯强化学习让模型自发学会"一步步思考"，无需任何 CoT 标注数据</td>
+</tr>
+<tr>
+<td>Qwen3</td>
+<td><a href="modules/07_classic_models/qwen3/qwen3.html">Qwen3 解析</a></td>
+<td><strong>混合思考模式</strong>、<strong>Dense + MoE 双轨</strong>与四阶段后训练</td>
+<td>同一模型内动态切换深度推理和快速回答，兼顾效率与能力</td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<h2 id="technical-reference">🧠 核心技术参考 (Technical Reference)<a aria-label="Jump to heading" class="heading-anchor" href="#technical-reference">#</a></h2>
+<h3 id="1-memory-compute">1. 显存计算与容量估算 (Memory &amp; Compute)<a aria-label="Jump to heading" class="heading-anchor" href="#1-memory-compute">#</a></h3>
+<ul>
+<li><strong>静态权重</strong>：<code>fp16</code> 占 2 Bytes/Param。</li>
+<li><strong>KV Cache（总量）</strong>：<code>batch_size × seq_len × 2 × layers × kv_heads × head_dim × precision_bytes</code>。<br/>
+  （其中 <code>2</code> 表示 K/V 两份缓存）</li>
+<li><strong>量化增益</strong>：通过 <strong>定点量化</strong> (INT4/INT8)，显存占用可降低 50%-75%。</li>
+</ul>
+<h3 id="2">2. 注意力机制变体<a aria-label="Jump to heading" class="heading-anchor" href="#2">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>机制</th>
+<th>特点</th>
+<th>显存优化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MHA</td>
+<td>Multi-Head Attention</td>
+<td>标准</td>
+</tr>
+<tr>
+<td>MQA</td>
+<td>Multi-Query Attention</td>
+<td>KV 头=1</td>
+</tr>
+<tr>
+<td>GQA</td>
+<td>Grouped-Query Attention</td>
+<td>折中方案</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="3">3. 对齐算法演进<a aria-label="Jump to heading" class="heading-anchor" href="#3">#</a></h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>算法</th>
+<th>核心思想</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SFT</td>
+<td>Supervised Fine-Tuning</td>
+<td>模仿学习</td>
+</tr>
+<tr>
+<td>RLHF</td>
+<td>PPO + Reward Model</td>
+<td>人类反馈强化学习</td>
+</tr>
+<tr>
+<td>DPO</td>
+<td>Direct Preference Optimization</td>
+<td>离线对比优化</td>
+</tr>
+<tr>
+<td>GRPO</td>
+<td>Group Relative Policy Optimization</td>
+<td>组内相对优势</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="4-agent">4. Agent 架构演进<a aria-label="Jump to heading" class="heading-anchor" href="#4-agent">#</a></h3>
+<ul>
+<li><strong>ReAct 范式</strong>：协同推理（Reason）与行动（Act），动态调整计划。</li>
+<li><strong>Plan and Execute</strong>：先计划再执行，适合长链条任务。</li>
+<li><strong>Multi-Agent Mesh</strong>：去中心化编排，支持分布式决策与角色分担。</li>
+</ul>
+<h3 id="5">5. 分布式训练策略<a aria-label="Jump to heading" class="heading-anchor" href="#5">#</a></h3>
+<ul>
+<li><strong>数据并行 (DP)</strong>：副本间切分数据，All-Reduce 同步梯度</li>
+<li><strong>张量并行 (TP)</strong>：切分层内权重，All-Gather 激活</li>
+<li><strong>流水线并行 (PP)</strong>：按层切分 Stage，Bubble 时间</li>
+<li><strong>专家并行 (EP)</strong>：MoE 特有，All-to-All 路由专家</li>
+</ul>
+<hr/>
+<h2 id="project-structure">📂 项目结构 (Project Structure)<a aria-label="Jump to heading" class="heading-anchor" href="#project-structure">#</a></h2>
+<ul>
+<li><code>modules/</code>: 核心知识组件</li>
+<li><code>01_foundation_rl/</code>: 理论根基 (MDP, TD, GAE)</li>
+<li><code>02_architecture/</code>: 架构核心 (总览 + LLM, VLM, Generation, Diffusion, DiT)</li>
+<li><code>03_alignment/</code>: 对齐技术 (SFT, PEFT, PPO, DPO, GRPO, Agentic-RL, Data Synthesis)</li>
+<li><code>04_advanced_topics/</code>: 进阶课题 (总览 + Offline RL: BCQ, CQL)</li>
+<li><code>05_engineering/</code>: 工程与性能 (DeepSpeed, Megatron, vLLM, sglang, CUDA, 混合精度)</li>
+<li><code>06_agent/</code>: 智能体 (Memory, RAG, Orchestration, Frameworks, Multi-Agent, OpenClaw)</li>
+<li><code>07_classic_models/</code>: 经典解析 (总览 + ChatGPT, DeepSeek-R1, Qwen3)</li>
+<li><code>tools/</code>: 历史脚本（归档，默认不作为当前文档体系的一部分）</li>
+<li><code>output/</code>: 历史输出目录（归档）</li>
+<li><code>docs/</code>: 文档规范、章节导航与学习路径（如 <code>NAVIGATION.md</code>、<code>LEARNING_PATH.md</code>、<code>DOC_STYLE.md</code>、<code>TERMINOLOGY.md</code>）</li>
+<li><code>scripts/</code>: 文档检查脚本（如链接检查）</li>
+</ul>
+<hr/>
+<h2 id="key-model-index">🏗️ 核心模型索引 (Key Model Index)<a aria-label="Jump to heading" class="heading-anchor" href="#key-model-index">#</a></h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th style="text-align: left;">模型分类</th>
+<th style="text-align: left;">代表模型</th>
+<th style="text-align: left;">核心解析文档</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>基础语言模型 (LLM)</strong></td>
+<td style="text-align: left;">LLaMA-3 / Transformer</td>
+<td style="text-align: left;"><a href="modules/02_architecture/llm/llm.html">Transformer Core</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>注意力机制</strong></td>
+<td style="text-align: left;">Flash Attention</td>
+<td style="text-align: left;"><a href="modules/02_architecture/llm/attention.html">Attention Mechanisms</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>多模态 VLM</strong></td>
+<td style="text-align: left;"><strong>LLaVA</strong></td>
+<td style="text-align: left;"><a href="modules/02_architecture/vlm/llava/llava.html">LLaVA 详述</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>多模态 VLM</strong></td>
+<td style="text-align: left;"><strong>Flamingo</strong></td>
+<td style="text-align: left;"><a href="modules/02_architecture/vlm/flamingo/flamingo.html">Flamingo 详述</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>多模态 VLM</strong></td>
+<td style="text-align: left;"><strong>BLIP-2</strong></td>
+<td style="text-align: left;"><a href="modules/02_architecture/vlm/blip2/blip2.html">BLIP-2 详述</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>生成模型</strong></td>
+<td style="text-align: left;">Diffusion / DiT</td>
+<td style="text-align: left;"><a href="modules/02_architecture/generation/diffusion/diffusion.html">Diffusion</a> / <a href="modules/02_architecture/generation/dit/dit.html">DiT</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>推理增强模型</strong></td>
+<td style="text-align: left;">DeepSeek (GRPO)</td>
+<td style="text-align: left;"><a href="modules/03_alignment/grpo/grpo.html">GRPO 对齐范式</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>分布式框架</strong></td>
+<td style="text-align: left;">Megatron-LM</td>
+<td style="text-align: left;"><a href="modules/05_engineering/megatron/megatron.html">Megatron 并行策略</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>推理框架</strong></td>
+<td style="text-align: left;">vLLM / sglang</td>
+<td style="text-align: left;"><a href="modules/05_engineering/inference/inference.html">推理框架</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>本地Agent</strong></td>
+<td style="text-align: left;">OpenClaw</td>
+<td style="text-align: left;"><a href="modules/06_agent/openclaw/openclaw.html">OpenClaw 架构</a></td>
+</tr>
+</tbody>
+</table></div>
+<hr/>
+<h2 id="_4">🧪 文档质量检查（建议）<a aria-label="Jump to heading" class="heading-anchor" href="#_4">#</a></h2>
+<pre data-lang="bash"><code class="language-bash"># 1) Markdown 本地链接检查（README + modules + docs）
+python scripts/check_markdown_links.py README.md modules docs
+</code></pre>
+<ul>
+<li>结构模板：<code>docs/MODULE_DOC_TEMPLATE.md</code></li>
+<li>结构规范：<code>docs/DOC_STYLE.md</code>（推荐章节顺序：通俗理解→定义与目标→适用场景与边界→关键步骤→关键公式→关键步骤代码）</li>
+<li>术语一致性：以 <code>docs/TERMINOLOGY.md</code> 为唯一规范，新增术语先入表再落文档。</li>
+<li>结构一致性：改动 <code>modules/</code> 后同步更新 README、<code>docs/NAVIGATION.md</code> 与 <code>docs/LEARNING_PATH.md</code>。</li>
+</ul>
+        </article>
+      <footer class="page-footer">
+        <div class="page-footer-grid">
+          <div class="page-card empty"></div>
+          <a class="page-card" href="docs/DOC_STYLE.html"><span class="page-card-label">Next</span><strong>Documentation Style Guide</strong><small>Guides</small><p>本仓库是文档优先仓库。所有模块文档按统一结构编写，确保读者能从概念快速走到工程实现。</p></a>
+        </div>
+      </footer>
+      </article>
+    </main>
+    <aside class="toc-panel">
+      <div class="toc-card">
+        <p class="toc-title">On This Page</p>
+        <nav class="toc-nav" id="toc-nav"></nav>
+      </div>
+    </aside>
+  </div>
+  <script>window.__LLM_CORE_PAGE__ = {"path": "README.html"};</script>
+  <script src="_site/site-data.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script type="module" src="_site/site.js"></script>
+</body>
+</html>
